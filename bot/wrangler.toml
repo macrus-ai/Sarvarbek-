@@ -1,0 +1,24 @@
+# Ovoza boti: Cloudflare Workers sozlamalari
+name = "ovoza-bot"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+# Mini ilova fayllari
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Ma'lumotlar bazasi. database_id yozilmagan: wrangler bazani nomi bo'yicha topadi
+# (deploy workflow birinchi marta uni o'zi yaratadi).
+[[d1_databases]]
+binding = "DB"
+database_name = "ovoza-db"
+migrations_dir = "migrations"
+
+[observability]
+enabled = true
+
+# Maxfiy qiymatlar (wrangler.toml ga yozilmaydi):
+#   BOT_TOKEN  — @BotFather bergan token
+#   ADMIN_IDS  — /stats buyrug'idan foydalana oladigan Telegram ID'lar (vergul bilan), ixtiyoriy
