@@ -1,0 +1,33 @@
+# main branchiga o'zgarish kirganda saytni avtomatik yangilaydi.
+# GitHub Pages sayti gh-pages branchidan chiqariladi. Bu workflow gh-pages ni
+# har safar main ning aynan nusxasi bilan almashtiradi, shuning uchun
+# gh-pages ni qo'lda o'zgartirmang: o'zgarishlar main orqali kiritilsin.
+name: Saytni yangilash
+
+on:
+  push:
+    branches: [main]
+  # Actions bo'limidan qo'lda ishga tushirish uchun
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sayt-yangilash
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: gh-pages ni main bilan tenglashtirish
+    runs-on: ubuntu-latest
+    steps:
+      - name: main ni gh-pages ga yuborish
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git init -q
+          git fetch -q --no-tags "$remote" "$GITHUB_SHA"
+          git push -q --force "$remote" "${GITHUB_SHA}:refs/heads/gh-pages"
+          echo "gh-pages endi ${GITHUB_SHA} commitida. Sayt bir-ikki daqiqada yangilanadi."
