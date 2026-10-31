@@ -61,7 +61,14 @@ Arizalarni Telegramga yuborish uchun kichik server yoki serverless funksiya (mas
 
 ## Internetga joylash
 
-Eng oson yo‘li GitHub Pages: repozitoriy **Settings → Pages** bo‘limida branch va `/ (root)` papkasini tanlang. Netlify, Vercel yoki istalgan hosting ham mos keladi: fayllarni shundayligicha yuklash kifoya.
+Sayt GitHub Pages orqali ishlaydi: https://macrus-ai.github.io/Sarvarbek-/
+
+- Pages sayti `gh-pages` branchidan chiqariladi.
+- `main` ga har bir o‘zgarish kirganda `.github/workflows/sayt-yangilash.yml` `gh-pages` ni `main` nusxasi bilan almashtiradi, keyin GitHub saytni bir-ikki daqiqada yangilaydi.
+- `gh-pages` ni qo‘lda o‘zgartirmang: undagi o‘zgarishlar keyingi yangilanishda o‘chib ketadi. Hamma o‘zgarish `main` orqali kiritilsin.
+- Yangilashni qo‘lda ham ishga tushirish mumkin: **Actions → Saytni yangilash → Run workflow**.
+
+Netlify, Vercel yoki istalgan boshqa hosting ham mos keladi: fayllarni shundayligicha yuklash kifoya.
 
 ## Keyingi qadamlar
 
