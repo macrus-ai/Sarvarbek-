@@ -70,6 +70,10 @@ Sayt GitHub Pages orqali ishlaydi: https://macrus-ai.github.io/Sarvarbek-/
 
 Netlify, Vercel yoki istalgan boshqa hosting ham mos keladi: fayllarni shundayligicha yuklash kifoya.
 
+## Telegram bot va mini ilova
+
+Ro‘yxatdan o‘tish, kampaniyalar va so‘rovlar Telegram bot orqali ishlaydi. Kodi va sozlash qo‘llanmasi `bot/` papkasida: [bot/README.md](bot/README.md).
+
 ## Keyingi qadamlar
 
 Bu sayt platformaning tashqi ko‘rinishi va landing sahifasi. To‘liq ishlaydigan platforma uchun server qismi kerak bo‘ladi:
