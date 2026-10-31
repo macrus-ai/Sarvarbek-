@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ovoza</title>
+  <meta name="description" content="Ovoza bizneslar va blogerlarni barter asosida bog‘laydi: siz mahsulot yoki xizmat berasiz, bloger u haqida sharh va reklama tayyorlaydi.">
+  <meta name="theme-color" content="#1A34B5">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Ovoza: barter marketing platformasi">
+  <meta property="og:description" content="Reklama uchun pul emas, mahsulot bilan to‘lang. Bizneslar va blogerlar uchun barter platformasi.">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/i18n.js" defer></script>
+  <script src="assets/js/campaigns.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+<!-- Ikonkalar to'plami -->
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0">
+  <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></g></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></g></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></g></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></g></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></g></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></g></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></g></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></g></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20h18M6 16v-5M11 16V6M16 16v-8M20 16v-3"/></g></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8S10.5 3.5 8 4.5 9 8 12 8zM12 8s1.5-4.5 4-3.5S15 8 12 8z"/></g></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></g></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.8 7.5 9 4.3-1.2 7.5-4.5 7.5-9V6z"/><path d="m9 12 2 2 4-4"/></g></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7zM21 3 10 13"/></g></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></g></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></g></symbol>
+</svg>
+
+<a class="skip" href="#main" data-i18n="skip">Asosiy mazmunga o‘tish</a>
+
+<header class="site-header" id="top">
+  <div class="wrap header-inner">
+    <a class="logo" href="#top" aria-label="Ovoza, bosh sahifa" data-i18n-aria="logo.aria">
+      <svg class="logo-mark" viewBox="0 0 36 36" aria-hidden="true">
+        <rect class="lm-bg" width="36" height="36" rx="11"/>
+        <circle class="lm-dot" cx="14" cy="18" r="5"/>
+        <path class="lm-wave" d="M21 12.5a8 8 0 0 1 0 11M25.5 9a13 13 0 0 1 0 18" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+      <span>Ovoza</span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Asosiy menyu" data-i18n-aria="nav.label">
+      <a href="#qanday" data-i18n="nav.how">Qanday ishlaydi</a>
+      <a href="#kampaniyalar" data-i18n="nav.campaigns">Kampaniyalar</a>
+      <a href="#kalkulyator" data-i18n="nav.calc">Kalkulyator</a>
+      <a href="#tariflar" data-i18n="nav.pricing">Tariflar</a>
+      <a href="#savollar" data-i18n="nav.faq">Savollar</a>
+      <a class="nav-cta" href="#royxat" data-i18n="nav.cta">Ro‘yxatdan o‘tish</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="lang" role="group" aria-label="Til" data-i18n-aria="lang.label">
+        <button type="button" data-lang="uz" aria-pressed="true">UZ</button>
+        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      </div>
+      <a class="btn btn-primary btn-sm header-cta" href="#royxat" data-i18n="nav.cta">Ro‘yxatdan o‘tish</a>
+      <button class="icon-btn burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menyuni ochish">
+        <svg class="i" aria-hidden="true"><use href="#i-menu"></use></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- Bosh blok -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="hero.eyebrow">Barter marketing platformasi</p>
+        <h1 data-i18n="hero.title">Mahsulotingiz haqida <mark>ovoza</mark> tarqalsin</h1>
+        <p class="hero-lead" data-i18n="hero.lead">Ovoza bizneslar va blogerlarni barter asosida bog‘laydi. Siz mahsulot yoki xizmat berasiz, bloger u haqida sharh va reklama tayyorlaydi. Reklama uchun pul to‘lamaysiz.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-accent" href="#royxat" data-role-link="business">
+            <span data-i18n="hero.ctaBusiness">Men biznes egasiman</span>
+            <svg class="i" aria-hidden="true"><use href="#i-arrow"></use></svg>
+          </a>
+          <a class="btn btn-ghost-band" href="#royxat" data-role-link="blogger" data-i18n="hero.ctaBlogger">Men blogerman</a>
+        </div>
+        <ul class="hero-facts">
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="hero.f1">Reklama byudjeti shart emas</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="hero.f2">1 000 obunachidan boshlab blogerlar</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="hero.f3">Instagram, Telegram, TikTok va YouTube</span></li>
+        </ul>
+      </div>
+
+      <div class="ripple" aria-hidden="true">
+        <span class="ring r1"></span>
+        <span class="ring r2"></span>
+        <span class="ring r3"></span>
+        <span class="pulse"></span>
+        <span class="pulse pulse-2"></span>
+        <div class="deal">
+          <span class="deal-tag" data-i18n="hero.dealTag">Kampaniya</span>
+          <strong class="deal-title" data-i18n="hero.dealTitle">Tabiiy yuz kremi</strong>
+          <span class="deal-price" data-i18n="hero.dealPrice">180 000 so‘m</span>
+          <span class="deal-swap" data-i18n="hero.dealSwap">evaziga: 1 Reels + 2 Stories</span>
+        </div>
+        <div class="chip-b c1"><span class="ava">D</span><span><b>Dilnoza</b><small>Instagram · 12,4K</small></span></div>
+        <div class="chip-b c2"><span class="ava">S</span><span><b>Sardor</b><small>Telegram · 8,1K</small></span></div>
+        <div class="chip-b c3"><span class="ava">M</span><span><b>Madina</b><small>TikTok · 31K</small></span></div>
+        <div class="chip-b c4"><span class="ava">J</span><span><b>Jasur</b><small>YouTube · 5,6K</small></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Platformalar -->
+  <section class="strip" aria-labelledby="strip-label">
+    <div class="wrap strip-inner">
+      <p class="strip-label" id="strip-label" data-i18n="strip.label">Kontent qayerda chiqadi</p>
+      <ul class="strip-list">
+        <li><strong>Instagram</strong><span data-i18n="strip.ig">Reels, Stories, post</span></li>
+        <li><strong>Telegram</strong><span data-i18n="strip.tg">Kanal postlari</span></li>
+        <li><strong>TikTok</strong><span data-i18n="strip.tt">Qisqa videolar</span></li>
+        <li><strong>YouTube</strong><span data-i18n="strip.yt">Shorts va integratsiyalar</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Qanday ishlaydi -->
+  <section class="section" id="qanday">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="how.eyebrow">Qanday ishlaydi</p>
+        <h2 data-i18n="how.title">Barter hamkorlik to‘rt qadamda</h2>
+        <p class="lead" data-i18n="how.lead">Platforma ikki tomonni bog‘laydi va kelishuv shartlarini ochiq qiladi.</p>
+      </div>
+
+      <div class="seg" id="how-tabs" role="tablist" aria-label="Kim uchun" data-i18n-aria="how.tabsAria">
+        <button type="button" role="tab" id="tab-how-business" aria-selected="true" aria-controls="how-business" data-i18n="role.business">Biznes uchun</button>
+        <button type="button" role="tab" id="tab-how-blogger" aria-selected="false" aria-controls="how-blogger" tabindex="-1" data-i18n="role.blogger">Bloger uchun</button>
+      </div>
+
+      <ol class="steps" id="how-business" role="tabpanel" aria-labelledby="tab-how-business">
+        <li><span class="step-n">1</span><h3 data-i18n="how.b1.t">Kampaniya yarating</h3><p data-i18n="how.b1.d">Mahsulot, uning qiymati, reklama formati va blogerga talablarni kiriting.</p></li>
+        <li><span class="step-n">2</span><h3 data-i18n="how.b2.t">Blogerlarni tanlang</h3><p data-i18n="how.b2.d">Arizalarni ko‘ring: profil, auditoriya va avvalgi ishlarni solishtirib, mosini tasdiqlang.</p></li>
+        <li><span class="step-n">3</span><h3 data-i18n="how.b3.t">Mahsulotni topshiring</h3><p data-i18n="how.b3.d">Kuryer, pochta yoki do‘koningiz orqali. Xizmatlar joyida ko‘rsatiladi.</p></li>
+        <li><span class="step-n">4</span><h3 data-i18n="how.b4.t">Kontentni oling</h3><p data-i18n="how.b4.d">Bloger kelishilgan muddatda sharh joylab, havolasini yuklaydi. Siz bajarilganini tasdiqlaysiz.</p></li>
+      </ol>
+
+      <ol class="steps" id="how-blogger" role="tabpanel" aria-labelledby="tab-how-blogger" hidden>
+        <li><span class="step-n">1</span><h3 data-i18n="how.g1.t">Profil yarating</h3><p data-i18n="how.g1.d">Ijtimoiy tarmoq, obunachilar soni, shahar va yo‘nalishingizni kiriting.</p></li>
+        <li><span class="step-n">2</span><h3 data-i18n="how.g2.t">Kampaniya tanlang</h3><p data-i18n="how.g2.d">Faqat sizga qiziq mahsulot va xizmatlarga ariza bering.</p></li>
+        <li><span class="step-n">3</span><h3 data-i18n="how.g3.t">Mahsulotni oling</h3><p data-i18n="how.g3.d">Biznes tasdiqlagach, mahsulotni yuboradi yoki xizmatga taklif qiladi.</p></li>
+        <li><span class="step-n">4</span><h3 data-i18n="how.g4.t">Kontent joylang</h3><p data-i18n="how.g4.d">Kelishilgan muddatda post, Reels yoki video chiqarib, havolasini yuklang. Hamkorlik portfoliongizga qo‘shiladi.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Foydalar -->
+  <section class="section section-alt" id="foyda">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="ben.eyebrow">Nega Ovoza</p>
+        <h2 data-i18n="ben.title">Ikki tomon ham yutadi</h2>
+      </div>
+
+      <div class="benefits">
+        <article class="benefit-panel">
+          <h3 data-i18n="ben.business">Bizneslar uchun</h3>
+          <ul class="benefit-list">
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-wallet"></use></svg></span><div><strong data-i18n="ben.b1.t">Reklama byudjetini tejang</strong><p data-i18n="ben.b1.d">Pul o‘rniga mahsulot berasiz. Xarajatingiz faqat mahsulot tannarxi.</p></div></li>
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-star"></use></svg></span><div><strong data-i18n="ben.b2.t">Jonli sharhlar</strong><p data-i18n="ben.b2.d">Bloger mahsulotni o‘zi sinab ko‘radi, shuning uchun sharh tabiiy chiqadi.</p></div></li>
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-users"></use></svg></span><div><strong data-i18n="ben.b3.t">Mos auditoriya</strong><p data-i18n="ben.b3.d">Blogerlarni yo‘nalish, shahar va obunachilar soni bo‘yicha saralang.</p></div></li>
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-chart"></use></svg></span><div><strong data-i18n="ben.b4.t">Natija ko‘rinib turadi</strong><p data-i18n="ben.b4.d">Barcha postlar havolasi kampaniya sahifasida saqlanadi.</p></div></li>
+          </ul>
+        </article>
+
+        <article class="benefit-panel benefit-panel-blogger">
+          <h3 data-i18n="ben.blogger">Blogerlar uchun</h3>
+          <ul class="benefit-list">
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-gift"></use></svg></span><div><strong data-i18n="ben.g1.t">Bepul mahsulot va xizmatlar</strong><p data-i18n="ben.g1.d">Kosmetika, kiyim, kafe, salon, kurslar va boshqa yo‘nalishlar.</p></div></li>
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-camera"></use></svg></span><div><strong data-i18n="ben.g2.t">Portfolio to‘planadi</strong><p data-i18n="ben.g2.d">Bajarilgan hamkorliklar profilingizda ko‘rinadi va yangi brendlarni jalb qiladi.</p></div></li>
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-shield"></use></svg></span><div><strong data-i18n="ben.g3.t">Aniq shartlar</strong><p data-i18n="ben.g3.d">Format, muddat va talablar ariza berishdan oldin ma’lum bo‘ladi.</p></div></li>
+            <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-clock"></use></svg></span><div><strong data-i18n="ben.g4.t">Majburiyatsiz</strong><p data-i18n="ben.g4.d">Faqat o‘zingizga va auditoriyangizga yoqqanini tanlaysiz.</p></div></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Kampaniyalar -->
+  <section class="section" id="kampaniyalar">
+    <div class="wrap">
+      <div class="section-head section-head-row">
+        <div>
+          <p class="eyebrow" data-i18n="cat.eyebrow">Kampaniyalar</p>
+          <h2 data-i18n="cat.title">Blogerlarni kutayotgan takliflar</h2>
+        </div>
+        <p class="note"><span class="badge" data-i18n="cat.badge">Namuna</span> <span data-i18n="cat.note">Bu kampaniyalar katalog qanday ko‘rinishini ko‘rsatish uchun namuna.</span></p>
+      </div>
+
+      <div class="filters">
+        <div class="chips" id="cat-chips" role="group" aria-label="Toifalar" data-i18n-aria="cat.chipsAria"></div>
+        <div class="filter-row">
+          <label class="search">
+            <span class="sr-only" data-i18n="cat.searchLabel">Qidiruv</span>
+            <svg class="i" aria-hidden="true"><use href="#i-search"></use></svg>
+            <input id="cat-search" type="search" autocomplete="off" placeholder="Mahsulot, do‘kon yoki shahar" data-i18n-ph="cat.searchPh">
+          </label>
+          <label class="filter-select">
+            <span class="sr-only" data-i18n="cat.platformLabel">Platforma</span>
+            <select class="control" id="cat-platform">
+              <option value="all" data-i18n="cat.allPlatforms">Barcha platformalar</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Telegram">Telegram</option>
+              <option value="TikTok">TikTok</option>
+              <option value="YouTube">YouTube</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <p class="results-count" id="cat-count" aria-live="polite"></p>
+      <div class="camp-grid" id="cat-grid"></div>
+      <div class="empty" id="cat-empty" hidden>
+        <p data-i18n="cat.empty">Bu filtrlar bo‘yicha kampaniya yo‘q. Toifa yoki qidiruv so‘zini o‘zgartiring.</p>
+        <button type="button" class="btn btn-outline btn-sm" id="cat-reset" data-i18n="cat.reset">Filtrlarni tozalash</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Kalkulyator -->
+  <section class="section section-alt" id="kalkulyator">
+    <div class="wrap calc">
+      <div>
+        <div class="section-head">
+          <p class="eyebrow" data-i18n="calc.eyebrow">Kalkulyator</p>
+          <h2 data-i18n="calc.title">Barter qancha tejaydi?</h2>
+          <p class="lead" data-i18n="calc.lead">O‘z raqamlaringizni kiriting: mahsulot tannarxi, blogerlar soni va bitta pullik reklama narxi.</p>
+        </div>
+        <form class="calc-form" id="calc" novalidate>
+          <div class="field">
+            <label for="calc-cost" data-i18n="calc.cost">Mahsulot tannarxi, so‘m</label>
+            <input class="control" id="calc-cost" type="text" inputmode="numeric" autocomplete="off" value="120 000">
+          </div>
+          <div class="field">
+            <label for="calc-count"><span data-i18n="calc.count">Blogerlar soni</span><output id="calc-count-out" for="calc-count">5</output></label>
+            <input id="calc-count" type="range" min="1" max="50" step="1" value="5">
+          </div>
+          <div class="field">
+            <label for="calc-ad" data-i18n="calc.ad">Bitta pullik reklama narxi, so‘m</label>
+            <input class="control" id="calc-ad" type="text" inputmode="numeric" autocomplete="off" value="600 000" aria-describedby="calc-ad-hint">
+            <p class="hint" id="calc-ad-hint" data-i18n="calc.adHint">Blogerlar reklama uchun so‘raydigan o‘rtacha narx.</p>
+          </div>
+        </form>
+      </div>
+
+      <div class="calc-result" aria-live="polite">
+        <div class="bars">
+          <div class="bar-row">
+            <span data-i18n="calc.paid">Pullik reklama</span>
+            <b id="res-paid">3 000 000 so‘m</b>
+            <span class="bar"><i id="bar-paid" style="width: 100%"></i></span>
+          </div>
+          <div class="bar-row">
+            <span data-i18n="calc.barter">Barter</span>
+            <b id="res-barter">600 000 so‘m</b>
+            <span class="bar bar-barter"><i id="bar-barter" style="width: 20%"></i></span>
+          </div>
+        </div>
+        <p class="saving-label" data-i18n="calc.saving">Tejaysiz</p>
+        <p class="saving" id="res-saving">2 400 000 so‘m</p>
+        <p class="saving-note" id="res-note">Reklama xarajati 80% ga kamayadi</p>
+        <p class="calc-foot" data-i18n="calc.footnote">Hisob faqat siz kiritgan raqamlarga asoslanadi.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tariflar -->
+  <section class="section" id="tariflar">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="pricing.eyebrow">Tariflar</p>
+        <h2 data-i18n="pricing.title">Blogerlarga bepul, bizneslarga ehtiyojga qarab</h2>
+        <p class="lead" data-i18n="pricing.lead">To‘lov oylik, narxlar so‘mda.</p>
+      </div>
+
+      <div class="plans">
+        <article class="plan">
+          <h3 data-i18n="plan1.name">Start</h3>
+          <p class="price" data-i18n="plan1.price"><span>0</span> so‘m</p>
+          <p class="plan-desc" data-i18n="plan1.desc">Platformani sinab ko‘rish uchun</p>
+          <ul>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan1.f1">1 ta faol kampaniya</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan1.f2">5 tagacha bloger</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan1.f3">Asosiy filtrlar</span></li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="#royxat" data-role-link="business" data-i18n="plan1.cta">Bepul boshlash</a>
+        </article>
+
+        <article class="plan plan-featured">
+          <span class="plan-badge" data-i18n="plan2.badge">Tavsiya etamiz</span>
+          <h3 data-i18n="plan2.name">Biznes</h3>
+          <p class="price" data-i18n="plan2.price"><span>249 000</span> so‘m / oy</p>
+          <p class="plan-desc" data-i18n="plan2.desc">Muntazam reklama qiladigan do‘konlar uchun</p>
+          <ul>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan2.f1">10 tagacha faol kampaniya</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan2.f2">Cheksiz arizalar</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan2.f3">Blogerlar statistikasi</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan2.f4">Kampaniya katalog boshida</span></li>
+          </ul>
+          <a class="btn btn-primary btn-block" href="#royxat" data-role-link="business" data-i18n="plan2.cta">Tarifni tanlash</a>
+        </article>
+
+        <article class="plan">
+          <h3 data-i18n="plan3.name">Korporativ</h3>
+          <p class="price price-text" data-i18n="plan3.price"><span>Kelishuv</span> asosida</p>
+          <p class="plan-desc" data-i18n="plan3.desc">Brendlar va agentliklar uchun</p>
+          <ul>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan3.f1">Cheksiz kampaniyalar</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan3.f2">Shaxsiy menejer</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan3.f3">Blogerlarni vazifaga qarab saralash</span></li>
+            <li><svg class="i" aria-hidden="true"><use href="#i-check"></use></svg><span data-i18n="plan3.f4">Kampaniya yakunlari bo‘yicha hisobot</span></li>
+          </ul>
+          <a class="btn btn-outline btn-block" href="#royxat" data-role-link="business" data-i18n="plan3.cta">Bog‘lanish</a>
+        </article>
+      </div>
+      <p class="plans-note" data-i18n="pricing.note">Blogerlar uchun Ovoza har doim bepul.</p>
+    </div>
+  </section>
+
+  <!-- Savollar -->
+  <section class="section section-alt" id="savollar">
+    <div class="wrap faq">
+      <div class="section-head">
+        <p class="eyebrow" data-i18n="faq.eyebrow">Savollar</p>
+        <h2 data-i18n="faq.title">Ko‘p beriladigan savollar</h2>
+        <p class="lead" data-i18n="faq.lead">Javob topmadingizmi? Bizga Telegram orqali yozing.</p>
+      </div>
+      <div class="faq-list">
+        <details open>
+          <summary><span data-i18n="faq.q1">Barter reklama nima?</span></summary>
+          <p data-i18n="faq.a1">Biznes blogerga mahsulot yoki xizmat beradi, bloger esa evaziga u haqida kontent joylaydi: post, Stories, Reels yoki video. Pul o‘tkazilmaydi.</p>
+        </details>
+        <details>
+          <summary><span data-i18n="faq.q2">Bloger mahsulotni olib, post joylamasa-chi?</span></summary>
+          <p data-i18n="faq.a2">Format va muddat kampaniyada oldindan yoziladi. Bloger post havolasini yuklaydi, biznes uni tasdiqlaydi. Shartni buzgan blogerning reytingi tushadi, takrorlansa, akkaunt bloklanadi.</p>
+        </details>
+        <details>
+          <summary><span data-i18n="faq.q3">Necha obunachi kerak?</span></summary>
+          <p data-i18n="faq.a3">Ko‘pchilik kampaniyalar 1 000 dan 10 000 gacha obunachisi bor mikroblogerlarga mo‘ljallangan. Aniq talab har bir kampaniya kartasida yozilgan.</p>
+        </details>
+        <details>
+          <summary><span data-i18n="faq.q4">Qaysi bizneslar kampaniya joylay oladi?</span></summary>
+          <p data-i18n="faq.a4">Mahsulot yoki xizmat taklif qila oladigan har qanday biznes: marketpleys sotuvchilari, onlayn do‘konlar, kafe va restoranlar, go‘zallik salonlari, o‘quv markazlari.</p>
+        </details>
+        <details>
+          <summary><span data-i18n="faq.q5">Mahsulot qanday yetkaziladi?</span></summary>
+          <p data-i18n="faq.a5">Usulni biznes tanlaydi: kuryer, pochta yoki do‘kondan olib ketish. Xizmatlar (salon, kafe, kurslar) joyida ko‘rsatiladi.</p>
+        </details>
+        <details>
+          <summary><span data-i18n="faq.q6">Blogerga mahsulotdan tashqari pul to‘lash mumkinmi?</span></summary>
+          <p data-i18n="faq.a6">Ha. Kampaniya yaratishda qo‘shimcha haq belgilash mumkin, u kampaniya kartasida ko‘rinadi.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ro'yxatdan o'tish -->
+  <section class="section signup-band" id="royxat">
+    <div class="wrap signup">
+      <div>
+        <p class="eyebrow" data-i18n="signup.eyebrow">Ro‘yxatdan o‘tish</p>
+        <h2 data-i18n="signup.title">Birinchi barterni bugun boshlang</h2>
+        <p class="lead" data-i18n="signup.lead">Ariza qoldiring, menejer profil yoki kampaniyani sozlashga yordam beradi.</p>
+        <!-- Aloqa ma'lumotlarini o'zingiznikiga almashtiring -->
+        <ul class="contact-list">
+          <li><span class="ci"><svg class="i" aria-hidden="true"><use href="#i-send"></use></svg></span><div><small>Telegram</small><a href="https://t.me/ovoza_uz" target="_blank" rel="noopener">@ovoza_uz</a></div></li>
+          <li><span class="ci"><svg class="i" aria-hidden="true"><use href="#i-phone"></use></svg></span><div><small data-i18n="contact.phone">Telefon</small><a href="tel:+998000000000">+998 00 000 00 00</a></div></li>
+          <li><span class="ci"><svg class="i" aria-hidden="true"><use href="#i-mail"></use></svg></span><div><small>Email</small><a href="mailto:info@ovoza.uz">info@ovoza.uz</a></div></li>
+        </ul>
+      </div>
+
+      <div class="signup-card">
+        <div class="seg" id="signup-tabs" role="tablist" aria-label="Siz kimsiz" data-i18n-aria="signup.tabsAria">
+          <button type="button" role="tab" id="tab-su-business" data-role="business" aria-selected="true" aria-controls="form-business" data-i18n="role.businessShort">Biznes</button>
+          <button type="button" role="tab" id="tab-su-blogger" data-role="blogger" aria-selected="false" aria-controls="form-blogger" tabindex="-1" data-i18n="role.bloggerShort">Bloger</button>
+        </div>
+
+        <form class="form" id="form-business" data-kind="business" role="tabpanel" aria-labelledby="tab-su-business" novalidate>
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="b-name" data-i18n="form.name">Ismingiz</label>
+              <input class="control" id="b-name" name="name" type="text" autocomplete="name" required placeholder="Masalan, Aziz" data-i18n-ph="form.namePh">
+            </div>
+            <div class="field">
+              <label for="b-phone" data-i18n="form.phone">Telefon raqam</label>
+              <input class="control" id="b-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required data-validate="phone" placeholder="+998 90 123 45 67">
+            </div>
+          </div>
+          <div class="field">
+            <label for="b-company" data-i18n="form.company">Do‘kon yoki kompaniya nomi</label>
+            <input class="control" id="b-company" name="company" type="text" autocomplete="organization" required>
+          </div>
+          <div class="field">
+            <label for="b-category" data-i18n="form.category">Mahsulot toifasi</label>
+            <select class="control" id="b-category" name="category" required>
+              <option value="" selected disabled data-i18n="form.choose">Tanlang</option>
+              <option value="beauty" data-i18n="opt.beauty">Go‘zallik</option>
+              <option value="food" data-i18n="opt.food">Oziq-ovqat va kafe</option>
+              <option value="clothes" data-i18n="opt.clothes">Kiyim</option>
+              <option value="kids" data-i18n="opt.kids">Bolalar uchun</option>
+              <option value="tech" data-i18n="opt.tech">Texnika</option>
+              <option value="home" data-i18n="opt.home">Uy-ro‘zg‘or</option>
+              <option value="services" data-i18n="opt.services">Xizmatlar</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="b-message"><span data-i18n="form.message">Nimani reklama qilmoqchisiz?</span><span class="opt" data-i18n="form.optional">ixtiyoriy</span></label>
+            <textarea class="control" id="b-message" name="message" rows="3" placeholder="Mahsulot va maqsad haqida qisqacha" data-i18n-ph="form.messagePh"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" data-i18n="form.submit">Ariza yuborish</button>
+          <p class="form-legal" data-i18n="form.legal">Tugmani bosib, shaxsiy ma’lumotlaringizni qayta ishlashga rozilik bildirasiz.</p>
+        </form>
+
+        <form class="form" id="form-blogger" data-kind="blogger" role="tabpanel" aria-labelledby="tab-su-blogger" novalidate hidden>
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="g-name" data-i18n="form.name">Ismingiz</label>
+              <input class="control" id="g-name" name="name" type="text" autocomplete="name" required placeholder="Masalan, Aziz" data-i18n-ph="form.namePh">
+            </div>
+            <div class="field">
+              <label for="g-phone" data-i18n="form.phone">Telefon raqam</label>
+              <input class="control" id="g-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required data-validate="phone" placeholder="+998 90 123 45 67">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="g-platform" data-i18n="form.platform">Asosiy ijtimoiy tarmoq</label>
+              <select class="control" id="g-platform" name="platform" required>
+                <option value="" selected disabled data-i18n="form.choose">Tanlang</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Telegram">Telegram</option>
+                <option value="TikTok">TikTok</option>
+                <option value="YouTube">YouTube</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="g-followers" data-i18n="form.followers">Obunachilar soni</label>
+              <select class="control" id="g-followers" name="followers" required>
+                <option value="" selected disabled data-i18n="form.choose">Tanlang</option>
+                <option value="1000-5000">1 000 – 5 000</option>
+                <option value="5000-10000">5 000 – 10 000</option>
+                <option value="10000-50000">10 000 – 50 000</option>
+                <option value="50000-100000">50 000 – 100 000</option>
+                <option value="100000+">100 000+</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="g-profile" data-i18n="form.profile">Profil havolasi yoki @username</label>
+            <input class="control" id="g-profile" name="profile" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" required data-validate="profile" placeholder="@username">
+          </div>
+          <div class="field">
+            <label for="g-niche" data-i18n="form.niche">Blog yo‘nalishi</label>
+            <select class="control" id="g-niche" name="niche" required>
+              <option value="" selected disabled data-i18n="form.choose">Tanlang</option>
+              <option value="beauty" data-i18n="opt.beauty">Go‘zallik</option>
+              <option value="food" data-i18n="opt.food">Oziq-ovqat va kafe</option>
+              <option value="clothes" data-i18n="opt.clothes">Kiyim</option>
+              <option value="kids" data-i18n="opt.kids">Bolalar uchun</option>
+              <option value="tech" data-i18n="opt.tech">Texnika</option>
+              <option value="home" data-i18n="opt.home">Uy-ro‘zg‘or</option>
+              <option value="services" data-i18n="opt.services">Xizmatlar</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" data-i18n="form.submit">Ariza yuborish</button>
+          <p class="form-legal" data-i18n="form.legal">Tugmani bosib, shaxsiy ma’lumotlaringizni qayta ishlashga rozilik bildirasiz.</p>
+        </form>
+
+        <div class="form-success" id="form-success" role="status" tabindex="-1" hidden>
+          <span class="success-icon"><svg class="i i-lg" aria-hidden="true"><use href="#i-check"></use></svg></span>
+          <h3 data-i18n="success.title">Rahmat!</h3>
+          <p id="success-text"></p>
+          <p class="demo-note" id="success-demo" data-i18n="success.demo">Demo rejim: forma hali serverga ulanmagan, shuning uchun ma’lumot hech qayerga yuborilmadi.</p>
+          <button type="button" class="btn btn-outline" id="success-again" data-i18n="success.again">Yana ariza yuborish</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="logo" href="#top" aria-label="Ovoza, bosh sahifa" data-i18n-aria="logo.aria">
+        <svg class="logo-mark" viewBox="0 0 36 36" aria-hidden="true">
+          <rect class="lm-bg" width="36" height="36" rx="11"/>
+          <circle class="lm-dot" cx="14" cy="18" r="5"/>
+          <path class="lm-wave" d="M21 12.5a8 8 0 0 1 0 11M25.5 9a13 13 0 0 1 0 18" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+        <span>Ovoza</span>
+      </a>
+      <p data-i18n="footer.about">O‘zbekistondagi bizneslar va blogerlar uchun barter platformasi.</p>
+    </div>
+    <div class="footer-col">
+      <h3 data-i18n="footer.platform">Platforma</h3>
+      <ul>
+        <li><a href="#qanday" data-i18n="nav.how">Qanday ishlaydi</a></li>
+        <li><a href="#kampaniyalar" data-i18n="nav.campaigns">Kampaniyalar</a></li>
+        <li><a href="#tariflar" data-i18n="nav.pricing">Tariflar</a></li>
+        <li><a href="#savollar" data-i18n="nav.faq">Savollar</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3 data-i18n="footer.contacts">Aloqa</h3>
+      <ul>
+        <li><a href="https://t.me/ovoza_uz" target="_blank" rel="noopener">@ovoza_uz</a></li>
+        <li><a href="tel:+998000000000">+998 00 000 00 00</a></li>
+        <li><a href="mailto:info@ovoza.uz">info@ovoza.uz</a></li>
+        <li><span data-i18n="footer.address">Toshkent, O‘zbekiston</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© <span id="year">2026</span> Ovoza. <span data-i18n="footer.rights">Barcha huquqlar himoyalangan.</span></span>
+    <a href="#top" data-i18n="footer.top">Yuqoriga</a>
+  </div>
+</footer>
+
+<!-- Kampaniyaga ariza oynasi -->
+<dialog class="modal" id="apply-modal" aria-labelledby="apply-title">
+  <div class="modal-inner">
+    <button type="button" class="icon-btn modal-x" data-close-modal aria-label="Yopish" data-i18n-aria="modal.close">
+      <svg class="i" aria-hidden="true"><use href="#i-close"></use></svg>
+    </button>
+    <p class="eyebrow" data-i18n="modal.eyebrow">Kampaniyaga ariza</p>
+    <h2 id="apply-title">Kampaniya</h2>
+    <p class="modal-sub" id="apply-sub"></p>
+
+    <form class="form" id="form-apply" data-kind="apply" novalidate>
+      <div class="form-grid-2">
+        <div class="field">
+          <label for="a-name" data-i18n="form.name">Ismingiz</label>
+          <input class="control" id="a-name" name="name" type="text" autocomplete="name" required placeholder="Masalan, Aziz" data-i18n-ph="form.namePh">
+        </div>
+        <div class="field">
+          <label for="a-phone" data-i18n="form.phone">Telefon raqam</label>
+          <input class="control" id="a-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required data-validate="phone" placeholder="+998 90 123 45 67">
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label for="a-platform" data-i18n="form.platformShort">Platforma</label>
+          <select class="control" id="a-platform" name="platform" required></select>
+        </div>
+        <div class="field">
+          <label for="a-profile" data-i18n="form.profileShort">Profil yoki @username</label>
+          <input class="control" id="a-profile" name="profile" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" required data-validate="profile" placeholder="@username">
+        </div>
+      </div>
+      <div class="field">
+        <label for="a-note"><span data-i18n="modal.noteLabel">Izoh</span><span class="opt" data-i18n="form.optional">ixtiyoriy</span></label>
+        <textarea class="control" id="a-note" name="note" rows="3" placeholder="Nega aynan siz mos kelasiz?" data-i18n-ph="modal.notePh"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.submit">Arizani yuborish</button>
+    </form>
+
+    <div class="form-success" id="apply-success" role="status" tabindex="-1" hidden>
+      <span class="success-icon"><svg class="i i-lg" aria-hidden="true"><use href="#i-check"></use></svg></span>
+      <h3 data-i18n="success.title">Rahmat!</h3>
+      <p id="apply-success-text"></p>
+      <p class="demo-note" id="apply-demo" data-i18n="success.demo">Demo rejim: forma hali serverga ulanmagan, shuning uchun ma’lumot hech qayerga yuborilmadi.</p>
+      <button type="button" class="btn btn-outline" data-close-modal data-i18n="modal.done">Yopish</button>
+    </div>
+  </div>
+</dialog>
+
+</body>
+</html>
