@@ -41,7 +41,7 @@ python3 -m http.server 8000
 
 - **Matnlar**: o‘zbekcha matnlar `index.html` ichida. Matnni o‘zgartirsangiz, ruschasini `assets/js/i18n.js` dagi xuddi shu kalit (`data-i18n` qiymati) bo‘yicha yangilang.
 - **Kampaniyalar**: `assets/js/campaigns.js`. Hozirgilari namuna, saytda ham "Namuna" deb belgilangan.
-- **Aloqa ma’lumotlari**: telefon `+998 00 000 00 00`, Telegram `@ovoza_uz` va `info@ovoza.uz` vaqtinchalik qiymatlar. Ularni `index.html` da (ro‘yxatdan o‘tish bo‘limi va footer) o‘zingiznikiga almashtiring.
+- **Aloqa ma’lumotlari**: telefon raqami `+998 95 555 45 49`. Telegram `@ovoza_uz` va `info@ovoza.uz` hozircha vaqtinchalik qiymatlar. Ular `index.html` da ikki joyda turadi: ro‘yxatdan o‘tish bo‘limi va footer.
 - **Tarif narxlari**: `index.html` dagi "Tariflar" bo‘limi va `i18n.js` dagi `plan…` kalitlari.
 - **Ranglar**: `assets/css/style.css` boshidagi `:root` bloki (kunduzgi) va undan keyingi tungi rejim bloklari.
 
