@@ -40,25 +40,24 @@ Cloudflare'ning bepul tarifi boshlash uchun yetadi: kuniga 100 000 so‘rov, 5 G
 
 Tokenni hech kimga yubormang va chatlarga yozmang: u bilan botingizni boshqarish mumkin.
 
-### 2. Cloudflare akkaunti
+### 2. Cloudflare API token
 
 1. [dash.cloudflare.com](https://dash.cloudflare.com/sign-up) da bepul ro‘yxatdan o‘ting.
-2. **Account ID:** chap menyuda **Workers & Pages** ni oching, o‘ng tomonda "Account ID" bor. Nusxalab oling.
-3. **API token:** o‘ng yuqoridagi profil belgisi → **My Profile** → **API Tokens** → **Create Token**.
-   - **Edit Cloudflare Workers** shablonini tanlang (**Use template**).
-   - Ruxsatlar ro‘yxatida **Account → D1 → Edit** bo‘lmasa, uni qo‘shing (**+ Add more**).
+2. [API Tokens](https://dash.cloudflare.com/profile/api-tokens) sahifasini oching → **Create Token**.
+   - **Edit Cloudflare Workers** qatoridagi **Use template** ni bosing.
+   - Ruxsatlar ro‘yxatida **Account → D1 → Edit** bo‘lmasa, **+ Add more** orqali qo‘shing.
    - **Account Resources:** o‘z akkauntingizni tanlang.
    - **Continue to summary** → **Create Token** → tokenni nusxalab oling.
 
 ### 3. GitHubga secretlarni qo‘shish
 
-Repozitoriyada: **Settings → Secrets and variables → Actions → New repository secret**. Quyidagilarni bittadan qo‘shing:
+[New repository secret](https://github.com/macrus-ai/Sarvarbek-/settings/secrets/actions/new) sahifasida (**Settings → Secrets and variables → Actions**) quyidagilarni bittadan qo‘shing:
 
 | Nomi | Qiymati |
 | --- | --- |
 | `TELEGRAM_BOT_TOKEN` | BotFather bergan token |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Account ID |
+| `CLOUDFLARE_ACCOUNT_ID` | *(ixtiyoriy)* Cloudflare Account ID. Kerak emas: workflow uni tokendan o‘zi topadi. Faqat tokeningiz bir nechta akkauntga tegishli bo‘lsa qo‘shing |
 | `ADMIN_IDS` | *(ixtiyoriy)* `/stats` dan foydalanadiganlarning Telegram ID'lari, vergul bilan. O‘z ID'ingizni [@userinfobot](https://t.me/userinfobot) aytadi |
 
 ### 4. Joylash
