@@ -231,3 +231,28 @@ export function getStats(db) {
     )
     .first();
 }
+
+/* ---------- Ma'lumotlarni o'chirish va moderatsiya ---------- */
+
+// Foydalanuvchining barcha ma'lumotlari: profili, kampaniyalari va so'rovlari
+export async function deleteUserData(db, id) {
+  await db
+    .prepare('DELETE FROM applications WHERE blogger_id = ?1 OR campaign_id IN (SELECT id FROM campaigns WHERE business_id = ?1)')
+    .bind(id)
+    .run();
+  await db.prepare('DELETE FROM campaigns WHERE business_id = ?1').bind(id).run();
+  await db.prepare('DELETE FROM users WHERE tg_id = ?1').bind(id).run();
+}
+
+// Admin kampaniyani yopadi (egasidan qat'i nazar). Yopilgan kampaniyani qaytaradi.
+export async function closeCampaignByAdmin(db, id) {
+  const res = await db
+    .prepare("UPDATE campaigns SET status = 'closed', updated_at = ?1 WHERE id = ?2 AND status = 'active'")
+    .bind(now(), id)
+    .run();
+  const row = await db
+    .prepare('SELECT c.id, c.title, c.business_id, u.lang AS business_lang FROM campaigns c JOIN users u ON u.tg_id = c.business_id WHERE c.id = ?1')
+    .bind(id)
+    .first();
+  return { changed: res.meta.changes > 0, campaign: row };
+}

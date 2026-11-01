@@ -17,12 +17,12 @@ const at = (username) => (username ? ` (@${esc(username)})` : '');
 
 const uz = {
   chooseLang: '🇺🇿 Tilni tanlang\n🇷🇺 Выберите язык',
-  welcome:
-    '<b>Ovoza</b> platformasiga xush kelibsiz!\n\nBu yerda bizneslar mahsulot yoki xizmat evaziga blogerlar bilan barter hamkorlik qiladi.\n\nSiz kimsiz?',
+  welcome: (url) =>
+    `<b>Ovoza</b> platformasiga xush kelibsiz!\n\nBu yerda bizneslar mahsulot yoki xizmat evaziga blogerlar bilan barter hamkorlik qiladi.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.\n\nSiz kimsiz?`,
   roleBusiness: '🏪 Biznes egasiman',
   roleBlogger: '📸 Blogerman',
-  welcomeAs: (role) =>
-    `<b>Ovoza</b> platformasiga xush kelibsiz! ${role === 'business' ? 'Biznes' : 'Bloger'} sifatida ro‘yxatdan o‘tamiz, bir nechta savolga javob bering.`,
+  welcomeAs: (role, url) =>
+    `<b>Ovoza</b> platformasiga xush kelibsiz! ${role === 'business' ? 'Biznes' : 'Bloger'} sifatida ro‘yxatdan o‘tamiz, bir nechta savolga javob bering.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.`,
   askName: 'Ismingizni yozing:',
   askCompany: 'Do‘kon yoki kompaniyangiz nomini yozing:',
   askCategory: 'Mahsulot yoki xizmatingiz qaysi toifaga kiradi?',
@@ -30,7 +30,8 @@ const uz = {
   askProfile: 'Profilingiz havolasini yoki @username ni yozing:',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
-  askPhone: 'Oxirgi qadam: telefon raqamingizni yuboring. Pastdagi tugmani bosing 👇',
+  askPhone:
+    'Oxirgi qadam: telefon raqamingizni yuboring. Pastdagi tugmani bosing 👇\n\nRaqamingiz faqat so‘rov qabul qilinganda ikkinchi tomonga ko‘rsatiladi.',
   phoneButton: '📱 Raqamni yuborish',
   phoneSaved: '✓ Raqam saqlandi.',
   errName: 'Ism 2–60 belgidan iborat bo‘lsin. Qaytadan yozing:',
@@ -48,9 +49,39 @@ const uz = {
   updateProfile: '✏️ Ma’lumotlarni yangilash',
   home: (name) => `Assalomu alaykum, ${esc(name)}! Kampaniyalar va so‘rovlar ilovada.`,
   help:
-    '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/lang — tilni o‘zgartirish\n/help — yordam',
+    '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
   notRegistered: 'Avval ro‘yxatdan o‘ting: /start',
   langSaved: 'Til saqlandi: O‘zbekcha 🇺🇿',
+  privacy: (url) => `Qaysi ma’lumotlar yig‘iladi va qanday ishlatiladi: <a href="${esc(url)}">maxfiylik siyosati</a>.\n\nMa’lumotlaringizni o‘chirish uchun /delete yuboring.`,
+  myId: (id) => `Sizning Telegram ID: <code>${Number(id)}</code>`,
+  deleteConfirm:
+    'Profilingiz, kampaniyalaringiz va so‘rovlaringiz butunlay o‘chiriladi. Buni qaytarib bo‘lmaydi. O‘chirilsinmi?',
+  deleteYes: '🗑 Ha, o‘chirish',
+  deleteNo: 'Bekor qilish',
+  deleted: 'Ma’lumotlaringiz o‘chirildi. Qaytadan foydalanish uchun /start yuboring.',
+  deleteCancelled: 'Bekor qilindi. Ma’lumotlaringiz joyida.',
+  adminNewUser: (u) =>
+    [
+      `👤 <b>Yangi ${u.role === 'business' ? 'biznes' : 'bloger'}</b>`,
+      u.role === 'business'
+        ? `🏪 ${esc(u.company)} · ${esc(catLabel(u.category, 'uz'))}`
+        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(catLabel(u.niche, 'uz'))}\n🔗 ${esc(u.profile)}`,
+      `${mention(u.tg_id, u.name)}${at(u.username)} · ${esc(formatPhone(u.phone))}`
+    ].join('\n'),
+  adminNewCampaign: (c) =>
+    [
+      '📢 <b>Yangi kampaniya</b>',
+      `«${esc(c.title)}» · ${esc(catLabel(c.category, 'uz'))}`,
+      `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+      `💰 ${fmtNum(c.value)} so‘m · ${esc(String(c.platforms).split(',').join(', '))}`,
+      `📝 ${esc(c.format)} · ${c.slots} o‘rin · ${c.days} kun`,
+      c.description ? `\n${esc(c.description)}` : ''
+    ].join('\n').trim(),
+  adminClose: '🚫 Kampaniyani yopish',
+  adminClosed: '🚫 <b>Siz yopdingiz.</b>',
+  adminAlreadyClosed: 'Kampaniya allaqachon yopilgan.',
+  toBusinessClosed: (title) =>
+    `Kampaniyangiz «${esc(title)}» moderator tomonidan yopildi. Savollar bo‘lsa, shu botga yozing.`,
   newApplication: (a) =>
     [
       '🆕 <b>Yangi so‘rov</b>',
@@ -95,6 +126,7 @@ const uz = {
     { command: 'start', description: 'Ro‘yxatdan o‘tish yoki bosh menyu' },
     { command: 'app', description: 'Ilovani ochish' },
     { command: 'lang', description: 'Tilni o‘zgartirish' },
+    { command: 'privacy', description: 'Maxfiylik siyosati' },
     { command: 'help', description: 'Yordam' }
   ],
   description:
@@ -104,12 +136,12 @@ const uz = {
 
 const ru = {
   chooseLang: uz.chooseLang,
-  welcome:
-    'Добро пожаловать в <b>Ovoza</b>!\n\nЗдесь бизнес и блогеры сотрудничают по бартеру: товар или услуга в обмен на рекламу.\n\nКто вы?',
+  welcome: (url) =>
+    `Добро пожаловать в <b>Ovoza</b>!\n\nЗдесь бизнес и блогеры сотрудничают по бартеру: товар или услуга в обмен на рекламу.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.\n\nКто вы?`,
   roleBusiness: '🏪 У меня бизнес',
   roleBlogger: '📸 Я блогер',
-  welcomeAs: (role) =>
-    `Добро пожаловать в <b>Ovoza</b>! Регистрация для ${role === 'business' ? 'бизнеса' : 'блогера'}: ответьте на несколько вопросов.`,
+  welcomeAs: (role, url) =>
+    `Добро пожаловать в <b>Ovoza</b>! Регистрация для ${role === 'business' ? 'бизнеса' : 'блогера'}: ответьте на несколько вопросов.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.`,
   askName: 'Напишите ваше имя:',
   askCompany: 'Напишите название магазина или компании:',
   askCategory: 'К какой категории относится ваш товар или услуга?',
@@ -117,7 +149,8 @@ const ru = {
   askProfile: 'Напишите ссылку на профиль или @username:',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
-  askPhone: 'Последний шаг: отправьте номер телефона. Нажмите кнопку ниже 👇',
+  askPhone:
+    'Последний шаг: отправьте номер телефона. Нажмите кнопку ниже 👇\n\nНомер увидит другая сторона только после того, как отклик будет принят.',
   phoneButton: '📱 Отправить номер',
   phoneSaved: '✓ Номер сохранён.',
   errName: 'Имя должно быть от 2 до 60 символов. Напишите ещё раз:',
@@ -135,9 +168,38 @@ const ru = {
   updateProfile: '✏️ Обновить данные',
   home: (name) => `Здравствуйте, ${esc(name)}! Кампании и отклики — в приложении.`,
   help:
-    '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/lang — сменить язык\n/help — помощь',
+    '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
   notRegistered: 'Сначала пройдите регистрацию: /start',
   langSaved: 'Язык сохранён: Русский 🇷🇺',
+  privacy: (url) => `Какие данные собираются и как используются: <a href="${esc(url)}">политика конфиденциальности</a>.\n\nЧтобы удалить свои данные, отправьте /delete.`,
+  myId: (id) => `Ваш Telegram ID: <code>${Number(id)}</code>`,
+  deleteConfirm: 'Ваш профиль, кампании и отклики будут удалены навсегда. Отменить это нельзя. Удалить?',
+  deleteYes: '🗑 Да, удалить',
+  deleteNo: 'Отмена',
+  deleted: 'Ваши данные удалены. Чтобы снова пользоваться ботом, отправьте /start.',
+  deleteCancelled: 'Отменено. Ваши данные на месте.',
+  adminNewUser: (u) =>
+    [
+      `👤 <b>Новый ${u.role === 'business' ? 'бизнес' : 'блогер'}</b>`,
+      u.role === 'business'
+        ? `🏪 ${esc(u.company)} · ${esc(catLabel(u.category, 'ru'))}`
+        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(catLabel(u.niche, 'ru'))}\n🔗 ${esc(u.profile)}`,
+      `${mention(u.tg_id, u.name)}${at(u.username)} · ${esc(formatPhone(u.phone))}`
+    ].join('\n'),
+  adminNewCampaign: (c) =>
+    [
+      '📢 <b>Новая кампания</b>',
+      `«${esc(c.title)}» · ${esc(catLabel(c.category, 'ru'))}`,
+      `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+      `💰 ${fmtNum(c.value)} сум · ${esc(String(c.platforms).split(',').join(', '))}`,
+      `📝 ${esc(c.format)} · мест: ${c.slots} · дней: ${c.days}`,
+      c.description ? `\n${esc(c.description)}` : ''
+    ].join('\n').trim(),
+  adminClose: '🚫 Закрыть кампанию',
+  adminClosed: '🚫 <b>Вы закрыли кампанию.</b>',
+  adminAlreadyClosed: 'Кампания уже закрыта.',
+  toBusinessClosed: (title) =>
+    `Ваша кампания «${esc(title)}» закрыта модератором. Если есть вопросы, напишите в этот бот.`,
   newApplication: (a) =>
     [
       '🆕 <b>Новый отклик</b>',
@@ -182,6 +244,7 @@ const ru = {
     { command: 'start', description: 'Регистрация или главное меню' },
     { command: 'app', description: 'Открыть приложение' },
     { command: 'lang', description: 'Сменить язык' },
+    { command: 'privacy', description: 'Политика конфиденциальности' },
     { command: 'help', description: 'Помощь' }
   ],
   description:

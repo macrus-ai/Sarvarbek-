@@ -1,5 +1,7 @@
 // Umumiy yordamchi funksiyalar
 
+import { DEFAULT_PRIVACY_URL } from './constants.js';
+
 export const now = () => Math.floor(Date.now() / 1000);
 
 const HTML_ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -58,6 +60,18 @@ export const guessLang = (code) => (String(code || '').toLowerCase().startsWith(
 
 export function isRegistered(user) {
   return Boolean(user && user.role && user.reg_step === 'done' && user.registered_at);
+}
+
+export function privacyUrl(env, lang) {
+  const base = (env && env.PRIVACY_URL) || DEFAULT_PRIVACY_URL;
+  return lang === 'ru' ? `${base}?lang=ru` : base;
+}
+
+export function adminIds(env) {
+  return String(env.ADMIN_IDS || '')
+    .split(/[\s,]+/)
+    .map(Number)
+    .filter((n) => Number.isSafeInteger(n) && n > 0);
 }
 
 export function isAdmin(id, env) {

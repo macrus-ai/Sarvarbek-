@@ -52,6 +52,7 @@ Saytdagi barcha "Ro‘yxatdan o‘tish", "Men biznes egasiman", "Men blogerman" 
 
 - Havolada rol va sayt tili uzatiladi (`t.me/Ovozauz_bot?start=business-uz`). Shuning uchun bot til va rolni qayta so‘ramay, darhol ismni so‘raydi.
 - Kompyuterdan kirganlar uchun ro‘yxatdan o‘tish bo‘limida QR-kod bor.
+- Maxfiylik siyosati: `privacy.html` (o‘zbek va rus tilida). Bot ro‘yxatdan o‘tishda shu sahifaga havola beradi. Matn namuna sifatida yozilgan, uni yurist bilan ko‘rib chiqing.
 - Bot nomi o‘zgarsa, `assets/js/config.js` dagi `botUsername` ni va `index.html` dagi `t.me/Ovozauz_bot` havolalarini yangilang.
 
 Bot va mini ilova kodi `bot/` papkasida: [bot/README.md](bot/README.md).

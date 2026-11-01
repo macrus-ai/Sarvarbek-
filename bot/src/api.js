@@ -5,7 +5,7 @@ import {
   countActiveCampaigns, createCampaign, getCampaign, listActiveCampaigns, listBloggerApplications,
   listBusinessCampaigns, listBusinessRequests, setCampaignStatus, touchUser
 } from './db.js';
-import { AppError, applyToCampaign, decide } from './services.js';
+import { AppError, applyToCampaign, decide, notifyAdmins } from './services.js';
 import { validateInitData } from './telegram.js';
 import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } from './util.js';
 
@@ -210,7 +210,13 @@ async function route(ctx, user, method, path, url, request) {
       throw new AppError('too_many_campaigns', 409, { limit: LIMITS.activeCampaigns });
     }
     const campaignId = await createCampaign(db, id, data);
-    return json({ campaign: campaignOut(await getCampaign(db, campaignId, id), id) }, 201);
+    const created = await getCampaign(db, campaignId, id);
+    // Adminga yangi kampaniya haqida xabar va "yopish" tugmasi (moderatsiya)
+    await notifyAdmins(ctx, (T) => ({
+      text: T.adminNewCampaign({ ...created, business_contact: user.name }),
+      extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${created.id}` }]] } }
+    }));
+    return json({ campaign: campaignOut(created, id) }, 201);
   }
 
   if ((m = path.match(/^\/api\/campaigns\/(\d+)$/))) {

@@ -16,7 +16,17 @@ Qo‘shimcha:
 - Bo‘sh o‘rinlar soni hisobga olinadi: o‘rin to‘lsa, yangi so‘rov qabul qilinmaydi.
 - Blogerning obunachilari kampaniya talabidan kam bo‘lsa, so‘rov yuborib bo‘lmaydi.
 - Telefon raqamlar faqat so‘rov qabul qilingandan keyin ko‘rinadi.
-- `/stats` buyrug‘i (faqat adminlar uchun) foydalanuvchilar, kampaniyalar va so‘rovlar sonini ko‘rsatadi.
+- Ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi (saytdagi `privacy.html`, manzil `wrangler.toml` dagi `PRIVACY_URL` da).
+- `/delete` foydalanuvchining profili, kampaniyalari va so‘rovlarini tasdiqdan keyin butunlay o‘chiradi. `/privacy` siyosat havolasini yuboradi.
+
+### Admin imkoniyatlari
+
+`ADMIN_IDS` secretida ko‘rsatilgan Telegram ID egalari:
+- har bir yangi biznes va bloger haqida botda xabar oladi;
+- har bir yangi kampaniya haqida "🚫 Kampaniyani yopish" tugmasi bilan xabar oladi. Yopilsa, biznesga moderator yopgani haqida xabar boradi;
+- `/stats` buyrug‘i bilan foydalanuvchilar, kampaniyalar va so‘rovlar sonini ko‘radi.
+
+O‘z ID'ingizni bilish uchun botga `/id` yuboring.
 
 ## Texnik tuzilish
 
@@ -58,7 +68,7 @@ Tokenni hech kimga yubormang va chatlarga yozmang: u bilan botingizni boshqarish
 | `TELEGRAM_BOT_TOKEN` | BotFather bergan token |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
 | `CLOUDFLARE_ACCOUNT_ID` | *(ixtiyoriy)* Cloudflare Account ID. Kerak emas: workflow uni tokendan o‘zi topadi. Faqat tokeningiz bir nechta akkauntga tegishli bo‘lsa qo‘shing |
-| `ADMIN_IDS` | *(ixtiyoriy)* `/stats` dan foydalanadiganlarning Telegram ID'lari, vergul bilan. O‘z ID'ingizni [@userinfobot](https://t.me/userinfobot) aytadi |
+| `ADMIN_IDS` | *(ixtiyoriy)* adminlarning Telegram ID'lari, vergul bilan. O‘z ID'ingizni botga `/id` yuborib bilasiz |
 
 ### 4. Joylash
 

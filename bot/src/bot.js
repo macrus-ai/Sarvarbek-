@@ -1,10 +1,10 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
 import { CATEGORIES, FOLLOWERS, PLATFORMS, findFollowers, isCategory, isPlatform } from './constants.js';
-import { closeBusinessCampaigns, getStats, touchUser, updateUser } from './db.js';
+import { closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getStats, touchUser, updateUser } from './db.js';
 import { catLabel, followersLabel, tr } from './i18n.js';
-import { AppError, appUrl, decide } from './services.js';
-import { esc, guessLang, isAdmin, isRegistered, normalizePhone, now } from './util.js';
+import { AppError, appUrl, decide, notifyAdmins } from './services.js';
+import { esc, guessLang, isAdmin, isRegistered, normalizePhone, now, privacyUrl } from './util.js';
 
 // Ro'yxatdan o'tish qadamlari
 const FLOW = {
@@ -68,7 +68,7 @@ function ask(ctx, user, step) {
     case 'lang':
       return ctx.tg.send(id, T.chooseLang, { reply_markup: langKeyboard('lang') });
     case 'role':
-      return ctx.tg.send(id, T.welcome, {
+      return ctx.tg.send(id, T.welcome(privacyUrl(ctx.env, lang)), {
         reply_markup: {
           inline_keyboard: [
             [{ text: T.roleBusiness, callback_data: 'role:business' }],
@@ -110,7 +110,8 @@ async function save(ctx, user, fields) {
   const changes = { ...fields, reg_step: next };
   if (next === 'done') changes.registered_at = user.registered_at || now();
   await updateUser(ctx.db, user.tg_id, changes);
-  return { ...user, ...changes };
+  // firstRegistration: adminga "yangi foydalanuvchi" xabari uchun (qayta ro'yxatdan o'tishda emas)
+  return { ...user, ...changes, firstRegistration: next === 'done' && !user.registered_at };
 }
 
 // Keyingi savolni beradi yoki ro'yxatdan o'tishni yakunlaydi
@@ -121,10 +122,14 @@ async function advance(ctx, user, fields) {
   return proceed(ctx, await save(ctx, user, fields));
 }
 
-function finish(ctx, user) {
+async function finish(ctx, user) {
   const T = tr(user.lang);
   const text = user.role === 'business' ? T.doneBusiness(T.summaryBusiness(user)) : T.doneBlogger(T.summaryBlogger(user));
-  return ctx.tg.send(user.tg_id, text, { reply_markup: homeKeyboard(T, ctx) });
+  try {
+    await ctx.tg.send(user.tg_id, text, { reply_markup: homeKeyboard(T, ctx) });
+  } finally {
+    if (user.firstRegistration) await notifyAdmins(ctx, (TA) => ({ text: TA.adminNewUser(user) }));
+  }
 }
 
 function sendHome(ctx, user) {
@@ -145,7 +150,7 @@ async function beginAs(ctx, user, role, lang) {
   if (user.role === 'business' && role === 'blogger') await closeBusinessCampaigns(ctx.db, user.tg_id);
   await updateUser(ctx.db, user.tg_id, { lang, role, reg_step: 'name' });
   const updated = { ...user, lang, role, reg_step: 'name' };
-  await ctx.tg.send(user.tg_id, tr(lang).welcomeAs(role));
+  await ctx.tg.send(user.tg_id, tr(lang).welcomeAs(role, privacyUrl(ctx.env, lang)));
   return ask(ctx, updated, 'name');
 }
 
@@ -166,6 +171,18 @@ async function onMessage(msg, ctx) {
     if (cmd === 'help') return ctx.tg.send(id, T.help);
     if (cmd === 'app') return isRegistered(user) ? sendHome(ctx, user) : ctx.tg.send(id, T.notRegistered);
     if (cmd === 'stats' && isAdmin(id, ctx.env)) return ctx.tg.send(id, T.stats(await getStats(ctx.db)));
+    if (cmd === 'id') return ctx.tg.send(id, T.myId(id));
+    if (cmd === 'privacy') return ctx.tg.send(id, T.privacy(privacyUrl(ctx.env, user.lang)));
+    if (cmd === 'delete') {
+      return ctx.tg.send(id, T.deleteConfirm, {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: T.deleteYes, callback_data: 'del:yes' },
+            { text: T.deleteNo, callback_data: 'del:no' }
+          ]]
+        }
+      });
+    }
   }
 
   switch (user.reg_step) {
@@ -297,6 +314,38 @@ async function onCallback(cq, ctx) {
         return ack(messages[e.code] || T.errNotFound, true);
       }
       return ack(decision === 'accepted' ? T.decidedAccepted : T.decidedRejected);
+    }
+    case 'del': {
+      if (value !== 'yes' && value !== 'no') return stale();
+      await ack();
+      if (value === 'yes') await deleteUserData(ctx.db, user.tg_id);
+      try {
+        await ctx.tg.edit(chatId, messageId, value === 'yes' ? T.deleted : T.deleteCancelled);
+      } catch {
+        /* e'tiborsiz */
+      }
+      return undefined;
+    }
+    case 'adm': {
+      // Moderatsiya: faqat ADMIN_IDS dagilar uchun
+      if (value !== 'close' || !isAdmin(user.tg_id, ctx.env)) return stale();
+      const { changed, campaign } = await closeCampaignByAdmin(ctx.db, Number(extra));
+      if (!campaign) return stale();
+      if (!changed) return ack(T.adminAlreadyClosed, true);
+      await ack();
+      try {
+        await ctx.tg.edit(chatId, messageId, `${esc(cq.message.text || '')}\n\n${T.adminClosed}`, {
+          reply_markup: { inline_keyboard: [] }
+        });
+      } catch {
+        /* e'tiborsiz */
+      }
+      try {
+        await ctx.tg.send(campaign.business_id, tr(campaign.business_lang).toBusinessClosed(campaign.title));
+      } catch (e) {
+        console.warn('notify business failed:', e.message);
+      }
+      return undefined;
     }
     default:
       return stale();

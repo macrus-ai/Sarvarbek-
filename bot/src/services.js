@@ -1,9 +1,9 @@
 // So'rov yuborish va so'rov bo'yicha qaror: mini ilova ham, bot tugmalari ham shu funksiyalardan foydalanadi
 
 import { findFollowers } from './constants.js';
-import { decideApplication, getApplicationFull, getCampaign, insertApplication, setApplicationNotify } from './db.js';
+import { decideApplication, getApplicationFull, getCampaign, getUser, insertApplication, setApplicationNotify } from './db.js';
 import { tr } from './i18n.js';
-import { isRegistered } from './util.js';
+import { adminIds, isRegistered } from './util.js';
 
 export class AppError extends Error {
   constructor(code, status = 400, extra = {}) {
@@ -95,4 +95,17 @@ export async function decide(ctx, business, appId, decision) {
   }
 
   return { id: a.id, status: a.status };
+}
+
+// Adminlarga (ADMIN_IDS) xabar. build(T) => { text, extra }. Xato bo'lsa ham asosiy ish to'xtamaydi.
+export async function notifyAdmins(ctx, build) {
+  for (const id of adminIds(ctx.env)) {
+    try {
+      const admin = await getUser(ctx.db, id);
+      const { text, extra = {} } = build(tr(admin?.lang));
+      await ctx.tg.send(id, text, extra);
+    } catch (e) {
+      console.warn('notify admin failed:', e.message);
+    }
+  }
 }
