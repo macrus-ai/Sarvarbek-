@@ -1,8 +1,8 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
-import { CATEGORIES, FOLLOWERS, PLATFORMS, findFollowers, isCategory, isPlatform } from './constants.js';
+import { CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, findFollowers, isCategory, isNiche, isPlatform } from './constants.js';
 import { closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getStats, touchUser, updateUser } from './db.js';
-import { catLabel, followersLabel, tr } from './i18n.js';
+import { catLabel, followersLabel, nicheLabel, tr } from './i18n.js';
 import { AppError, appUrl, decide, notifyAdmins } from './services.js';
 import { esc, guessLang, isAdmin, isRegistered, normalizePhone, now, privacyUrl } from './util.js';
 
@@ -63,6 +63,9 @@ function ask(ctx, user, step) {
   const categoryButtons = () => ({
     inline_keyboard: rows(CATEGORIES.map((c) => ({ text: c[lang], callback_data: `cat:${c.id}` })), 2)
   });
+  const nicheButtons = () => ({
+    inline_keyboard: rows(NICHES.map((n) => ({ text: n[lang], callback_data: `niche:${n.id}` })), 2)
+  });
 
   switch (step) {
     case 'lang':
@@ -83,7 +86,7 @@ function ask(ctx, user, step) {
     case 'category':
       return ctx.tg.send(id, T.askCategory, { reply_markup: categoryButtons() });
     case 'niche':
-      return ctx.tg.send(id, T.askNiche, { reply_markup: categoryButtons() });
+      return ctx.tg.send(id, T.askNiche, { reply_markup: nicheButtons() });
     case 'platform':
       return ctx.tg.send(id, T.askPlatform, {
         reply_markup: { inline_keyboard: rows(PLATFORMS.map((p) => ({ text: p, callback_data: `plat:${p}` })), 2) }
@@ -284,11 +287,15 @@ async function onCallback(cq, ctx) {
       await updateUser(ctx.db, user.tg_id, { role: value, reg_step: 'name' });
       return ask(ctx, { ...user, role: value, reg_step: 'name' }, 'name');
     }
-    case 'cat': {
-      if ((user.reg_step !== 'category' && user.reg_step !== 'niche') || !isCategory(value)) return stale();
+    // Biznes toifasi (cat:) yoki bloger yo'nalishi (niche:). Eski "cat:" tugmalari yo'nalish uchun ham ishlaydi.
+    case 'cat':
+    case 'niche': {
+      const step = user.reg_step;
+      const valid = step === 'category' ? kind === 'cat' && isCategory(value) : step === 'niche' && isNiche(value);
+      if (!valid) return stale();
       await ack();
-      await markChosen(catLabel(value, user.lang));
-      return advance(ctx, user, { [user.reg_step]: value });
+      await markChosen(step === 'niche' ? nicheLabel(value, user.lang) : catLabel(value, user.lang));
+      return advance(ctx, user, { [step]: value });
     }
     case 'plat': {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();

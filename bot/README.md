@@ -6,7 +6,7 @@ Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilova
 
 1. **Ro‘yxatdan o‘tish (bot ichida).** `/start` → til (o‘zbekcha / ruscha) → "Biznes egasiman" yoki "Blogerman".
    - **Biznes:** ism, do‘kon yoki kompaniya nomi, toifa, telefon ("Raqamni yuborish" tugmasi).
-   - **Bloger:** ism, asosiy tarmoq, profil havolasi yoki @username, obunachilar soni, yo‘nalish, telefon.
+   - **Bloger:** ism, asosiy tarmoq, profil havolasi yoki @username, obunachilar soni, yo‘nalish (21 ta variant, oxirgisi "Boshqa"), telefon.
 2. **Biznes** mini ilovada reklama e’loni joylaydi: rasm (ixtiyoriy), mahsulot, qiymati, platformalar, format, kerakli obunachilar, muddat, blogerlar soni.
 3. **Bloger** mini ilovada reklama e’lonlarini ko‘radi (toifa, platforma va qidiruv bo‘yicha) va so‘rov yuboradi.
 4. **Biznesga botda xabar keladi**, xabarda "✅ Qabul qilish" va "❌ Rad etish" tugmalari bor. Xuddi shuni mini ilovadagi "So‘rovlar" bo‘limida ham qilish mumkin.
@@ -94,7 +94,7 @@ Tugagach, workflow sahifasidagi **Summary** da bot havolasi va mini ilova manzil
 
 - **Bot xabarlari:** `src/i18n.js` (o‘zbekcha va ruscha).
 - **Mini ilova matnlari:** `public/app.js` boshidagi `TEXT`.
-- **Toifalar, platformalar, obunachilar oraliqlari:** `src/constants.js`.
+- **Biznes toifalari (`CATEGORIES`), bloger yo‘nalishlari (`NICHES`, 20 ta + "Boshqa"), platformalar, obunachilar oraliqlari:** `src/constants.js`.
 - **Cheklovlar** (faol e’lonlar soni, matn uzunligi, rasm hajmi va boshqalar): `src/constants.js` dagi `LIMITS`.
 
 ## Kompyuterda ishlatish (dasturchilar uchun)

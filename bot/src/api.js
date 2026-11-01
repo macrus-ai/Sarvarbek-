@@ -1,6 +1,6 @@
 // Mini ilova uchun API. Har bir so'rov Telegram initData bilan tekshiriladi.
 
-import { CATEGORIES, FOLLOWERS, LIMITS, PLATFORMS, isCategory, isPlatform } from './constants.js';
+import { CATEGORIES, FOLLOWERS, LIMITS, NICHES, PLATFORMS, isCategory, isPlatform } from './constants.js';
 import {
   countActiveCampaigns, createCampaign, getCampaign, listActiveCampaigns, listBloggerApplications,
   listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser
@@ -13,6 +13,7 @@ import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } fr
 
 const META = {
   categories: CATEGORIES,
+  niches: NICHES,
   platforms: PLATFORMS,
   followers: FOLLOWERS
 };
