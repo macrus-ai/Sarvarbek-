@@ -3,10 +3,12 @@
 import { CATEGORIES, FOLLOWERS, LIMITS, PLATFORMS, isCategory, isPlatform } from './constants.js';
 import {
   countActiveCampaigns, createCampaign, getCampaign, listActiveCampaigns, listBloggerApplications,
-  listBusinessCampaigns, listBusinessRequests, setCampaignStatus, touchUser
+  listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser
 } from './db.js';
+import { tr } from './i18n.js';
+import { forgetImage, imageOut, newImageKey, pickSizes, sniffImage } from './images.js';
 import { AppError, applyToCampaign, decide, notifyAdmins } from './services.js';
-import { validateInitData } from './telegram.js';
+import { TelegramError, validateInitData } from './telegram.js';
 import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } from './util.js';
 
 const META = {
@@ -48,6 +50,7 @@ function campaignOut(c, viewerId) {
     slots: c.slots,
     city: c.city || '',
     description: c.description || '',
+    image: imageOut(c.id, c),
     status: c.status,
     businessName: c.business_name || '',
     accepted,
@@ -74,7 +77,8 @@ function myApplicationOut(a) {
       days: a.days,
       city: a.city || '',
       status: a.campaign_status,
-      businessName: a.company || ''
+      businessName: a.company || '',
+      image: imageOut(a.campaign_id, a)
     },
     contact:
       a.status === 'accepted'
@@ -156,6 +160,38 @@ function requireRole(user, role) {
   if (user.role !== role) throw new AppError('forbidden', 403);
 }
 
+// Rasm so'rov tanasida xom baytlar sifatida keladi (multipart emas)
+async function readImage(request) {
+  const declared = Number(request.headers.get('content-length'));
+  const tooLarge = () => new AppError('image_too_large', 413, { limitMb: LIMITS.imageMaxBytes / 1024 / 1024 });
+  if (declared > LIMITS.imageMaxBytes) throw tooLarge();
+  const bytes = new Uint8Array(await request.arrayBuffer());
+  if (bytes.length > LIMITS.imageMaxBytes) throw tooLarge();
+  const kind = sniffImage(bytes);
+  if (!kind) throw new AppError('image_invalid', 400);
+  return { bytes, type: kind.type, name: `ovoza.${kind.ext}` };
+}
+
+// Rasmni Telegramga yuklaydi: u biznesning bot bilan chatiga tasdiq sifatida boradi
+async function uploadImage(ctx, user, campaign, file) {
+  let message;
+  try {
+    message = await ctx.tg.uploadPhoto(user.tg_id, file, tr(user.lang).imageSaved(campaign.title), {
+      disable_notification: true
+    });
+  } catch (e) {
+    if (e instanceof TelegramError) {
+      console.warn('image upload failed:', e.message);
+      // 400 — Telegram rasmni qabul qilmadi (buzilgan fayl yoki juda cho'zinchoq rasm)
+      throw new AppError(e.code === 400 ? 'image_invalid' : 'image_failed', e.code === 400 ? 400 : 502);
+    }
+    throw e;
+  }
+  const sizes = pickSizes(message?.photo);
+  if (!sizes) throw new AppError('image_failed', 502);
+  return { ...sizes, key: newImageKey() };
+}
+
 /* ---------- Marshrutlar ---------- */
 
 export async function handleApi(request, ctx) {
@@ -184,7 +220,7 @@ async function route(ctx, user, method, path, url, request) {
   const id = user.tg_id;
   let m;
 
-  // Faol kampaniyalar ro'yxati (filtrlar bilan)
+  // Faol reklama e'lonlari ro'yxati (filtrlar bilan)
   if (method === 'GET' && path === '/api/campaigns') {
     const category = url.searchParams.get('category') || null;
     const platform = url.searchParams.get('platform') || null;
@@ -202,7 +238,7 @@ async function route(ctx, user, method, path, url, request) {
     return json({ campaigns: rows.map((c) => campaignOut(c, id)) });
   }
 
-  // Yangi kampaniya (faqat biznes)
+  // Yangi reklama e'loni (faqat biznes)
   if (method === 'POST' && path === '/api/campaigns') {
     requireRole(user, 'business');
     const data = validateCampaign(await readBody(request));
@@ -211,7 +247,7 @@ async function route(ctx, user, method, path, url, request) {
     }
     const campaignId = await createCampaign(db, id, data);
     const created = await getCampaign(db, campaignId, id);
-    // Adminga yangi kampaniya haqida xabar va "yopish" tugmasi (moderatsiya)
+    // Adminga yangi e'lon haqida xabar va "yopish" tugmasi (moderatsiya)
     await notifyAdmins(ctx, (T) => ({
       text: T.adminNewCampaign({ ...created, business_contact: user.name }),
       extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${created.id}` }]] } }
@@ -224,12 +260,12 @@ async function route(ctx, user, method, path, url, request) {
 
     if (method === 'GET') {
       const c = await getCampaign(db, campaignId, id);
-      // Yopilgan kampaniyani faqat egasi va so'rov yuborganlar ko'radi
+      // Yopilgan e'lonni faqat egasi va so'rov yuborganlar ko'radi
       if (!c || (c.status !== 'active' && c.business_id !== id && !c.my_status)) throw new AppError('not_found', 404);
       return json({ campaign: campaignOut(c, id) });
     }
 
-    // Kampaniyani yopish yoki qayta ochish
+    // E'lonni yopish yoki qayta ochish
     if (method === 'PATCH') {
       requireRole(user, 'business');
       const { status } = await readBody(request);
@@ -244,7 +280,30 @@ async function route(ctx, user, method, path, url, request) {
     }
   }
 
-  // Bloger kampaniyaga so'rov yuboradi
+  // E'lon rasmi: PUT — qo'yish yoki almashtirish, DELETE — olib tashlash (faqat egasi)
+  if ((m = path.match(/^\/api\/campaigns\/(\d+)\/image$/)) && (method === 'PUT' || method === 'DELETE')) {
+    requireRole(user, 'business');
+    const campaignId = Number(m[1]);
+    const current = await getCampaign(db, campaignId, id);
+    if (!current || current.business_id !== id) throw new AppError('not_found', 404);
+
+    if (method === 'DELETE') {
+      await setCampaignImage(db, campaignId, id, null);
+    } else {
+      const image = await uploadImage(ctx, user, current, await readImage(request));
+      await setCampaignImage(db, campaignId, id, image);
+      // Adminga rasm ham ko'rinsin: e'lon joylangandan keyin almashtirilgan rasmlar ham moderatsiyadan o'tadi
+      await notifyAdmins(ctx, (T) => ({
+        photo: image.fileId,
+        text: T.adminNewImage({ ...current, business_contact: user.name }),
+        extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${campaignId}` }]] } }
+      }));
+    }
+    await forgetImage(ctx.origin, campaignId, current.image_key);
+    return json({ campaign: campaignOut(await getCampaign(db, campaignId, id), id) });
+  }
+
+  // Bloger reklama e'loniga so'rov yuboradi
   if (method === 'POST' && (m = path.match(/^\/api\/campaigns\/(\d+)\/apply$/))) {
     requireRole(user, 'blogger');
     const body = await readBody(request);

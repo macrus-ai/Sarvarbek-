@@ -1,32 +1,40 @@
 # Ovoza Telegram boti va mini ilovasi
 
-Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilovaga kampaniya (reklama taklifi) joylaydi, blogerlar ko‘rib so‘rov yuboradi, so‘rovlar esa bizneslarga shu bot orqali keladi.
+Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilovaga reklama e’loni joylaydi, blogerlar ko‘rib so‘rov yuboradi, so‘rovlar esa bizneslarga shu bot orqali keladi.
 
 ## Qanday ishlaydi
 
 1. **Ro‘yxatdan o‘tish (bot ichida).** `/start` → til (o‘zbekcha / ruscha) → "Biznes egasiman" yoki "Blogerman".
    - **Biznes:** ism, do‘kon yoki kompaniya nomi, toifa, telefon ("Raqamni yuborish" tugmasi).
    - **Bloger:** ism, asosiy tarmoq, profil havolasi yoki @username, obunachilar soni, yo‘nalish, telefon.
-2. **Biznes** mini ilovada kampaniya joylaydi: mahsulot, qiymati, platformalar, format, kerakli obunachilar, muddat, blogerlar soni.
-3. **Bloger** mini ilovada kampaniyalarni ko‘radi (toifa, platforma va qidiruv bo‘yicha) va so‘rov yuboradi.
+2. **Biznes** mini ilovada reklama e’loni joylaydi: rasm (ixtiyoriy), mahsulot, qiymati, platformalar, format, kerakli obunachilar, muddat, blogerlar soni.
+3. **Bloger** mini ilovada reklama e’lonlarini ko‘radi (toifa, platforma va qidiruv bo‘yicha) va so‘rov yuboradi.
 4. **Biznesga botda xabar keladi**, xabarda "✅ Qabul qilish" va "❌ Rad etish" tugmalari bor. Xuddi shuni mini ilovadagi "So‘rovlar" bo‘limida ham qilish mumkin.
 5. **Blogerga javob botda keladi.** So‘rov qabul qilinsa, biznesning telefoni va Telegrami yuboriladi. Biznes ham blogerning telefonini ko‘radi.
 
 Qo‘shimcha:
 - Bo‘sh o‘rinlar soni hisobga olinadi: o‘rin to‘lsa, yangi so‘rov qabul qilinmaydi.
-- Blogerning obunachilari kampaniya talabidan kam bo‘lsa, so‘rov yuborib bo‘lmaydi.
+- Blogerning obunachilari e’lon talabidan kam bo‘lsa, so‘rov yuborib bo‘lmaydi.
 - Telefon raqamlar faqat so‘rov qabul qilingandan keyin ko‘rinadi.
 - Ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi (saytdagi `privacy.html`, manzil `wrangler.toml` dagi `PRIVACY_URL` da).
-- `/delete` foydalanuvchining profili, kampaniyalari va so‘rovlarini tasdiqdan keyin butunlay o‘chiradi. `/privacy` siyosat havolasini yuboradi.
+- `/delete` foydalanuvchining profili, e’lonlari va so‘rovlarini tasdiqdan keyin butunlay o‘chiradi. `/privacy` siyosat havolasini yuboradi.
 
 ### Admin imkoniyatlari
 
 `ADMIN_IDS` secretida ko‘rsatilgan Telegram ID egalari:
 - har bir yangi biznes va bloger haqida botda xabar oladi;
-- har bir yangi kampaniya haqida "🚫 Kampaniyani yopish" tugmasi bilan xabar oladi. Yopilsa, biznesga moderator yopgani haqida xabar boradi;
-- `/stats` buyrug‘i bilan foydalanuvchilar, kampaniyalar va so‘rovlar sonini ko‘radi.
+- har bir yangi reklama e’loni haqida "🚫 E’lonni yopish" tugmasi bilan xabar oladi. Yopilsa, biznesga moderator yopgani haqida xabar boradi;
+- e’longa rasm qo‘shilsa yoki almashtirilsa, rasmning o‘zini xuddi shu tugma bilan oladi;
+- `/stats` buyrug‘i bilan foydalanuvchilar, e’lonlar va so‘rovlar sonini ko‘radi.
 
 O‘z ID'ingizni bilish uchun botga `/id` yuboring.
+
+### E’lon rasmlari
+
+- Biznes rasmni e’lon joylashda yoki keyin e’lon sahifasida qo‘shadi, almashtiradi yoki olib tashlaydi.
+- Mini ilova rasmni yuklashdan oldin 1280 px gacha kichraytiradi (JPEG). Server JPG, PNG va WEBP ni qabul qiladi, hajmi 5 MB gacha.
+- Rasm Telegramga yuklanadi va Telegram serverida saqlanadi (bepul, alohida xizmat kerak emas). Biznesga botda "rasm qo‘shildi" degan tasdiq keladi. Bazada faqat rasmning `file_id` si turadi.
+- Mini ilova rasmni `/img/c/<id>-<kalit>.jpg` manzilidan oladi. Worker uni Telegramdan olib beradi, bot tokeni tashqariga chiqmaydi. Kalit tasodifiy va har yangi rasmda o‘zgaradi.
 
 ## Texnik tuzilish
 
@@ -87,7 +95,7 @@ Tugagach, workflow sahifasidagi **Summary** da bot havolasi va mini ilova manzil
 - **Bot xabarlari:** `src/i18n.js` (o‘zbekcha va ruscha).
 - **Mini ilova matnlari:** `public/app.js` boshidagi `TEXT`.
 - **Toifalar, platformalar, obunachilar oraliqlari:** `src/constants.js`.
-- **Cheklovlar** (faol kampaniyalar soni, matn uzunligi va boshqalar): `src/constants.js` dagi `LIMITS`.
+- **Cheklovlar** (faol e’lonlar soni, matn uzunligi, rasm hajmi va boshqalar): `src/constants.js` dagi `LIMITS`.
 
 ## Kompyuterda ishlatish (dasturchilar uchun)
 
@@ -104,8 +112,6 @@ Mini ilova faqat Telegram ichida to‘liq ishlaydi: brauzerda ochilsa, "Ilovani 
 
 ## Keyingi qadamlar uchun g‘oyalar
 
-- Kampaniyaga rasm qo‘shish.
 - Bloger post havolasini yuklashi va biznes uni tasdiqlashi.
 - Blogerlar reytingi va sharhlar.
 - Tariflar uchun to‘lov (Click, Payme).
-- Saytdagi "Ro‘yxatdan o‘tish" tugmasini botga ulash.

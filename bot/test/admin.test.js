@@ -67,7 +67,7 @@ test('admin yangi kampaniyani ko‘radi va yopa oladi', async () => {
   const id = data.campaign.id;
 
   const note = tg.sent(ADMIN).at(-1);
-  assert.match(note.body.text, /Yangi kampaniya/);
+  assert.match(note.body.text, /Yangi reklama e’loni/);
   assert.match(note.body.text, /Shubhali kampaniya/);
   assert.equal(note.body.reply_markup.inline_keyboard[0][0].callback_data, `adm:close:${id}`);
 
@@ -77,7 +77,7 @@ test('admin yangi kampaniyani ko‘radi va yopa oladi', async () => {
   assert.equal((await api(env, blogger, '/api/campaigns')).data.campaigns.length, 1);
 
   tg.clear();
-  await press(env, tgUser(ADMIN), `adm:close:${id}`, 'Yangi kampaniya');
+  await press(env, tgUser(ADMIN), `adm:close:${id}`, 'Yangi reklama e’loni');
   assert.equal((await api(env, blogger, '/api/campaigns')).data.campaigns.length, 0);
   assert.match(lastText(320), /moderator tomonidan yopildi/);
   assert.deepEqual(tg.last('editMessageText').body.reply_markup.inline_keyboard, []);

@@ -25,5 +25,5 @@ PRIVACY_URL = "https://macrus-ai.github.io/Sarvarbek-/privacy.html"
 
 # Maxfiy qiymatlar (wrangler.toml ga yozilmaydi):
 #   BOT_TOKEN  — @BotFather bergan token
-#   ADMIN_IDS  — admin Telegram ID'lari (vergul bilan), ixtiyoriy: yangi foydalanuvchi va kampaniya
-#                xabarlari, kampaniyani yopish tugmasi va /stats
+#   ADMIN_IDS  — admin Telegram ID'lari (vergul bilan), ixtiyoriy: yangi foydalanuvchi va reklama e'loni
+#                xabarlari, e'lonni yopish tugmasi va /stats

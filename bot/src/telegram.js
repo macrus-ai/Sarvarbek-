@@ -67,12 +67,8 @@ export class TelegramError extends Error {
 }
 
 export function createTelegram(token) {
-  async function call(method, params = {}) {
-    const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(params)
-    });
+  async function request(method, body, headers = {}) {
+    const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, { method: 'POST', headers, body });
     let data;
     try {
       data = await res.json();
@@ -83,6 +79,18 @@ export function createTelegram(token) {
     return data.result;
   }
 
+  const call = (method, params = {}) => request(method, JSON.stringify(params), { 'content-type': 'application/json' });
+
+  // Faylni (rasmni) multipart/form-data bilan yuklaydi
+  function upload(method, field, file, params = {}) {
+    const form = new FormData();
+    for (const [key, value] of Object.entries(params)) {
+      if (value != null) form.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+    }
+    form.append(field, new Blob([file.bytes], { type: file.type }), file.name);
+    return request(method, form);
+  }
+
   const html = { parse_mode: 'HTML', link_preview_options: { is_disabled: true } };
 
   return {
@@ -90,7 +98,17 @@ export function createTelegram(token) {
     send: (chatId, text, extra = {}) => call('sendMessage', { chat_id: chatId, text, ...html, ...extra }),
     edit: (chatId, messageId, text, extra = {}) =>
       call('editMessageText', { chat_id: chatId, message_id: messageId, text, ...html, ...extra }),
+    // photo — Telegramdagi file_id
+    photo: (chatId, photo, caption, extra = {}) =>
+      call('sendPhoto', { chat_id: chatId, photo, caption, parse_mode: 'HTML', ...extra }),
+    // Yangi rasmni yuklaydi; javobdagi message.photo da file_id'lar bo'ladi
+    uploadPhoto: (chatId, file, caption, extra = {}) =>
+      upload('sendPhoto', 'photo', file, { chat_id: chatId, caption, parse_mode: 'HTML', ...extra }),
+    editCaption: (chatId, messageId, caption, extra = {}) =>
+      call('editMessageCaption', { chat_id: chatId, message_id: messageId, caption, parse_mode: 'HTML', ...extra }),
     answer: (callbackId, text, showAlert = false) =>
-      call('answerCallbackQuery', { callback_query_id: callbackId, ...(text ? { text, show_alert: showAlert } : {}) })
+      call('answerCallbackQuery', { callback_query_id: callbackId, ...(text ? { text, show_alert: showAlert } : {}) }),
+    // Faylni yuklab olish manzili. Unda token bor: faqat serverda ishlatiladi, tashqariga berilmaydi.
+    fileUrl: (filePath) => `https://api.telegram.org/file/bot${token}/${filePath}`
   };
 }

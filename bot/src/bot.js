@@ -279,7 +279,7 @@ async function onCallback(cq, ctx) {
       if (user.reg_step !== 'role' || (value !== 'business' && value !== 'blogger')) return stale();
       await ack();
       await markChosen(value === 'business' ? T.roleBusiness : T.roleBlogger);
-      // Biznesdan blogerga o'tganda eski kampaniyalar yopiladi
+      // Biznesdan blogerga o'tganda eski e'lonlar yopiladi
       if (user.role === 'business' && value === 'blogger') await closeBusinessCampaigns(ctx.db, user.tg_id);
       await updateUser(ctx.db, user.tg_id, { role: value, reg_step: 'name' });
       return ask(ctx, { ...user, role: value, reg_step: 'name' }, 'name');
@@ -334,9 +334,13 @@ async function onCallback(cq, ctx) {
       if (!changed) return ack(T.adminAlreadyClosed, true);
       await ack();
       try {
-        await ctx.tg.edit(chatId, messageId, `${esc(cq.message.text || '')}\n\n${T.adminClosed}`, {
-          reply_markup: { inline_keyboard: [] }
-        });
+        // Xabar matnli yoki rasmli (e'lon rasmi) bo'lishi mumkin
+        const closedMarkup = { reply_markup: { inline_keyboard: [] } };
+        if (cq.message.photo) {
+          await ctx.tg.editCaption(chatId, messageId, `${esc(cq.message.caption || '')}\n\n${T.adminClosed}`, closedMarkup);
+        } else {
+          await ctx.tg.edit(chatId, messageId, `${esc(cq.message.text || '')}\n\n${T.adminClosed}`, closedMarkup);
+        }
       } catch {
         /* e'tiborsiz */
       }

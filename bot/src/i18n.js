@@ -42,12 +42,12 @@ const uz = {
   useButtons: 'Iltimos, yuqoridagi tugmalardan birini tanlang.',
   staleButton: 'Bu tugma eskirgan.',
   doneBusiness: (summary) =>
-    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nEndi ilovada kampaniya joylang. Blogerlar uni ko‘rib, so‘rov yuboradi, so‘rovlar shu botga keladi.`,
+    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nEndi ilovada reklama e’loni joylang. Blogerlar uni ko‘rib, so‘rov yuboradi, so‘rovlar shu botga keladi.`,
   doneBlogger: (summary) =>
-    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nIlovada kampaniyalarni ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi.`,
+    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi.`,
   openApp: '🚀 Ilovani ochish',
   updateProfile: '✏️ Ma’lumotlarni yangilash',
-  home: (name) => `Assalomu alaykum, ${esc(name)}! Kampaniyalar va so‘rovlar ilovada.`,
+  home: (name) => `Assalomu alaykum, ${esc(name)}! Reklama e’lonlari va so‘rovlar ilovada.`,
   help:
     '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
   notRegistered: 'Avval ro‘yxatdan o‘ting: /start',
@@ -55,7 +55,7 @@ const uz = {
   privacy: (url) => `Qaysi ma’lumotlar yig‘iladi va qanday ishlatiladi: <a href="${esc(url)}">maxfiylik siyosati</a>.\n\nMa’lumotlaringizni o‘chirish uchun /delete yuboring.`,
   myId: (id) => `Sizning Telegram ID: <code>${Number(id)}</code>`,
   deleteConfirm:
-    'Profilingiz, kampaniyalaringiz va so‘rovlaringiz butunlay o‘chiriladi. Buni qaytarib bo‘lmaydi. O‘chirilsinmi?',
+    'Profilingiz, e’lonlaringiz va so‘rovlaringiz butunlay o‘chiriladi. Buni qaytarib bo‘lmaydi. O‘chirilsinmi?',
   deleteYes: '🗑 Ha, o‘chirish',
   deleteNo: 'Bekor qilish',
   deleted: 'Ma’lumotlaringiz o‘chirildi. Qaytadan foydalanish uchun /start yuboring.',
@@ -70,22 +70,25 @@ const uz = {
     ].join('\n'),
   adminNewCampaign: (c) =>
     [
-      '📢 <b>Yangi kampaniya</b>',
+      '📢 <b>Yangi reklama e’loni</b>',
       `«${esc(c.title)}» · ${esc(catLabel(c.category, 'uz'))}`,
       `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
       `💰 ${fmtNum(c.value)} so‘m · ${esc(String(c.platforms).split(',').join(', '))}`,
       `📝 ${esc(c.format)} · ${c.slots} o‘rin · ${c.days} kun`,
       c.description ? `\n${esc(c.description)}` : ''
     ].join('\n').trim(),
-  adminClose: '🚫 Kampaniyani yopish',
+  adminNewImage: (c) =>
+    `🖼 <b>Reklama e’loniga rasm qo‘shildi</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+  imageSaved: (title) => `🖼 «${esc(title)}» reklama e’loniga rasm qo‘shildi. Blogerlar uni ilovada ko‘radi.`,
+  adminClose: '🚫 E’lonni yopish',
   adminClosed: '🚫 <b>Siz yopdingiz.</b>',
-  adminAlreadyClosed: 'Kampaniya allaqachon yopilgan.',
+  adminAlreadyClosed: 'E’lon allaqachon yopilgan.',
   toBusinessClosed: (title) =>
-    `Kampaniyangiz «${esc(title)}» moderator tomonidan yopildi. Savollar bo‘lsa, shu botga yozing.`,
+    `«${esc(title)}» reklama e’loningiz moderator tomonidan yopildi. Savollar bo‘lsa, shu botga yozing.`,
   newApplication: (a) =>
     [
       '🆕 <b>Yangi so‘rov</b>',
-      `Kampaniya: «${esc(a.title)}»`,
+      `Reklama e’loni: «${esc(a.title)}»`,
       '',
       `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
       `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} obunachi`,
@@ -103,7 +106,7 @@ const uz = {
   toBloggerAccepted: (a) =>
     [
       '🎉 <b>So‘rovingiz qabul qilindi!</b>',
-      `Kampaniya: «${esc(a.title)}»`,
+      `Reklama e’loni: «${esc(a.title)}»`,
       '',
       'Biznes bilan bog‘laning:',
       `🏪 ${esc(a.company)}`,
@@ -112,12 +115,12 @@ const uz = {
       '',
       `Kelishilgan format: ${esc(a.format)}.`
     ].join('\n'),
-  toBloggerRejected: (a) => `So‘rovingiz rad etildi.\nKampaniya: «${esc(a.title)}»\n\nIlovada boshqa kampaniyalar ham bor.`,
+  toBloggerRejected: (a) => `So‘rovingiz rad etildi.\nReklama e’loni: «${esc(a.title)}»\n\nIlovada boshqa reklama e’lonlari ham bor.`,
   errAlreadyDecided: 'Bu so‘rov bo‘yicha qaror allaqachon qabul qilingan.',
-  errCampaignFull: 'Bu kampaniyada bo‘sh o‘rin qolmagan.',
+  errCampaignFull: 'Bu reklama e’lonida bo‘sh o‘rin qolmagan.',
   errNotFound: 'So‘rov topilmadi.',
   stats: (s) =>
-    `📊 <b>Statistika</b>\nBizneslar: ${s.businesses}\nBlogerlar: ${s.bloggers}\nFaol kampaniyalar: ${s.active}\nSo‘rovlar: ${s.applications} (qabul qilingan: ${s.accepted})`,
+    `📊 <b>Statistika</b>\nBizneslar: ${s.businesses}\nBlogerlar: ${s.bloggers}\nFaol e’lonlar: ${s.active}\nSo‘rovlar: ${s.applications} (qabul qilingan: ${s.accepted})`,
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'uz'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
@@ -130,7 +133,7 @@ const uz = {
     { command: 'help', description: 'Yordam' }
   ],
   description:
-    'Ovoza — bizneslar va blogerlar uchun barter platformasi. Bizneslar kampaniya joylaydi, blogerlar so‘rov yuboradi, javoblar shu botga keladi.',
+    'Ovoza — bizneslar va blogerlar uchun barter platformasi. Bizneslar reklama e’loni joylaydi, blogerlar so‘rov yuboradi, javoblar shu botga keladi.',
   shortDescription: 'Mahsulot evaziga reklama: bizneslar va blogerlar uchun barter.'
 };
 
@@ -161,19 +164,19 @@ const ru = {
   useButtons: 'Пожалуйста, выберите один из вариантов выше.',
   staleButton: 'Эта кнопка устарела.',
   doneBusiness: (summary) =>
-    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nТеперь разместите кампанию в приложении. Блогеры увидят её и отправят отклики, а они придут в этот бот.`,
+    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nТеперь разместите рекламное объявление в приложении. Блогеры увидят его и отправят отклики, а они придут в этот бот.`,
   doneBlogger: (summary) =>
-    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nСмотрите кампании в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот.`,
+    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот.`,
   openApp: '🚀 Открыть приложение',
   updateProfile: '✏️ Обновить данные',
-  home: (name) => `Здравствуйте, ${esc(name)}! Кампании и отклики — в приложении.`,
+  home: (name) => `Здравствуйте, ${esc(name)}! Рекламные объявления и отклики — в приложении.`,
   help:
     '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
   notRegistered: 'Сначала пройдите регистрацию: /start',
   langSaved: 'Язык сохранён: Русский 🇷🇺',
   privacy: (url) => `Какие данные собираются и как используются: <a href="${esc(url)}">политика конфиденциальности</a>.\n\nЧтобы удалить свои данные, отправьте /delete.`,
   myId: (id) => `Ваш Telegram ID: <code>${Number(id)}</code>`,
-  deleteConfirm: 'Ваш профиль, кампании и отклики будут удалены навсегда. Отменить это нельзя. Удалить?',
+  deleteConfirm: 'Ваш профиль, объявления и отклики будут удалены навсегда. Отменить это нельзя. Удалить?',
   deleteYes: '🗑 Да, удалить',
   deleteNo: 'Отмена',
   deleted: 'Ваши данные удалены. Чтобы снова пользоваться ботом, отправьте /start.',
@@ -188,22 +191,25 @@ const ru = {
     ].join('\n'),
   adminNewCampaign: (c) =>
     [
-      '📢 <b>Новая кампания</b>',
+      '📢 <b>Новое рекламное объявление</b>',
       `«${esc(c.title)}» · ${esc(catLabel(c.category, 'ru'))}`,
       `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
       `💰 ${fmtNum(c.value)} сум · ${esc(String(c.platforms).split(',').join(', '))}`,
       `📝 ${esc(c.format)} · мест: ${c.slots} · дней: ${c.days}`,
       c.description ? `\n${esc(c.description)}` : ''
     ].join('\n').trim(),
-  adminClose: '🚫 Закрыть кампанию',
-  adminClosed: '🚫 <b>Вы закрыли кампанию.</b>',
-  adminAlreadyClosed: 'Кампания уже закрыта.',
+  adminNewImage: (c) =>
+    `🖼 <b>К рекламному объявлению добавлено фото</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+  imageSaved: (title) => `🖼 Фото добавлено к рекламному объявлению «${esc(title)}». Блогеры увидят его в приложении.`,
+  adminClose: '🚫 Закрыть объявление',
+  adminClosed: '🚫 <b>Вы закрыли объявление.</b>',
+  adminAlreadyClosed: 'Объявление уже закрыто.',
   toBusinessClosed: (title) =>
-    `Ваша кампания «${esc(title)}» закрыта модератором. Если есть вопросы, напишите в этот бот.`,
+    `Ваше рекламное объявление «${esc(title)}» закрыто модератором. Если есть вопросы, напишите в этот бот.`,
   newApplication: (a) =>
     [
       '🆕 <b>Новый отклик</b>',
-      `Кампания: «${esc(a.title)}»`,
+      `Объявление: «${esc(a.title)}»`,
       '',
       `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
       `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} подписчиков`,
@@ -221,7 +227,7 @@ const ru = {
   toBloggerAccepted: (a) =>
     [
       '🎉 <b>Ваш отклик принят!</b>',
-      `Кампания: «${esc(a.title)}»`,
+      `Объявление: «${esc(a.title)}»`,
       '',
       'Свяжитесь с бизнесом:',
       `🏪 ${esc(a.company)}`,
@@ -230,12 +236,12 @@ const ru = {
       '',
       `Согласованный формат: ${esc(a.format)}.`
     ].join('\n'),
-  toBloggerRejected: (a) => `Ваш отклик отклонён.\nКампания: «${esc(a.title)}»\n\nВ приложении есть и другие кампании.`,
+  toBloggerRejected: (a) => `Ваш отклик отклонён.\nОбъявление: «${esc(a.title)}»\n\nВ приложении есть и другие объявления.`,
   errAlreadyDecided: 'По этому отклику решение уже принято.',
-  errCampaignFull: 'В этой кампании не осталось свободных мест.',
+  errCampaignFull: 'В этом объявлении не осталось свободных мест.',
   errNotFound: 'Отклик не найден.',
   stats: (s) =>
-    `📊 <b>Статистика</b>\nБизнесы: ${s.businesses}\nБлогеры: ${s.bloggers}\nАктивные кампании: ${s.active}\nОтклики: ${s.applications} (принято: ${s.accepted})`,
+    `📊 <b>Статистика</b>\nБизнесы: ${s.businesses}\nБлогеры: ${s.bloggers}\nАктивные объявления: ${s.active}\nОтклики: ${s.applications} (принято: ${s.accepted})`,
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'ru'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
@@ -248,7 +254,7 @@ const ru = {
     { command: 'help', description: 'Помощь' }
   ],
   description:
-    'Ovoza — бартерная платформа для бизнеса и блогеров. Бизнес размещает кампании, блогеры откликаются, ответы приходят в этот бот.',
+    'Ovoza — бартерная платформа для бизнеса и блогеров. Бизнес размещает рекламные объявления, блогеры откликаются, ответы приходят в этот бот.',
   shortDescription: 'Реклама за товар: бартер для бизнеса и блогеров.'
 };
 

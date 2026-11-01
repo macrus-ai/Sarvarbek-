@@ -23,7 +23,7 @@ export const FOLLOWERS = [
 ];
 
 export const LIMITS = {
-  activeCampaigns: 20, // bitta biznesning bir vaqtdagi faol kampaniyalari
+  activeCampaigns: 20, // bitta biznesning bir vaqtdagi faol reklama e'lonlari
   titleMin: 3,
   titleMax: 80,
   formatMax: 80,
@@ -34,7 +34,8 @@ export const LIMITS = {
   valueMax: 1000000000,
   followersMax: 10000000,
   daysMax: 90,
-  slotsMax: 100
+  slotsMax: 100,
+  imageMaxBytes: 5 * 1024 * 1024 // yuklanadigan rasm hajmi (mini ilova uni oldindan kichraytiradi)
 };
 
 export const LANGS = ['uz', 'ru'];

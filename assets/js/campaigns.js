@@ -1,5 +1,5 @@
-/* Ovoza — namuna kampaniyalar va toifalar.
-   Haqiqiy kampaniyalar paydo bo'lganda shu ro'yxatni yangilang (yoki serverdan yuklang). */
+/* Ovoza — namuna reklama e'lonlari va toifalar.
+   Haqiqiy e'lonlar paydo bo'lganda shu ro'yxatni yangilang (yoki serverdan yuklang). */
 window.OVOZA_DATA = {
   categories: [
     { id: 'beauty', uz: 'Go‘zallik', ru: 'Красота' },

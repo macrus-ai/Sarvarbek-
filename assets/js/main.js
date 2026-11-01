@@ -165,7 +165,7 @@
     });
   }
 
-  /* ---------- Kampaniyalar katalogi ---------- */
+  /* ---------- Reklama e'lonlari katalogi ---------- */
   function catName(id, l = lang) {
     const cat = DATA.categories.find((c) => c.id === id);
     return cat ? cat[l] : id;

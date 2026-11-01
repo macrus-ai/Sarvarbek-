@@ -28,7 +28,7 @@ export function decisionKeyboard(T, appId, ctx) {
   };
 }
 
-// Bloger kampaniyaga so'rov yuboradi; biznesga bot orqali xabar boradi
+// Bloger reklama e'loniga so'rov yuboradi; biznesga bot orqali xabar boradi
 export async function applyToCampaign(ctx, blogger, campaignId, message) {
   if (!isRegistered(blogger) || blogger.role !== 'blogger') throw new AppError('forbidden', 403);
 
@@ -97,13 +97,14 @@ export async function decide(ctx, business, appId, decision) {
   return { id: a.id, status: a.status };
 }
 
-// Adminlarga (ADMIN_IDS) xabar. build(T) => { text, extra }. Xato bo'lsa ham asosiy ish to'xtamaydi.
+// Adminlarga (ADMIN_IDS) xabar. build(T) => { text, extra, photo? }. Xato bo'lsa ham asosiy ish to'xtamaydi.
 export async function notifyAdmins(ctx, build) {
   for (const id of adminIds(ctx.env)) {
     try {
       const admin = await getUser(ctx.db, id);
-      const { text, extra = {} } = build(tr(admin?.lang));
-      await ctx.tg.send(id, text, extra);
+      const { text, extra = {}, photo } = build(tr(admin?.lang));
+      if (photo) await ctx.tg.photo(id, photo, text, extra);
+      else await ctx.tg.send(id, text, extra);
     } catch (e) {
       console.warn('notify admin failed:', e.message);
     }
