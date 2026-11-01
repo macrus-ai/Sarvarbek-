@@ -1,18 +1,14 @@
-/* Ovoza — sayt skriptlari: til, menyu, tablar, katalog, kalkulyator va formalar. */
+/* Ovoza — sayt skriptlari: til, menyu, tablar, katalog, kalkulyator va Telegram bot havolalari. */
 (() => {
   'use strict';
 
-  const CONFIG = Object.assign({ formEndpoint: '', defaultLang: 'uz' }, window.OVOZA_CONFIG || {});
+  const CONFIG = Object.assign({ botUsername: 'Ovozauz_bot', defaultLang: 'uz' }, window.OVOZA_CONFIG || {});
   const I18N = window.OVOZA_I18N;
   const DATA = window.OVOZA_DATA;
   const LANG_KEY = 'ovoza-lang';
-  const PHONE_RE = /^998\d{9}$/;
 
   let lang = 'uz';
   const filter = { cat: 'all', platform: 'all', q: '' };
-  let currentCampaign = null;
-  let signupResult = null; // { kind, name, demo }
-  let applyResult = null; // { name, demo }
 
   /* ---------- Yordamchilar ---------- */
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -40,6 +36,15 @@
 
   function storageSet(key, value) {
     try { window.localStorage.setItem(key, value); } catch (e) { /* xotira yopiq bo'lsa, tanlov eslab qolinmaydi */ }
+  }
+
+  /* ---------- Telegram bot havolalari ---------- */
+  const botLink = (role) => `https://t.me/${CONFIG.botUsername}?start=${role}-${lang}`;
+
+  function updateBotLinks() {
+    $$('[data-bot-start]').forEach((a) => {
+      a.href = botLink(a.dataset.botStart);
+    });
   }
 
   /* ---------- Til ---------- */
@@ -74,9 +79,7 @@
     renderChips();
     renderCampaigns();
     updateCalc();
-    refreshMessages();
-    refreshResults();
-    fillModal();
+    updateBotLinks();
     storageSet(LANG_KEY, lang);
   }
 
@@ -212,7 +215,7 @@
       <div class="camp-value"><span>${esc(t('value'))}</span><strong>${money(c.value)}</strong></div>
       <dl class="camp-meta">${metaRow(t('format'), c.format[lang])}${metaRow(t('requirement'), t('followers', c.minFollowers))}${metaRow(t('deadline'), t('days', c.days))}</dl>
       <ul class="camp-platforms" aria-label="${esc(t('platforms'))}">${c.platforms.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
-      <button type="button" class="btn btn-primary btn-block" data-apply="${esc(c.id)}">${esc(t('apply'))}</button>
+      <a class="btn btn-primary btn-block" href="${botLink('blogger')}" data-bot-start="blogger" target="_blank" rel="noopener">${esc(t('applyInBot'))}</a>
     </article>`;
   }
 
@@ -249,258 +252,6 @@
       $('#cat-platform').value = 'all';
       updateChips();
       renderCampaigns();
-    });
-    $('#cat-grid').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-apply]');
-      if (btn) openApply(btn.dataset.apply);
-    });
-  }
-
-  /* ---------- Kampaniyaga ariza oynasi ---------- */
-  function fillModal() {
-    if (!currentCampaign) return;
-    const c = currentCampaign;
-    $('#apply-title').textContent = c.title[lang];
-    $('#apply-sub').textContent = `${c.seller[lang]} · ${c.city[lang]} · ${c.format[lang]}`;
-    const select = $('#a-platform');
-    const prev = select.value;
-    select.innerHTML = c.platforms.map((p) => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
-    if (c.platforms.includes(prev)) select.value = prev;
-  }
-
-  function openApply(id) {
-    currentCampaign = DATA.campaigns.find((c) => c.id === id) || null;
-    if (!currentCampaign) return;
-    const dialog = $('#apply-modal');
-    const form = $('#form-apply');
-    resetForm(form);
-    applyResult = null;
-    form.hidden = false;
-    $('#apply-success').hidden = true;
-    fillModal();
-    document.documentElement.classList.add('modal-open');
-    if (typeof dialog.showModal === 'function') dialog.showModal();
-    else dialog.setAttribute('open', '');
-    $('#a-name').focus();
-  }
-
-  function closeModal() {
-    const dialog = $('#apply-modal');
-    if (typeof dialog.close === 'function') dialog.close();
-    else dialog.removeAttribute('open');
-    document.documentElement.classList.remove('modal-open');
-  }
-
-  function initModal() {
-    const dialog = $('#apply-modal');
-    $$('[data-close-modal]', dialog).forEach((b) => b.addEventListener('click', closeModal));
-    // Oynadan tashqariga bosilganda yopiladi
-    dialog.addEventListener('click', (e) => { if (e.target === dialog) closeModal(); });
-    dialog.addEventListener('close', () => document.documentElement.classList.remove('modal-open'));
-  }
-
-  /* ---------- Formalar ---------- */
-  function formatPhone(value) {
-    let d = value.replace(/\D/g, '');
-    if (!d) return '';
-    if ('998'.startsWith(d)) return `+${d}`;
-    if (!d.startsWith('998')) d = `998${d}`;
-    const r = d.slice(3, 12);
-    let out = '+998';
-    if (r.length) out += ` ${r.slice(0, 2)}`;
-    if (r.length > 2) out += ` ${r.slice(2, 5)}`;
-    if (r.length > 5) out += ` ${r.slice(5, 7)}`;
-    if (r.length > 7) out += ` ${r.slice(7, 9)}`;
-    return out;
-  }
-
-  function initPhone(input) {
-    input.addEventListener('focus', () => { if (!input.value) input.value = '+998 '; });
-    input.addEventListener('blur', () => { if (input.value.replace(/\D/g, '').length <= 3) input.value = ''; });
-    input.addEventListener('input', () => { input.value = formatPhone(input.value); });
-  }
-
-  function controlsOf(form) {
-    return $$('input, select, textarea', form).filter((c) => c.name);
-  }
-
-  function errorSlot(control) {
-    const field = control.closest('.field');
-    if (!field) return null;
-    let slot = $('.field-error', field);
-    if (!slot) {
-      slot = document.createElement('p');
-      slot.className = 'field-error';
-      slot.id = `${control.id}-error`;
-      slot.hidden = true;
-      field.appendChild(slot);
-      const described = [control.getAttribute('aria-describedby'), slot.id].filter(Boolean).join(' ');
-      control.setAttribute('aria-describedby', described);
-    }
-    return slot;
-  }
-
-  function errorFor(control) {
-    const v = control.value.trim();
-    if (control.required && !v) return control.tagName === 'SELECT' ? 'errSelect' : 'errRequired';
-    if (!v) return null;
-    if (control.dataset.validate === 'phone' && !PHONE_RE.test(v.replace(/\D/g, ''))) return 'errPhone';
-    if (control.dataset.validate === 'profile' && v.replace(/[@\s]/g, '').length < 3) return 'errProfile';
-    return null;
-  }
-
-  function showError(control, key) {
-    const slot = errorSlot(control);
-    const field = control.closest('.field');
-    if (field) field.classList.toggle('has-error', Boolean(key));
-    if (key) control.setAttribute('aria-invalid', 'true');
-    else control.removeAttribute('aria-invalid');
-    if (slot) {
-      slot.dataset.key = key || '';
-      slot.textContent = key ? t(key) : '';
-      slot.hidden = !key;
-    }
-  }
-
-  function setAlert(form, key) {
-    let box = $('.form-alert', form);
-    if (!box) {
-      box = document.createElement('p');
-      box.className = 'form-alert';
-      box.setAttribute('role', 'alert');
-      box.hidden = true;
-      $('[type="submit"]', form).before(box);
-    }
-    box.dataset.key = key || '';
-    box.textContent = key ? t(key) : '';
-    box.hidden = !key;
-  }
-
-  function refreshMessages() {
-    $$('.field-error, .form-alert').forEach((el) => {
-      if (el.dataset.key) el.textContent = t(el.dataset.key);
-    });
-  }
-
-  function resetForm(form) {
-    form.reset();
-    controlsOf(form).forEach((c) => showError(c, null));
-    setAlert(form, null);
-  }
-
-  // Ma'lumotni yuborish. Manzil berilmagan bo'lsa, demo rejim.
-  function send(payload) {
-    if (!CONFIG.formEndpoint) return Promise.resolve({ demo: true });
-    return fetch(CONFIG.formEndpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload)
-    }).then((res) => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return { demo: false };
-    });
-  }
-
-  function initForm(form, onDone) {
-    const controls = controlsOf(form);
-    controls.forEach((c) => {
-      errorSlot(c);
-      const recheck = () => { if (c.getAttribute('aria-invalid') === 'true') showError(c, errorFor(c)); };
-      c.addEventListener('input', recheck);
-      c.addEventListener('change', recheck);
-      if (c.dataset.validate === 'phone') initPhone(c);
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      let firstBad = null;
-      controls.forEach((c) => {
-        const key = errorFor(c);
-        showError(c, key);
-        if (key && !firstBad) firstBad = c;
-      });
-      if (firstBad) {
-        firstBad.focus();
-        return;
-      }
-
-      const payload = { type: form.dataset.kind, lang, sentAt: new Date().toISOString() };
-      controls.forEach((c) => { payload[c.name] = c.value.trim(); });
-      if (form.dataset.kind === 'apply' && currentCampaign) {
-        payload.campaignId = currentCampaign.id;
-        payload.campaign = currentCampaign.title.uz;
-      }
-
-      const btn = $('[type="submit"]', form);
-      const label = btn.innerHTML;
-      btn.disabled = true;
-      btn.textContent = t('sending');
-      setAlert(form, null);
-
-      send(payload)
-        .then((res) => {
-          onDone(payload, res);
-          resetForm(form);
-        })
-        .catch(() => setAlert(form, 'errSend'))
-        .finally(() => {
-          btn.disabled = false;
-          btn.innerHTML = label;
-        });
-    });
-  }
-
-  function refreshResults() {
-    if (signupResult) {
-      const key = signupResult.kind === 'blogger' ? 'okBlogger' : 'okBusiness';
-      $('#success-text').textContent = t(key, signupResult.name);
-      $('#success-demo').hidden = !signupResult.demo;
-    }
-    if (applyResult && currentCampaign) {
-      $('#apply-success-text').textContent = t('okApply', applyResult.name, currentCampaign.title[lang]);
-      $('#apply-demo').hidden = !applyResult.demo;
-    }
-  }
-
-  function initSignup() {
-    const group = $('#signup-tabs');
-    const onTab = () => { $('#form-success').hidden = true; };
-    initTabs(group, onTab);
-
-    $('#success-again').addEventListener('click', () => {
-      const active = $('[role="tab"][aria-selected="true"]', group);
-      selectTab(group, active, onTab);
-      const input = $(`#${active.getAttribute('aria-controls')} input`);
-      if (input) input.focus();
-    });
-
-    // "Men biznes egasiman" / "Men blogerman" tugmalari kerakli formani ochadi
-    $$('[data-role-link]').forEach((link) => {
-      link.addEventListener('click', () => {
-        const tab = $(`[role="tab"][data-role="${link.dataset.roleLink}"]`, group);
-        if (tab) selectTab(group, tab, onTab);
-      });
-    });
-
-    const onDone = (payload, res) => {
-      signupResult = { kind: payload.type, name: payload.name, demo: res.demo };
-      $('#form-business').hidden = true;
-      $('#form-blogger').hidden = true;
-      const box = $('#form-success');
-      box.hidden = false;
-      refreshResults();
-      box.focus();
-    };
-    initForm($('#form-business'), onDone);
-    initForm($('#form-blogger'), onDone);
-
-    initForm($('#form-apply'), (payload, res) => {
-      applyResult = { name: payload.name, demo: res.demo };
-      $('#form-apply').hidden = true;
-      const box = $('#apply-success');
-      box.hidden = false;
-      refreshResults();
-      box.focus();
     });
   }
 
@@ -545,8 +296,6 @@
     initTabs($('#how-tabs'));
     initCatalog();
     initCalc();
-    initModal();
-    initSignup();
     $$('[data-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
     $('#year').textContent = String(new Date().getFullYear());
     setLang(storageGet(LANG_KEY) || CONFIG.defaultLang);

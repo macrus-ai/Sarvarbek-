@@ -21,6 +21,8 @@ const uz = {
     '<b>Ovoza</b> platformasiga xush kelibsiz!\n\nBu yerda bizneslar mahsulot yoki xizmat evaziga blogerlar bilan barter hamkorlik qiladi.\n\nSiz kimsiz?',
   roleBusiness: '🏪 Biznes egasiman',
   roleBlogger: '📸 Blogerman',
+  welcomeAs: (role) =>
+    `<b>Ovoza</b> platformasiga xush kelibsiz! ${role === 'business' ? 'Biznes' : 'Bloger'} sifatida ro‘yxatdan o‘tamiz, bir nechta savolga javob bering.`,
   askName: 'Ismingizni yozing:',
   askCompany: 'Do‘kon yoki kompaniyangiz nomini yozing:',
   askCategory: 'Mahsulot yoki xizmatingiz qaysi toifaga kiradi?',
@@ -106,6 +108,8 @@ const ru = {
     'Добро пожаловать в <b>Ovoza</b>!\n\nЗдесь бизнес и блогеры сотрудничают по бартеру: товар или услуга в обмен на рекламу.\n\nКто вы?',
   roleBusiness: '🏪 У меня бизнес',
   roleBlogger: '📸 Я блогер',
+  welcomeAs: (role) =>
+    `Добро пожаловать в <b>Ovoza</b>! Регистрация для ${role === 'business' ? 'бизнеса' : 'блогера'}: ответьте на несколько вопросов.`,
   askName: 'Напишите ваше имя:',
   askCompany: 'Напишите название магазина или компании:',
   askCategory: 'К какой категории относится ваш товар или услуга?',
