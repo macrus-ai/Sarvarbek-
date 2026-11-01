@@ -19,6 +19,11 @@ migrations_dir = "migrations"
 [observability]
 enabled = true
 
+[vars]
+# Maxfiylik siyosati sahifasi (saytda)
+PRIVACY_URL = "https://macrus-ai.github.io/Sarvarbek-/privacy.html"
+
 # Maxfiy qiymatlar (wrangler.toml ga yozilmaydi):
 #   BOT_TOKEN  — @BotFather bergan token
-#   ADMIN_IDS  — /stats buyrug'idan foydalana oladigan Telegram ID'lar (vergul bilan), ixtiyoriy
+#   ADMIN_IDS  — admin Telegram ID'lari (vergul bilan), ixtiyoriy: yangi foydalanuvchi va kampaniya
+#                xabarlari, kampaniyani yopish tugmasi va /stats

@@ -216,7 +216,9 @@
     'footer.contacts': 'Контакты',
     'footer.address': 'Ташкент, Узбекистан',
     'footer.rights': 'Все права защищены.',
-    'footer.top': 'Наверх'
+    'footer.top': 'Наверх',
+    'footer.privacy': 'Политика конфиденциальности',
+    'bot.consent': 'Регистрируясь, вы соглашаетесь с <a href="privacy.html">политикой конфиденциальности</a>.'
   };
 
   window.OVOZA_I18N = { ui, ru };
