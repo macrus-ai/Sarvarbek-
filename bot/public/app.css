@@ -154,6 +154,8 @@ h1, h2, h3, p { margin: 0; }
   padding: 6px 16px calc(96px + env(safe-area-inset-bottom, 0px));
 }
 
+.main-list { display: grid; gap: 12px; }
+
 .view-title {
   font-family: var(--font-display);
   font-size: 21px;
@@ -470,7 +472,86 @@ h1, h2, h3, p { margin: 0; }
 
 .contact-row .i { width: 18px; height: 18px; color: var(--ok); }
 
-/* ---------- Kampaniya sahifasi ---------- */
+/* ---------- Rasmlar ---------- */
+.card-img {
+  display: block;
+  width: calc(100% + 28px);
+  max-width: none;
+  margin: -14px -14px 2px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 16px 16px 0 0;
+  background: var(--field);
+}
+
+.title-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.thumb {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--field);
+}
+
+.detail-img {
+  display: block;
+  width: 100%;
+  max-height: 68vh;
+  object-fit: cover;
+  border-radius: 16px;
+  background: var(--field);
+}
+
+.img-figure { position: relative; display: grid; gap: 8px; margin: 0; }
+.img-actions { justify-content: flex-start; }
+.img-actions .btn { flex: none; }
+.detail .img-actions .btn { background: var(--card); }
+
+.img-pick {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  min-height: 132px;
+  padding: 18px 16px;
+  border: 1.5px dashed currentColor;
+  border-radius: 16px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.img-pick > span { font-size: 15px; }
+.img-pick .i { width: 30px; height: 30px; margin-bottom: 2px; }
+.img-pick small { color: var(--hint); font-size: 13px; font-weight: 400; }
+.img-pick:active { transform: scale(0.99); }
+.img-pick:focus-within,
+label.btn:focus-within { outline: 2px solid var(--brand); outline-offset: 2px; }
+label.btn { cursor: pointer; }
+
+.img-overlay {
+  position: absolute;
+  inset: 0 0 44px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.img-pick.is-busy { cursor: default; }
+.img-broken { display: none !important; }
+
+/* ---------- Reklama e'loni sahifasi ---------- */
 .detail { display: grid; gap: 12px; }
 
 .detail-title {
@@ -577,7 +658,7 @@ h1, h2, h3, p { margin: 0; }
 
 .field { display: grid; gap: 6px; min-width: 0; }
 
-.field > label,
+.field > label:not(.img-pick),
 .field > .label {
   display: flex;
   justify-content: space-between;

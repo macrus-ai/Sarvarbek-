@@ -41,7 +41,7 @@ export async function updateUser(db, id, fields) {
     .run();
 }
 
-/* ---------- Kampaniyalar ---------- */
+/* ---------- Reklama e'lonlari (jadvalda: campaigns) ---------- */
 
 // ?1 — ko'rayotgan foydalanuvchi (uning so'rovi holatini qo'shish uchun)
 const CAMPAIGN_SELECT = `
@@ -178,11 +178,21 @@ export function setApplicationNotify(db, id, chatId, messageId) {
 }
 
 // Blogerning so'rovlari. Biznes bilan aloqa ma'lumotlari faqat qabul qilinganda beriladi.
+// Rasmni qo'yadi yoki (image = null) olib tashlaydi. Faqat e'lon egasi uchun ishlaydi.
+export async function setCampaignImage(db, id, businessId, image) {
+  const res = await db
+    .prepare('UPDATE campaigns SET image_file_id = ?1, image_thumb_id = ?2, image_key = ?3, updated_at = ?4 WHERE id = ?5 AND business_id = ?6')
+    .bind(image?.fileId ?? null, image?.thumbId ?? null, image?.key ?? null, now(), id, businessId)
+    .run();
+  return res.meta.changes > 0;
+}
+
 export async function listBloggerApplications(db, bloggerId) {
   const { results } = await db
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at, a.updated_at,
          c.id AS campaign_id, c.title, c.value, c.format, c.days, c.city, c.status AS campaign_status,
+         c.image_file_id, c.image_key,
          b.company,
          CASE WHEN a.status = 'accepted' THEN b.name END AS contact_name,
          CASE WHEN a.status = 'accepted' THEN b.phone END AS contact_phone,

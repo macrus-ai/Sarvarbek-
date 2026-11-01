@@ -368,6 +368,7 @@ textarea { font: inherit; color: inherit; }
 .nav a {
   padding: 8px 12px;
   border-radius: 999px;
+  white-space: nowrap;
   color: var(--muted);
   font-size: 0.95rem;
   font-weight: 500;
@@ -382,6 +383,12 @@ textarea { font: inherit; color: inherit; }
 }
 
 .nav a.nav-cta { display: none; }
+
+/* Tor kompyuter ekranida menyu bir qatorga sig'sin */
+@media (max-width: 1100px) {
+  .nav a { padding: 8px 9px; font-size: 0.9rem; }
+  .header-cta { white-space: nowrap; }
+}
 
 .header-actions {
   display: flex;

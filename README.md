@@ -10,7 +10,7 @@ Sayt oddiy HTML, CSS va JavaScript bilan yozilgan. Hech qanday o‘rnatish yoki 
 - **Bosh blok**: platforma g‘oyasi va ikki tugma ("Men biznes egasiman", "Men blogerman").
 - **Qanday ishlaydi**: biznes va bloger uchun 4 qadam (tablar bilan almashtiriladi).
 - **Nega Ovoza**: ikki tomon uchun foydalar.
-- **Kampaniyalar katalogi**: toifa, platforma va qidiruv bo‘yicha filtr, har bir kampaniyaga ariza berish oynasi.
+- **Reklama e’lonlari katalogi**: toifa, platforma va qidiruv bo‘yicha filtr, har bir e’longa ariza berish oynasi.
 - **Kalkulyator**: barter pullik reklamaga nisbatan qancha tejashini hisoblaydi.
 - **Tariflar**, **Savollar (FAQ)**, **Ro‘yxatdan o‘tish** (Telegram botga havolalar va QR-kod).
 - **Ikki til**: o‘zbekcha (asosiy) va ruscha. Tanlangan til brauzerda eslab qolinadi.
@@ -24,7 +24,7 @@ index.html              sahifa va barcha o‘zbekcha matnlar
 assets/css/style.css    dizayn (ranglar fayl boshida)
 assets/js/config.js     sozlamalar: bot nomi, asosiy til
 assets/js/i18n.js       ruscha tarjimalar va skript matnlari
-assets/js/campaigns.js  kampaniyalar ro‘yxati va toifalar
+assets/js/campaigns.js  namuna reklama e’lonlari va toifalar
 assets/js/main.js       sayt mantiqi
 assets/img/favicon.svg  brauzer ikonkasi
 ```
@@ -41,7 +41,7 @@ python3 -m http.server 8000
 ## O‘zgartirish
 
 - **Matnlar**: o‘zbekcha matnlar `index.html` ichida. Matnni o‘zgartirsangiz, ruschasini `assets/js/i18n.js` dagi xuddi shu kalit (`data-i18n` qiymati) bo‘yicha yangilang.
-- **Kampaniyalar**: `assets/js/campaigns.js`. Hozirgilari namuna, saytda ham "Namuna" deb belgilangan.
+- **Reklama e’lonlari (namunalar)**: `assets/js/campaigns.js`. Hozirgilari namuna, saytda ham "Namuna" deb belgilangan.
 - **Aloqa ma’lumotlari**: telefon raqami `+998 95 555 45 49`. Telegram `@ovoza_uz` va `info@ovoza.uz` hozircha vaqtinchalik qiymatlar. Ular `index.html` da ikki joyda turadi: ro‘yxatdan o‘tish bo‘limi va footer.
 - **Tarif narxlari**: `index.html` dagi "Tariflar" bo‘limi va `i18n.js` dagi `plan…` kalitlari.
 - **Ranglar**: `assets/css/style.css` boshidagi `:root` bloki (kunduzgi) va undan keyingi tungi rejim bloklari.
@@ -71,5 +71,5 @@ Netlify, Vercel yoki istalgan boshqa hosting ham mos keladi: fayllarni shundayli
 ## Keyingi qadamlar
 
 Bu sayt platformaning tashqi ko‘rinishi va landing sahifasi. To‘liq ishlaydigan platforma uchun server qismi kerak bo‘ladi:
-foydalanuvchi akkauntlari (biznes va bloger), kampaniyalarni yaratish va boshqarish, arizalar va tasdiqlash,
+foydalanuvchi akkauntlari (biznes va bloger), reklama e’lonlarini yaratish va boshqarish, arizalar va tasdiqlash,
 post havolalarini tekshirish, reyting tizimi va to‘lovlar (tariflar uchun).
