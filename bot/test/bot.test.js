@@ -192,3 +192,45 @@ test('Telegram tugma signaliga xato qaytarsa ham javob saqlanadi', async () => {
   assert.equal(me.data.registered, true);
   assert.equal(me.data.user.category, 'beauty');
 });
+
+test('saytdagi havola: rol va til tayyor bo‘lsa, darhol ism so‘raladi', async () => {
+  const user = tgUser(110, { language_code: 'en' });
+  await say(env, user, '/start business-ru');
+  const sent = tg.sent(110);
+  assert.match(sent.at(-2).body.text, /Регистрация для бизнеса/);
+  assert.match(sent.at(-1).body.text, /Напишите ваше имя/);
+  const me = await api(env, user, '/api/me');
+  assert.equal(me.data.user.role, 'business');
+  assert.equal(me.data.user.lang, 'ru');
+  assert.equal(me.data.registered, false);
+  await say(env, user, 'Азиз');
+  assert.match(lastText(110), /названи[ея] магазина/);
+});
+
+test('saytdagi havola: faqat rol bo‘lsa, til so‘raladi va rol savoli o‘tkazib yuboriladi', async () => {
+  const user = tgUser(111);
+  await say(env, user, '/start blogger');
+  const question = tg.sent(111).at(-1);
+  assert.match(question.body.text, /Tilni tanlang/);
+  assert.equal(question.body.reply_markup.inline_keyboard[0][0].callback_data, 'lang:uz:blogger');
+  await press(env, user, 'lang:uz:blogger');
+  assert.match(lastText(111), /Ismingizni yozing/);
+  const me = await api(env, user, '/api/me');
+  assert.equal(me.data.user.role, 'blogger');
+});
+
+test('saytdagi havola: noma’lum parametr oddiy boshlanishga olib keladi', async () => {
+  const user = tgUser(112);
+  await say(env, user, '/start hello');
+  const question = tg.sent(112).at(-1);
+  assert.equal(question.body.reply_markup.inline_keyboard[0][0].callback_data, 'lang:uz');
+});
+
+test('saytdagi havola: ro‘yxatdan o‘tgan foydalanuvchiga bosh menyu chiqadi', async () => {
+  const user = tgUser(113);
+  await registerBusiness(env, user);
+  await say(env, user, '/start blogger-uz');
+  assert.match(lastText(113), /Assalomu alaykum/);
+  const me = await api(env, user, '/api/me');
+  assert.equal(me.data.user.role, 'business');
+});

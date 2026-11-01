@@ -12,8 +12,9 @@ Sayt oddiy HTML, CSS va JavaScript bilan yozilgan. Hech qanday o‘rnatish yoki 
 - **Nega Ovoza**: ikki tomon uchun foydalar.
 - **Kampaniyalar katalogi**: toifa, platforma va qidiruv bo‘yicha filtr, har bir kampaniyaga ariza berish oynasi.
 - **Kalkulyator**: barter pullik reklamaga nisbatan qancha tejashini hisoblaydi.
-- **Tariflar**, **Savollar (FAQ)**, **Ro‘yxatdan o‘tish** (biznes va bloger formalari).
+- **Tariflar**, **Savollar (FAQ)**, **Ro‘yxatdan o‘tish** (Telegram botga havolalar va QR-kod).
 - **Ikki til**: o‘zbekcha (asosiy) va ruscha. Tanlangan til brauzerda eslab qolinadi.
+- **Telegram bot**: ro‘yxatdan o‘tish va ariza berish [@Ovozauz_bot](https://t.me/Ovozauz_bot) orqali.
 - Telefon, planshet va kompyuterga moslashadi; tungi (dark) rejimni qo‘llab-quvvatlaydi.
 
 ## Fayllar
@@ -21,7 +22,7 @@ Sayt oddiy HTML, CSS va JavaScript bilan yozilgan. Hech qanday o‘rnatish yoki 
 ```
 index.html              sahifa va barcha o‘zbekcha matnlar
 assets/css/style.css    dizayn (ranglar fayl boshida)
-assets/js/config.js     sozlamalar: formalar manzili, asosiy til
+assets/js/config.js     sozlamalar: bot nomi, asosiy til
 assets/js/i18n.js       ruscha tarjimalar va skript matnlari
 assets/js/campaigns.js  kampaniyalar ro‘yxati va toifalar
 assets/js/main.js       sayt mantiqi
@@ -45,19 +46,15 @@ python3 -m http.server 8000
 - **Tarif narxlari**: `index.html` dagi "Tariflar" bo‘limi va `i18n.js` dagi `plan…` kalitlari.
 - **Ranglar**: `assets/css/style.css` boshidagi `:root` bloki (kunduzgi) va undan keyingi tungi rejim bloklari.
 
-## Formalarni ulash
+## Ro‘yxatdan o‘tish: Telegram bot
 
-Hozir formalar **demo rejimda**: tekshiruv ishlaydi, lekin ma’lumot hech qayerga yuborilmaydi va bu haqida foydalanuvchiga yozib qo‘yiladi.
+Saytdagi barcha "Ro‘yxatdan o‘tish", "Men biznes egasiman", "Men blogerman" va "Ariza berish" tugmalari Telegram botga ([@Ovozauz_bot](https://t.me/Ovozauz_bot)) olib boradi.
 
-Arizalarni qabul qilish uchun `assets/js/config.js` da `formEndpoint` ga manzil yozing. Sayt shu manzilga `POST` so‘rov bilan JSON yuboradi, masalan:
+- Havolada rol va sayt tili uzatiladi (`t.me/Ovozauz_bot?start=business-uz`). Shuning uchun bot til va rolni qayta so‘ramay, darhol ismni so‘raydi.
+- Kompyuterdan kirganlar uchun ro‘yxatdan o‘tish bo‘limida QR-kod bor.
+- Bot nomi o‘zgarsa, `assets/js/config.js` dagi `botUsername` ni va `index.html` dagi `t.me/Ovozauz_bot` havolalarini yangilang.
 
-```json
-{ "type": "business", "lang": "uz", "name": "Aziz", "phone": "+998 90 123 45 67", "company": "...", "category": "beauty", "message": "..." }
-```
-
-`type` qiymatlari: `business`, `blogger` yoki `apply` (kampaniyaga ariza; bunda `campaignId` va `campaign` ham bo‘ladi).
-
-Arizalarni Telegramga yuborish uchun kichik server yoki serverless funksiya (masalan, Cloudflare Workers, Vercel) yozib, u orqali bot API ga yuboring. **Bot tokenini sayt kodiga (brauzerga) qo‘ymang**, aks holda uni har kim ko‘ra oladi.
+Bot va mini ilova kodi `bot/` papkasida: [bot/README.md](bot/README.md).
 
 ## Internetga joylash
 
@@ -69,10 +66,6 @@ Sayt GitHub Pages orqali ishlaydi: https://macrus-ai.github.io/Sarvarbek-/
 - Yangilashni qo‘lda ham ishga tushirish mumkin: **Actions → Saytni yangilash → Run workflow**.
 
 Netlify, Vercel yoki istalgan boshqa hosting ham mos keladi: fayllarni shundayligicha yuklash kifoya.
-
-## Telegram bot va mini ilova
-
-Ro‘yxatdan o‘tish, kampaniyalar va so‘rovlar Telegram bot orqali ishlaydi. Kodi va sozlash qo‘llanmasi `bot/` papkasida: [bot/README.md](bot/README.md).
 
 ## Keyingi qadamlar
 

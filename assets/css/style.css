@@ -119,8 +119,6 @@ html {
   scroll-padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
 }
 
-html.modal-open { overflow: hidden; }
-
 body {
   margin: 0;
   background: var(--paper);
@@ -1243,22 +1241,7 @@ textarea { font: inherit; color: inherit; }
   .calc { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* ---------- Forma maydonlari ---------- */
-.form {
-  display: grid;
-  gap: 16px;
-}
-
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-@media (max-width: 560px) {
-  .form-grid-2 { grid-template-columns: minmax(0, 1fr); }
-}
-
+/* ---------- Kalkulyator maydonlari ---------- */
 .field {
   display: grid;
   gap: 8px;
@@ -1272,12 +1255,6 @@ textarea { font: inherit; color: inherit; }
   gap: 8px;
   font-size: 0.95rem;
   font-weight: 600;
-}
-
-.opt {
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: var(--muted);
 }
 
 .control,
@@ -1294,11 +1271,6 @@ textarea { font: inherit; color: inherit; }
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-textarea.control {
-  min-height: 96px;
-  resize: vertical;
-}
-
 .control::placeholder,
 .search input::placeholder { color: var(--muted); opacity: 0.8; }
 
@@ -1307,13 +1279,6 @@ textarea.control {
   outline: none;
   border-color: var(--cobalt);
   box-shadow: 0 0 0 3px var(--cobalt-soft);
-}
-
-.field.has-error .control { border-color: var(--danger); }
-
-.field-error {
-  font-size: 0.85rem;
-  color: var(--danger);
 }
 
 .hint {
@@ -1334,48 +1299,6 @@ output {
   font-weight: 600;
   color: var(--cobalt);
   font-variant-numeric: tabular-nums;
-}
-
-.form-legal {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.form-alert {
-  padding: 10px 12px;
-  border: 1px solid var(--danger);
-  border-radius: var(--r-s);
-  font-size: 0.9rem;
-  color: var(--danger);
-}
-
-.form-success {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
-}
-
-.form-success:focus { outline: none; }
-
-.form-success h3 { font-size: var(--step-2); }
-
-.success-icon {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--ok-soft);
-  color: var(--ok);
-}
-
-.demo-note {
-  padding: 10px 12px;
-  border: 1px dashed var(--line);
-  border-radius: var(--r-s);
-  background: var(--paper);
-  font-size: 0.85rem;
-  color: var(--muted);
 }
 
 /* ---------- Tariflar ---------- */
@@ -1591,57 +1514,110 @@ output {
   --focus: var(--cobalt);
 }
 
-.signup-card .seg {
-  display: flex;
-  width: 100%;
-  margin-bottom: 24px;
-  background: var(--paper);
-}
-
-.signup-card .seg [role="tab"] { flex: 1; }
-
 @media (max-width: 900px) {
   .signup { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* ---------- Modal oyna ---------- */
-.modal {
-  width: min(560px, calc(100% - 32px));
-  max-height: calc(100% - 32px);
-  padding: 0;
-  border: 0;
-  border-radius: var(--r-l);
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: var(--shadow-lg);
-}
-
-.modal::backdrop { background: var(--scrim); }
-
-.modal-inner {
-  position: relative;
+/* Telegram bot kartasi */
+.bot-card {
   display: grid;
-  gap: 12px;
-  padding: clamp(20px, 5vw, 32px);
+  gap: 22px;
 }
 
-.modal-inner .eyebrow { margin-bottom: 0; }
-
-.modal-x {
-  position: absolute;
-  top: 14px;
-  right: 14px;
+.bot-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-.modal h2 {
-  padding-right: 52px;
-  font-size: var(--step-2);
+.bot-avatar {
+  width: 52px;
+  height: 52px;
 }
 
-.modal-sub {
-  margin-bottom: 8px;
-  font-size: 0.92rem;
+.bot-head strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.bot-head span {
+  font-size: 0.9rem;
   color: var(--muted);
+}
+
+.bot-steps {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.bot-steps li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  counter-increment: step;
+}
+
+.bot-steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cobalt-soft);
+  color: var(--cobalt);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.bot-steps span { padding-top: 4px; }
+
+.bot-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.bot-qr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+/* QR-kod har ikki mavzuda ham oq fonda qoladi, aks holda kamera o'qimaydi */
+.qr-box {
+  flex: none;
+  width: 120px;
+  height: 120px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #FFFFFF;
+}
+
+.qr-box svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bot-qr p {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Telefonda QR-kod kerak emas: bot havolasi shu telefonning o'zida ochiladi */
+@media (max-width: 560px) {
+  .bot-qr { display: none; }
 }
 
 /* ---------- Pastki qism (footer) ---------- */

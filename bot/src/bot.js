@@ -27,12 +27,19 @@ function rows(buttons, perRow) {
   return out;
 }
 
-const langKeyboard = (prefix) => ({
+// role berilsa (saytdagi havoladan), til tanlangandan keyin rol savoli o'tkazib yuboriladi
+const langKeyboard = (prefix, role = null) => ({
   inline_keyboard: [[
-    { text: '🇺🇿 O‘zbekcha', callback_data: `${prefix}:uz` },
-    { text: '🇷🇺 Русский', callback_data: `${prefix}:ru` }
+    { text: '🇺🇿 O‘zbekcha', callback_data: `${prefix}:uz${role ? `:${role}` : ''}` },
+    { text: '🇷🇺 Русский', callback_data: `${prefix}:ru${role ? `:${role}` : ''}` }
   ]]
 });
+
+// Saytdagi havola: t.me/<bot>?start=business-uz (rol va ixtiyoriy til)
+export function parseStartPayload(payload) {
+  const m = String(payload || '').toLowerCase().match(/^(business|blogger)(?:[-_](uz|ru))?$/);
+  return { role: m ? m[1] : null, lang: m && m[2] ? m[2] : null };
+}
 
 const phoneKeyboard = (T) => ({
   keyboard: [[{ text: T.phoneButton, request_contact: true }]],
@@ -125,10 +132,21 @@ function sendHome(ctx, user) {
   return ctx.tg.send(user.tg_id, T.home(user.name || user.first_name || ''), { reply_markup: homeKeyboard(T, ctx) });
 }
 
-async function start(ctx, user) {
+async function start(ctx, user, payload) {
   if (isRegistered(user)) return sendHome(ctx, user);
+  const { role, lang } = parseStartPayload(payload);
+  if (role && lang) return beginAs(ctx, user, role, lang);
   await updateUser(ctx.db, user.tg_id, { reg_step: 'lang' });
-  return ask(ctx, { ...user, reg_step: 'lang' }, 'lang');
+  return ctx.tg.send(user.tg_id, tr(user.lang).chooseLang, { reply_markup: langKeyboard('lang', role) });
+}
+
+// Rol va til ma'lum: salomlashib, darhol ismni so'raymiz
+async function beginAs(ctx, user, role, lang) {
+  if (user.role === 'business' && role === 'blogger') await closeBusinessCampaigns(ctx.db, user.tg_id);
+  await updateUser(ctx.db, user.tg_id, { lang, role, reg_step: 'name' });
+  const updated = { ...user, lang, role, reg_step: 'name' };
+  await ctx.tg.send(user.tg_id, tr(lang).welcomeAs(role));
+  return ask(ctx, updated, 'name');
 }
 
 /* ---------- Matnli xabarlar ---------- */
@@ -143,7 +161,7 @@ async function onMessage(msg, ctx) {
 
   if (text.startsWith('/')) {
     const cmd = text.slice(1).split(/[\s@]/)[0].toLowerCase();
-    if (cmd === 'start') return start(ctx, user);
+    if (cmd === 'start') return start(ctx, user, text.split(/\s+/)[1]);
     if (cmd === 'lang') return ctx.tg.send(id, T.chooseLang, { reply_markup: langKeyboard('setlang') });
     if (cmd === 'help') return ctx.tg.send(id, T.help);
     if (cmd === 'app') return isRegistered(user) ? sendHome(ctx, user) : ctx.tg.send(id, T.notRegistered);
@@ -215,6 +233,7 @@ async function onCallback(cq, ctx) {
       if (user.reg_step !== 'lang' || (value !== 'uz' && value !== 'ru')) return stale();
       await ack();
       await markChosen(value === 'ru' ? 'Русский' : 'O‘zbekcha');
+      if (extra === 'business' || extra === 'blogger') return beginAs(ctx, user, extra, value);
       await updateUser(ctx.db, user.tg_id, { lang: value, reg_step: 'role' });
       return ask(ctx, { ...user, lang: value, reg_step: 'role' }, 'role');
     }
