@@ -337,6 +337,8 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
   const money = (n) => `${fmt(n)} ${t('currency')}`;
   const catName = (id) => state.meta?.categories.find((c) => c.id === id)?.[state.lang] ?? id ?? '';
+  // Bloger yo'nalishi; eski profillarda biznes toifasi bo'lishi mumkin
+  const nicheName = (id) => state.meta?.niches?.find((n) => n.id === id)?.[state.lang] ?? catName(id);
   const initial = (name) => (String(name || '?').trim()[0] || '?').toUpperCase();
 
   function followersLabel(id) {
@@ -672,7 +674,7 @@
       <div class="person"><span class="ava">${esc(initial(b.name))}</span>
         <div><strong>${esc(b.name)}</strong>${b.username ? `<span class="muted">@${esc(b.username)}</span>` : ''}</div>
       </div>
-      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(catName(b.niche))}</span></div>
+      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(nicheName(b.niche))}</span></div>
       ${profile}
       ${r.message ? `<blockquote class="quote">${esc(r.message)}</blockquote>` : ''}
       ${actions}${contact}

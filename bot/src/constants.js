@@ -11,6 +11,32 @@ export const CATEGORIES = [
   { id: 'services', uz: 'Xizmatlar', ru: 'Услуги' }
 ];
 
+// Blogerlar yo'nalishi (bloger ro'yxatdan o'tishda bittasini tanlaydi). "other" doim oxirida turadi.
+// Eski profillarda biznes toifasi id'lari (beauty, food, ...) saqlangan: ular shu ro'yxatda ham bor.
+export const NICHES = [
+  { id: 'beauty', uz: 'Go‘zallik va kosmetika', ru: 'Красота и косметика' },
+  { id: 'clothes', uz: 'Moda va kiyim', ru: 'Мода и одежда' },
+  { id: 'lifestyle', uz: 'Lifestyle', ru: 'Лайфстайл' },
+  { id: 'food', uz: 'Ovqat va kafelar', ru: 'Еда и кафе' },
+  { id: 'travel', uz: 'Sayohat', ru: 'Путешествия' },
+  { id: 'sport', uz: 'Sport va fitnes', ru: 'Спорт и фитнес' },
+  { id: 'health', uz: 'Sog‘liq', ru: 'Здоровье' },
+  { id: 'kids', uz: 'Onalik va bolalar', ru: 'Мамы и дети' },
+  { id: 'home', uz: 'Uy va interyer', ru: 'Дом и интерьер' },
+  { id: 'tech', uz: 'Texnika va gadjetlar', ru: 'Техника и гаджеты' },
+  { id: 'auto', uz: 'Avtomobillar', ru: 'Авто' },
+  { id: 'education', uz: 'Ta’lim', ru: 'Образование' },
+  { id: 'business', uz: 'Biznes va moliya', ru: 'Бизнес и финансы' },
+  { id: 'humor', uz: 'Hazil va ko‘ngilochar', ru: 'Юмор и развлечения' },
+  { id: 'games', uz: 'O‘yinlar', ru: 'Игры' },
+  { id: 'music', uz: 'Musiqa', ru: 'Музыка' },
+  { id: 'cinema', uz: 'Kino va seriallar', ru: 'Кино и сериалы' },
+  { id: 'art', uz: 'Ijod va qo‘l mehnati', ru: 'Творчество и хендмейд' },
+  { id: 'pets', uz: 'Uy hayvonlari', ru: 'Животные' },
+  { id: 'news', uz: 'Yangiliklar', ru: 'Новости' },
+  { id: 'other', uz: 'Boshqa', ru: 'Другое' }
+];
+
 export const PLATFORMS = ['Instagram', 'Telegram', 'TikTok', 'YouTube'];
 
 // max: null — yuqori chegara yo'q
@@ -44,5 +70,6 @@ export const LANGS = ['uz', 'ru'];
 export const DEFAULT_PRIVACY_URL = 'https://macrus-ai.github.io/Sarvarbek-/privacy.html';
 
 export const isCategory = (id) => CATEGORIES.some((c) => c.id === id);
+export const isNiche = (id) => NICHES.some((n) => n.id === id);
 export const isPlatform = (p) => PLATFORMS.includes(p);
 export const findFollowers = (id) => FOLLOWERS.find((f) => f.id === id) || null;

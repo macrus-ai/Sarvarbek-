@@ -97,7 +97,55 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   assert.equal(me.data.user.role, 'blogger');
   assert.equal(me.data.user.lang, 'ru');
   assert.equal(me.data.user.platform, 'TikTok');
-  assert.equal(me.data.user.niche, 'food');
+  assert.equal(me.data.user.niche, 'food'); // eski "cat:" tugmasi ham ishlaydi
+});
+
+test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohida', async () => {
+  const user = tgUser(21);
+  await say(env, user, '/start');
+  await press(env, user, 'lang:uz');
+  await press(env, user, 'role:blogger');
+  await say(env, user, 'Jasur');
+  await press(env, user, 'plat:YouTube');
+  await say(env, user, '@jasur_travel');
+  await press(env, user, 'fol:10000-50000');
+
+  const buttons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  assert.equal(buttons.length, 21);
+  assert.deepEqual(buttons.at(-1), { text: 'Boshqa', callback_data: 'niche:other' });
+  assert.ok(buttons.every((b) => b.callback_data.startsWith('niche:')));
+  assert.ok(buttons.some((b) => b.text === 'Sayohat'));
+  assert.equal(new Set(buttons.map((b) => b.callback_data)).size, 21);
+
+  await press(env, user, 'niche:travel');
+  await shareContact(env, user, '998901234567');
+  assert.match(lastText(21), /🏷 Sayohat/);
+  assert.equal((await api(env, user, '/api/me')).data.user.niche, 'travel');
+
+  // Ruscha nomlar va mini ilova uchun ro'yxat
+  const ru = tgUser(22, { language_code: 'ru' });
+  await registerBlogger(env, ru, { lang: 'ru', niche: 'other' });
+  assert.match(lastText(22), /🏷 Другое/);
+  const meta = (await api(env, ru, '/api/me')).data.meta;
+  assert.equal(meta.niches.length, 21);
+  assert.equal(meta.niches.at(-1).ru, 'Другое');
+  assert.equal(meta.categories.length, 7);
+
+  // Biznes toifasi ro'yxati o'zgarmagan, yo'nalish tugmasi u yerda ishlamaydi
+  const business = tgUser(23);
+  await say(env, business, '/start');
+  await press(env, business, 'lang:uz');
+  await press(env, business, 'role:business');
+  await say(env, business, 'Aziz');
+  await say(env, business, 'Aziz market');
+  const cats = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  assert.equal(cats.length, 7);
+  assert.ok(cats.every((b) => b.callback_data.startsWith('cat:')));
+  tg.clear();
+  await press(env, business, 'niche:travel');
+  assert.match(tg.last('answerCallbackQuery').body.text, /eskirgan|eski/i);
+  await press(env, business, 'cat:travel');
+  assert.equal((await api(env, business, '/api/me')).data.user.category, null);
 });
 
 test('eskirgan tugma bosilsa ogohlantiradi', async () => {
