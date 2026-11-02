@@ -37,6 +37,27 @@ export const NICHES = [
   { id: 'other', uz: 'Boshqa', ru: 'Другое' }
 ];
 
+// O'zbekiston hududlari: bloger qayerda yashaydi va reklama e'loni qaysi hudud uchun.
+export const REGIONS = [
+  { id: 'tashkent_city', uz: 'Toshkent shahri', ru: 'г. Ташкент' },
+  { id: 'tashkent', uz: 'Toshkent viloyati', ru: 'Ташкентская обл.' },
+  { id: 'andijan', uz: 'Andijon', ru: 'Андижан' },
+  { id: 'bukhara', uz: 'Buxoro', ru: 'Бухара' },
+  { id: 'fergana', uz: 'Farg‘ona', ru: 'Фергана' },
+  { id: 'jizzakh', uz: 'Jizzax', ru: 'Джизак' },
+  { id: 'namangan', uz: 'Namangan', ru: 'Наманган' },
+  { id: 'navoi', uz: 'Navoiy', ru: 'Навои' },
+  { id: 'kashkadarya', uz: 'Qashqadaryo', ru: 'Кашкадарья' },
+  { id: 'karakalpakstan', uz: 'Qoraqalpog‘iston', ru: 'Каракалпакстан' },
+  { id: 'samarkand', uz: 'Samarqand', ru: 'Самарканд' },
+  { id: 'syrdarya', uz: 'Sirdaryo', ru: 'Сырдарья' },
+  { id: 'surkhandarya', uz: 'Surxondaryo', ru: 'Сурхандарья' },
+  { id: 'khorezm', uz: 'Xorazm', ru: 'Хорезм' }
+];
+
+// E'lon butun O'zbekiston uchun (mahsulot yetkazib beriladi yoki onlayn xizmat)
+export const ALL_REGIONS = 'all';
+
 export const PLATFORMS = ['Instagram', 'Telegram', 'TikTok', 'YouTube'];
 
 // max: null — yuqori chegara yo'q
@@ -71,5 +92,7 @@ export const DEFAULT_PRIVACY_URL = 'https://macrus-ai.github.io/Sarvarbek-/priva
 
 export const isCategory = (id) => CATEGORIES.some((c) => c.id === id);
 export const isNiche = (id) => NICHES.some((n) => n.id === id);
+export const isRegion = (id) => REGIONS.some((r) => r.id === id);
+export const isCampaignRegion = (id) => id === ALL_REGIONS || isRegion(id);
 export const isPlatform = (p) => PLATFORMS.includes(p);
 export const findFollowers = (id) => FOLLOWERS.find((f) => f.id === id) || null;

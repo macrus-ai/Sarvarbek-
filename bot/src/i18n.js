@@ -1,12 +1,22 @@
 // Bot matnlari (o'zbekcha va ruscha)
 
-import { CATEGORIES, NICHES, findFollowers } from './constants.js';
+import { ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findFollowers } from './constants.js';
 import { esc, fmtNum, formatPhone } from './util.js';
 
 export const catLabel = (id, lang) => CATEGORIES.find((c) => c.id === id)?.[lang === 'ru' ? 'ru' : 'uz'] ?? id ?? '';
 // Bloger yo'nalishi. Eski profillarda biznes toifasi (masalan, "services") bo'lishi mumkin.
 export const nicheLabel = (id, lang) =>
   NICHES.find((n) => n.id === id)?.[lang === 'ru' ? 'ru' : 'uz'] ?? catLabel(id, lang);
+
+// Hudud nomi. 'all' — butun O'zbekiston (faqat e'lonlarda)
+export function regionLabel(id, lang) {
+  const key = lang === 'ru' ? 'ru' : 'uz';
+  if (id === ALL_REGIONS) return key === 'ru' ? 'Весь Узбекистан' : 'Butun O‘zbekiston';
+  return REGIONS.find((r) => r.id === id)?.[key] ?? '';
+}
+
+// Hudud ma'lum bo'lsa "📍 Samarqand" qatori, aks holda bo'sh
+const regionLine = (id, lang) => (regionLabel(id, lang) ? `📍 ${esc(regionLabel(id, lang))}` : '');
 
 export function followersLabel(id) {
   const f = findFollowers(id);
@@ -33,6 +43,7 @@ const uz = {
   askProfile: 'Profilingiz havolasini yoki @username ni yozing:',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
+  askRegion: 'Qaysi hududda yashaysiz? Ilovada avvalo shu hududdagi reklama e’lonlari ko‘rsatiladi.',
   askPhone:
     'Oxirgi qadam: telefon raqamingizni yuboring. Pastdagi tugmani bosing 👇\n\nRaqamingiz faqat so‘rov qabul qilinganda ikkinchi tomonga ko‘rsatiladi.',
   phoneButton: '📱 Raqamni yuborish',
@@ -68,7 +79,7 @@ const uz = {
       `👤 <b>Yangi ${u.role === 'business' ? 'biznes' : 'bloger'}</b>`,
       u.role === 'business'
         ? `🏪 ${esc(u.company)} · ${esc(catLabel(u.category, 'uz'))}`
-        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(nicheLabel(u.niche, 'uz'))}\n🔗 ${esc(u.profile)}`,
+        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(nicheLabel(u.niche, 'uz'))}\n🔗 ${esc(u.profile)}${u.region ? `\n${regionLine(u.region, 'uz')}` : ''}`,
       `${mention(u.tg_id, u.name)}${at(u.username)} · ${esc(formatPhone(u.phone))}`
     ].join('\n'),
   adminNewCampaign: (c) =>
@@ -78,6 +89,7 @@ const uz = {
       `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
       `💰 ${fmtNum(c.value)} so‘m · ${esc(String(c.platforms).split(',').join(', '))}`,
       `📝 ${esc(c.format)} · ${c.slots} o‘rin · ${c.days} kun`,
+      regionLine(c.region, 'uz'),
       c.description ? `\n${esc(c.description)}` : ''
     ].join('\n').trim(),
   adminNewImage: (c) =>
@@ -97,6 +109,7 @@ const uz = {
       `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} obunachi`,
       `🔗 ${esc(a.profile)}`,
       `🏷 ${esc(nicheLabel(a.niche, 'uz'))}`,
+      ...(a.region ? [regionLine(a.region, 'uz')] : []),
       a.message ? `\n💬 ${esc(a.message)}` : ''
     ].join('\n').trim(),
   accept: '✅ Qabul qilish',
@@ -127,7 +140,14 @@ const uz = {
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'uz'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
-    `👤 ${esc(u.name)}\n📱 ${esc(u.platform)} · ${followersLabel(u.followers)} obunachi\n🔗 ${esc(u.profile)}\n🏷 ${esc(nicheLabel(u.niche, 'uz'))}\n📞 ${esc(formatPhone(u.phone))}`,
+    [
+      `👤 ${esc(u.name)}`,
+      `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} obunachi`,
+      `🔗 ${esc(u.profile)}`,
+      `🏷 ${esc(nicheLabel(u.niche, 'uz'))}`,
+      regionLine(u.region, 'uz'),
+      `📞 ${esc(formatPhone(u.phone))}`
+    ].filter(Boolean).join('\n'),
   commands: [
     { command: 'start', description: 'Ro‘yxatdan o‘tish yoki bosh menyu' },
     { command: 'app', description: 'Ilovani ochish' },
@@ -155,6 +175,7 @@ const ru = {
   askProfile: 'Напишите ссылку на профиль или @username:',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
+  askRegion: 'В каком регионе вы живёте? В приложении сначала будут показаны рекламные объявления вашего региона.',
   askPhone:
     'Последний шаг: отправьте номер телефона. Нажмите кнопку ниже 👇\n\nНомер увидит другая сторона только после того, как отклик будет принят.',
   phoneButton: '📱 Отправить номер',
@@ -189,7 +210,7 @@ const ru = {
       `👤 <b>Новый ${u.role === 'business' ? 'бизнес' : 'блогер'}</b>`,
       u.role === 'business'
         ? `🏪 ${esc(u.company)} · ${esc(catLabel(u.category, 'ru'))}`
-        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(nicheLabel(u.niche, 'ru'))}\n🔗 ${esc(u.profile)}`,
+        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(nicheLabel(u.niche, 'ru'))}\n🔗 ${esc(u.profile)}${u.region ? `\n${regionLine(u.region, 'ru')}` : ''}`,
       `${mention(u.tg_id, u.name)}${at(u.username)} · ${esc(formatPhone(u.phone))}`
     ].join('\n'),
   adminNewCampaign: (c) =>
@@ -199,6 +220,7 @@ const ru = {
       `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
       `💰 ${fmtNum(c.value)} сум · ${esc(String(c.platforms).split(',').join(', '))}`,
       `📝 ${esc(c.format)} · мест: ${c.slots} · дней: ${c.days}`,
+      regionLine(c.region, 'ru'),
       c.description ? `\n${esc(c.description)}` : ''
     ].join('\n').trim(),
   adminNewImage: (c) =>
@@ -218,6 +240,7 @@ const ru = {
       `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} подписчиков`,
       `🔗 ${esc(a.profile)}`,
       `🏷 ${esc(nicheLabel(a.niche, 'ru'))}`,
+      ...(a.region ? [regionLine(a.region, 'ru')] : []),
       a.message ? `\n💬 ${esc(a.message)}` : ''
     ].join('\n').trim(),
   accept: '✅ Принять',
@@ -248,7 +271,14 @@ const ru = {
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'ru'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
-    `👤 ${esc(u.name)}\n📱 ${esc(u.platform)} · ${followersLabel(u.followers)} подписчиков\n🔗 ${esc(u.profile)}\n🏷 ${esc(nicheLabel(u.niche, 'ru'))}\n📞 ${esc(formatPhone(u.phone))}`,
+    [
+      `👤 ${esc(u.name)}`,
+      `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} подписчиков`,
+      `🔗 ${esc(u.profile)}`,
+      `🏷 ${esc(nicheLabel(u.niche, 'ru'))}`,
+      regionLine(u.region, 'ru'),
+      `📞 ${esc(formatPhone(u.phone))}`
+    ].filter(Boolean).join('\n'),
   commands: [
     { command: 'start', description: 'Регистрация или главное меню' },
     { command: 'app', description: 'Открыть приложение' },

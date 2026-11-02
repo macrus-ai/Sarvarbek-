@@ -89,8 +89,11 @@
       fMinHint: '0 — talab yo‘q',
       fDays: 'Muddat, kun',
       fSlots: 'Blogerlar soni',
-      fCity: 'Shahar',
-      fCityPh: 'Masalan, Toshkent',
+      fCity: 'Tuman yoki manzil',
+      fCityPh: 'Masalan, Chilonzor tumani',
+      fRegion: 'Hudud',
+      regionAllOption: 'Butun O‘zbekiston (yetkazib beriladi yoki onlayn)',
+      e_region: 'Hududni tanlang',
       fDesc: 'Tavsif',
       fDescPh: 'Mahsulot, shartlar va yetkazib berish haqida',
       fImage: 'Rasm',
@@ -117,7 +120,25 @@
       e_city: '40 belgidan oshmasin',
       e_description: '600 belgidan oshmasin',
       filterNew: 'Yangi',
+      filterAccepted: 'Qabul qilingan',
       filterAll: 'Hammasi',
+      filters: 'Filtr',
+      region: 'Hudud',
+      allRegions: 'Barcha hududlar',
+      regionAll: 'Butun O‘zbekiston',
+      sort: 'Saralash',
+      sortNew: 'Yangilari',
+      sortValue: 'Qimmatroq',
+      sortFollowers: 'Ko‘p obunachili',
+      fitOnly: 'Faqat menga moslari',
+      fitHint: 'Obunachilar talabi, hudud va bo‘sh o‘rin bo‘yicha',
+      resetFilters: 'Filtrni tozalash',
+      regionAskTitle: 'Hududingizni tanlang',
+      regionAskText: 'Sizga yaqin reklama e’lonlarini ko‘rsatamiz.',
+      regionSaved: 'Hudud saqlandi',
+      campaignFilter: 'E’lon',
+      allCampaigns: 'Barcha e’lonlar',
+      emptyRequestsFiltered: 'Bu filtr bo‘yicha so‘rov yo‘q.',
       emptyRequests: 'Hozircha so‘rov yo‘q. Blogerlar so‘rov yuborsa, shu yerda va botda ko‘rinadi.',
       emptyRequestsNew: 'Yangi so‘rov yo‘q. Ko‘rib chiqilganlari “Hammasi” bo‘limida.',
       accept: 'Qabul qilish',
@@ -238,8 +259,11 @@
       fMinHint: '0 — без требований',
       fDays: 'Срок, дней',
       fSlots: 'Число блогеров',
-      fCity: 'Город',
-      fCityPh: 'Например, Ташкент',
+      fCity: 'Район или адрес',
+      fCityPh: 'Например, Чиланзарский район',
+      fRegion: 'Регион',
+      regionAllOption: 'Весь Узбекистан (доставка или онлайн)',
+      e_region: 'Выберите регион',
       fDesc: 'Описание',
       fDescPh: 'О товаре, условиях и доставке',
       fImage: 'Фото',
@@ -266,7 +290,25 @@
       e_city: 'Не больше 40 символов',
       e_description: 'Не больше 600 символов',
       filterNew: 'Новые',
+      filterAccepted: 'Принятые',
       filterAll: 'Все',
+      filters: 'Фильтр',
+      region: 'Регион',
+      allRegions: 'Все регионы',
+      regionAll: 'Весь Узбекистан',
+      sort: 'Сортировка',
+      sortNew: 'Сначала новые',
+      sortValue: 'Дороже',
+      sortFollowers: 'Больше подписчиков',
+      fitOnly: 'Только подходящие мне',
+      fitHint: 'По подписчикам, региону и свободным местам',
+      resetFilters: 'Сбросить фильтры',
+      regionAskTitle: 'Укажите ваш регион',
+      regionAskText: 'Покажем рекламные объявления рядом с вами.',
+      regionSaved: 'Регион сохранён',
+      campaignFilter: 'Объявление',
+      allCampaigns: 'Все объявления',
+      emptyRequestsFiltered: 'По этому фильтру откликов нет.',
       emptyRequests: 'Пока откликов нет. Когда блогеры откликнутся, они появятся здесь и в боте.',
       emptyRequestsNew: 'Новых откликов нет. Просмотренные — во вкладке «Все».',
       accept: 'Принять',
@@ -314,12 +356,14 @@
     role: null,
     tab: null,
     view: null, // null | { name: 'detail', id } | { name: 'new' }
-    filters: { category: '', platform: '', q: '' },
+    filters: { category: '', platform: '', q: '', region: '', sort: 'new', fit: false },
+    filtersOpen: false,
     data: { campaigns: null, mine: null, myCampaigns: null, requests: null },
     detail: null,
     form: null,
     errors: {},
-    requestFilter: 'pending',
+    // Biznes: so'rovlar filtri (status: pending | accepted | all, campaign: e'lon id yoki 0)
+    req: { status: 'pending', campaign: 0, region: '', sort: 'new' },
     scroll: {},
     busy: false,
     imageBusy: false // e'lon sahifasida rasm yuklanmoqda
@@ -337,6 +381,15 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
   const money = (n) => `${fmt(n)} ${t('currency')}`;
   const catName = (id) => state.meta?.categories.find((c) => c.id === id)?.[state.lang] ?? id ?? '';
+  const regionName = (id) => {
+    if (!id) return '';
+    if (id === 'all') return t('regionAll');
+    return state.meta?.regions?.find((r) => r.id === id)?.[state.lang] ?? '';
+  };
+  const regionOptions = (selected) =>
+    (state.meta?.regions || [])
+      .map((r) => `<option value="${esc(r.id)}" ${selected === r.id ? 'selected' : ''}>${esc(r[state.lang])}</option>`)
+      .join('');
   // Bloger yo'nalishi; eski profillarda biznes toifasi bo'lishi mumkin
   const nicheName = (id) => state.meta?.niches?.find((n) => n.id === id)?.[state.lang] ?? catName(id);
   const initial = (name) => (String(name || '?').trim()[0] || '?').toUpperCase();
@@ -428,6 +481,44 @@
     return key in dict ? t(key, e.data || {}) : t('err_server');
   };
 
+  /* ---------- Filtrlarni eslab qolish ---------- */
+  const FILTERS_KEY = 'ovoza-filters-v1';
+
+  function saveFilters() {
+    const { category, platform, region, sort, fit } = state.filters;
+    try {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify({ category, platform, region, sort, fit }));
+    } catch {
+      /* xotira yopiq bo'lsa ham ilova ishlaydi */
+    }
+  }
+
+  // Saqlangan filtrlar, bo'lmasa blogerning o'z hududi
+  function restoreFilters() {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(FILTERS_KEY) || 'null');
+    } catch {
+      saved = null;
+    }
+    const f = state.filters;
+    const known = (list, id) => !id || (list || []).some((x) => (x.id ?? x) === id);
+    if (saved && typeof saved === 'object') {
+      if (known(state.meta.categories, saved.category)) f.category = saved.category || '';
+      if (known(state.meta.platforms, saved.platform)) f.platform = saved.platform || '';
+      if (known(state.meta.regions, saved.region)) f.region = saved.region || '';
+      f.sort = saved.sort === 'value' ? 'value' : 'new';
+      f.fit = saved.fit === true;
+    } else {
+      f.region = state.user?.region || '';
+    }
+  }
+
+  const activeFilterCount = () => {
+    const f = state.filters;
+    return (f.region ? 1 : 0) + (f.platform ? 1 : 0) + (f.sort !== 'new' ? 1 : 0) + (f.fit ? 1 : 0);
+  };
+
   /* ---------- Rasmlar ---------- */
   const IMAGE_MAX_SIDE = 1280;
 
@@ -496,7 +587,9 @@
     link: '<path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
-    image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>'
+    image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
+    sliders: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'
   };
 
   const icon = (name) =>
@@ -551,30 +644,73 @@
   // Bloger: reklama e'lonlari ro'yxati
   function browseHTML() {
     const cats = [{ id: '', label: t('allCats') }, ...state.meta.categories.map((c) => ({ id: c.id, label: c[state.lang] }))];
-    const platformOptions = state.meta.platforms
-      .map((p) => `<option value="${esc(p)}" ${state.filters.platform === p ? 'selected' : ''}>${esc(p)}</option>`)
-      .join('');
+    const count = activeFilterCount();
     return `
       <h1 class="view-title">${esc(t('browseTitle'))}</h1>
+      ${regionAskHTML()}
       <div class="filters">
-        <label class="search">${icon('search')}<span class="sr-only">${esc(t('search'))}</span>
-          <input id="f-q" class="control" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(t('searchPh'))}" value="${esc(state.filters.q)}">
-        </label>
+        <div class="search-row">
+          <label class="search">${icon('search')}<span class="sr-only">${esc(t('search'))}</span>
+            <input id="f-q" class="control" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(t('searchPh'))}" value="${esc(state.filters.q)}">
+          </label>
+          <button type="button" class="filter-btn" data-act="toggle-filters" aria-expanded="${state.filtersOpen}" aria-controls="filter-panel">
+            ${icon('sliders')}<span>${esc(t('filters'))}</span>${count ? `<span class="count">${count}</span>` : ''}
+          </button>
+        </div>
         <div class="chips" id="f-cats" role="group" aria-label="${esc(t('categories'))}">
           ${cats.map((c) => `<button type="button" class="chip" data-act="cat" data-id="${c.id}" aria-pressed="${state.filters.category === c.id}">${esc(c.label)}</button>`).join('')}
         </div>
-        <select id="f-platform" class="control" aria-label="${esc(t('platform'))}">
-          <option value="">${esc(t('allPlatforms'))}</option>${platformOptions}
-        </select>
+        ${state.filtersOpen ? filterPanelHTML() : ''}
       </div>
       <div class="main-list" id="list">${browseListHTML()}</div>`;
+  }
+
+  // Bloger hududini bilmasak, bir marta so'raymiz (profilga saqlanadi)
+  function regionAskHTML() {
+    if (state.role !== 'blogger' || state.user?.region) return '';
+    return `<div class="region-ask">
+      <div class="region-ask-text">${icon('pin')}<div><strong>${esc(t('regionAskTitle'))}</strong><span>${esc(t('regionAskText'))}</span></div></div>
+      <select id="me-region" class="control" aria-label="${esc(t('region'))}">
+        <option value="" selected disabled>${esc(t('choose'))}</option>${regionOptions('')}
+      </select>
+    </div>`;
+  }
+
+  function filterPanelHTML() {
+    const f = state.filters;
+    const platformOptions = state.meta.platforms
+      .map((p) => `<option value="${esc(p)}" ${f.platform === p ? 'selected' : ''}>${esc(p)}</option>`)
+      .join('');
+    const sortBtn = (id, label) =>
+      `<button type="button" data-act="sort" data-id="${id}" aria-pressed="${f.sort === id}">${esc(label)}</button>`;
+    return `<div class="filter-panel card" id="filter-panel">
+      <div class="filter-grid">
+        <div class="field"><label for="f-region">${esc(t('region'))}</label>
+          <select id="f-region" class="control"><option value="">${esc(t('allRegions'))}</option>${regionOptions(f.region)}</select>
+        </div>
+        <div class="field"><label for="f-platform">${esc(t('platform'))}</label>
+          <select id="f-platform" class="control"><option value="">${esc(t('allPlatforms'))}</option>${platformOptions}</select>
+        </div>
+      </div>
+      <div class="field"><span class="label">${esc(t('sort'))}</span>
+        <div class="seg" role="group" aria-label="${esc(t('sort'))}">${sortBtn('new', t('sortNew'))}${sortBtn('value', t('sortValue'))}</div>
+      </div>
+      <label class="switch-row" for="f-fit">
+        <span><strong>${esc(t('fitOnly'))}</strong><small>${esc(t('fitHint'))}</small></span>
+        <input type="checkbox" id="f-fit" class="switch" ${f.fit ? 'checked' : ''}>
+      </label>
+      ${activeFilterCount() ? `<button type="button" class="link-btn" data-act="reset-filters">${esc(t('resetFilters'))}</button>` : ''}
+    </div>`;
   }
 
   function browseListHTML() {
     const list = state.data.campaigns;
     if (!list) return skeleton(3);
-    const filtered = state.filters.q || state.filters.category || state.filters.platform;
-    if (!list.length) return emptyHTML(filtered ? t('emptyFiltered') : t('emptyBrowse'), 'search');
+    const filtered = state.filters.q || state.filters.category || activeFilterCount();
+    if (!list.length) {
+      if (!filtered) return emptyHTML(t('emptyBrowse'), 'search');
+      return emptyHTML(t('emptyFiltered'), 'search', `<button type="button" class="btn btn-secondary" data-act="reset-filters">${esc(t('resetFilters'))}</button>`);
+    }
     return list.map(campaignCardHTML).join('');
   }
 
@@ -586,7 +722,7 @@
     let status = `<span class="slots">${esc(t('slotsLeft', c.left))}</span>`;
     if (c.myStatus) status = statusPill(c.myStatus);
     else if (c.left <= 0) status = `<span class="pill pill-muted">${esc(t('full'))}</span>`;
-    const where = [c.businessName, c.city].filter(Boolean).join(' · ');
+    const where = [c.businessName, regionName(c.region), c.city].filter(Boolean).join(' · ');
     return `<a class="card card-link" href="?c=${c.id}" data-act="open" data-id="${c.id}">
       ${cardImage(c)}
       <div class="row"><span class="tag">${esc(catName(c.category))}</span>${status}</div>
@@ -645,15 +781,54 @@
     const list = state.data.requests;
     const title = `<h1 class="view-title">${esc(t('requestsTitle'))}</h1>`;
     if (!list) return title + skeleton(2);
-    const pending = list.filter((r) => r.status === 'pending');
-    const seg = `<div class="seg" role="tablist">
-      <button type="button" role="tab" data-act="req-filter" data-id="pending" aria-selected="${state.requestFilter === 'pending'}">${esc(t('filterNew'))}${pending.length ? ` · ${pending.length}` : ''}</button>
-      <button type="button" role="tab" data-act="req-filter" data-id="all" aria-selected="${state.requestFilter === 'all'}">${esc(t('filterAll'))}</button>
-    </div>`;
     if (!list.length) return title + emptyHTML(t('emptyRequests'), 'inbox');
-    const shown = state.requestFilter === 'pending' ? pending : list;
-    if (!shown.length) return title + seg + emptyHTML(t('emptyRequestsNew'), 'check');
-    return title + seg + shown.map(requestCardHTML).join('');
+    const r = state.req;
+    const pending = list.filter((x) => x.status === 'pending');
+    const segBtn = (id, label) =>
+      `<button type="button" role="tab" data-act="req-filter" data-id="${id}" aria-selected="${r.status === id}">${label}</button>`;
+    const seg = `<div class="seg" role="tablist">
+      ${segBtn('pending', `${esc(t('filterNew'))}${pending.length ? ` · ${pending.length}` : ''}`)}
+      ${segBtn('accepted', esc(t('filterAccepted')))}
+      ${segBtn('all', esc(t('filterAll')))}
+    </div>`;
+
+    // Filtrlar faqat kerak bo'lganda: bir nechta e'lon yoki turli hududdagi blogerlar bo'lsa
+    const campaigns = [...new Map(list.map((x) => [x.campaign.id, x.campaign.title])).entries()];
+    const regions = [...new Set(list.map((x) => x.blogger.region).filter(Boolean))];
+    const campaignSelect = campaigns.length > 1 || r.campaign
+      ? `<select id="rq-campaign" class="control wide" aria-label="${esc(t('campaignFilter'))}">
+          <option value="0">${esc(t('allCampaigns'))}</option>
+          ${campaigns.map(([id, name]) => `<option value="${id}" ${r.campaign === id ? 'selected' : ''}>${esc(name)}</option>`).join('')}
+        </select>`
+      : '';
+    const regionSelect = regions.length > 1 || r.region
+      ? `<select id="rq-region" class="control" aria-label="${esc(t('region'))}">
+          <option value="">${esc(t('allRegions'))}</option>
+          ${regions.map((id) => `<option value="${esc(id)}" ${r.region === id ? 'selected' : ''}>${esc(regionName(id))}</option>`).join('')}
+        </select>`
+      : '';
+    const sortSelect = `<select id="rq-sort" class="control" aria-label="${esc(t('sort'))}">
+        <option value="new" ${r.sort === 'new' ? 'selected' : ''}>${esc(t('sortNew'))}</option>
+        <option value="followers" ${r.sort === 'followers' ? 'selected' : ''}>${esc(t('sortFollowers'))}</option>
+      </select>`;
+    const filterRow = `<div class="filters filter-row ${regionSelect ? '' : 'one'}">${campaignSelect}${regionSelect}${sortSelect}</div>`;
+
+    let shown = list.filter(
+      (x) =>
+        (r.status === 'all' || x.status === r.status) &&
+        (!r.campaign || x.campaign.id === r.campaign) &&
+        (!r.region || x.blogger.region === r.region)
+    );
+    if (r.sort === 'followers') {
+      const rank = (id) => state.meta.followers.findIndex((f) => f.id === id);
+      shown = [...shown].sort((a, b) => rank(b.blogger.followers) - rank(a.blogger.followers) || b.createdAt - a.createdAt);
+    }
+    const head = title + seg + filterRow;
+    if (!shown.length) {
+      const narrowed = r.campaign || r.region;
+      return head + emptyHTML(narrowed ? t('emptyRequestsFiltered') : t('emptyRequestsNew'), 'check');
+    }
+    return head + shown.map(requestCardHTML).join('');
   }
 
   function requestCardHTML(r) {
@@ -674,7 +849,7 @@
       <div class="person"><span class="ava">${esc(initial(b.name))}</span>
         <div><strong>${esc(b.name)}</strong>${b.username ? `<span class="muted">@${esc(b.username)}</span>` : ''}</div>
       </div>
-      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(nicheName(b.niche))}</span></div>
+      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(nicheName(b.niche))}</span>${b.region ? `<span>${icon('pin')}${esc(regionName(b.region))}</span>` : ''}</div>
       ${profile}
       ${r.message ? `<blockquote class="quote">${esc(r.message)}</blockquote>` : ''}
       ${actions}${contact}
@@ -688,6 +863,7 @@
     if (!c) return skeleton(1);
     const where = [c.businessName, c.city].filter(Boolean).join(' · ');
     const rows = [
+      ...(c.region ? [[t('region'), regionName(c.region)]] : []),
       [t('format'), c.format],
       [t('requirement'), c.minFollowers > 0 ? t('followersMin', c.minFollowers) : t('noRequirement')],
       [t('deadline'), t('days', c.days)],
@@ -738,7 +914,7 @@
         c.status === 'active'
           ? `<button type="button" class="btn btn-quiet" data-act="campaign-status" data-status="closed">${esc(t('closeCampaign'))}</button>`
           : `<button type="button" class="btn btn-secondary" data-act="campaign-status" data-status="active">${esc(t('reopenCampaign'))}</button>`;
-      return `${toggle}<button type="button" class="btn btn-primary" data-act="tab" data-tab="requests">${esc(t('viewRequests'))}</button>`;
+      return `${toggle}<button type="button" class="btn btn-primary" data-act="campaign-requests">${esc(t('viewRequests'))}</button>`;
     }
     if (state.role !== 'blogger') return '';
     if (c.myStatus) return `<button type="button" class="btn btn-secondary" disabled>${icon('check')}<span>${esc(t('applied'))}</span></button>`;
@@ -770,6 +946,7 @@
         </div>
         ${field('title', lbl('nc-title', t('fTitle')), `<input id="nc-title" class="control" maxlength="80" placeholder="${esc(t('fTitlePh'))}" value="${esc(f.title)}">`)}
         ${field('category', lbl('nc-category', t('fCategory')), `<select id="nc-category" class="control"><option value="" ${f.category ? '' : 'selected'} disabled>${esc(t('choose'))}</option>${categories}</select>`)}
+        ${field('region', lbl('nc-region', t('fRegion')), `<select id="nc-region" class="control"><option value="" ${f.region ? '' : 'selected'} disabled>${esc(t('choose'))}</option><option value="all" ${f.region === 'all' ? 'selected' : ''}>${esc(t('regionAllOption'))}</option>${regionOptions(f.region)}</select>`)}
         ${field('value', lbl('nc-value', t('fValue')), `<input id="nc-value" class="control" inputmode="numeric" autocomplete="off" placeholder="${esc(t('fValuePh'))}" value="${esc(f.value)}">`)}
         ${field('platforms', `<span class="label">${esc(t('fPlatforms'))}</span>`, `<div class="toggles" role="group">${platforms}</div>`)}
         ${field('format', lbl('nc-format', t('fFormat')), `<input id="nc-format" class="control" maxlength="80" placeholder="${esc(t('fFormatPh'))}" value="${esc(f.format)}">`)}
@@ -850,6 +1027,9 @@
     const params = new URLSearchParams();
     if (state.filters.category) params.set('category', state.filters.category);
     if (state.filters.platform) params.set('platform', state.filters.platform);
+    if (state.filters.region) params.set('region', state.filters.region);
+    if (state.filters.sort !== 'new') params.set('sort', state.filters.sort);
+    if (state.filters.fit) params.set('fit', '1');
     if (state.filters.q.trim()) params.set('q', state.filters.q.trim());
     try {
       const data = await api(`/api/campaigns?${params}`);
@@ -858,6 +1038,26 @@
       renderList();
     } catch (e) {
       if (token === campaignsRequest) toast(errorText(e));
+    }
+  }
+
+  // Filtr o'zgardi: tugmadagi son va panel darhol yangilanadi, ro'yxat serverdan keladi
+  function filtersChanged() {
+    saveFilters();
+    render();
+    loadCampaigns();
+  }
+
+  async function saveMyRegion(region) {
+    try {
+      const data = await api('/api/me', { method: 'PATCH', body: { region } });
+      state.user = { ...state.user, ...data.user };
+      state.filters.region = region;
+      haptic('success');
+      toast(t('regionSaved'));
+      filtersChanged();
+    } catch (e) {
+      toast(errorText(e));
     }
   }
 
@@ -932,7 +1132,9 @@
     state.scroll[state.tab] = window.scrollY;
     state.view = { name: 'new' };
     state.form = state.form || {
-      title: '', category: '', value: '', platforms: ['Instagram'], format: '', minFollowers: '0', days: '7', slots: '3', city: '', description: ''
+      title: '', category: '', value: '', platforms: ['Instagram'], format: '', minFollowers: '0', days: '7', slots: '3', city: '', description: '',
+      // Hudud: oxirgi e'londagidek (ko'pincha biznes bir joyda ishlaydi)
+      region: state.data.myCampaigns?.[0]?.region || ''
     };
     state.errors = {};
     render();
@@ -944,6 +1146,7 @@
     Object.assign(state.form, {
       title: val('nc-title').trim(),
       category: val('nc-category'),
+      region: val('nc-region'),
       value: val('nc-value'),
       format: val('nc-format').trim(),
       minFollowers: val('nc-min'),
@@ -964,6 +1167,7 @@
     const inRange = (n, min, max) => Number.isInteger(n) && n >= min && n <= max;
     if (f.title.length < 3 || f.title.length > 80) errors.title = true;
     if (!f.category) errors.category = true;
+    if (!f.region) errors.region = true;
     if (!inRange(digits(f.value), 1000, 1000000000)) errors.value = true;
     if (!f.platforms.length) errors.platforms = true;
     if (f.format.length < 2 || f.format.length > 80) errors.format = true;
@@ -1003,6 +1207,7 @@
         body: {
           title: f.title,
           category: f.category,
+          region: f.region,
           value: digits(f.value),
           platforms: f.platforms,
           format: f.format,
@@ -1199,11 +1404,13 @@
     const id = Number(el.dataset.id);
     switch (el.dataset.act) {
       case 'tab':
+        if (el.dataset.tab === 'requests') state.req.campaign = 0; // pastki paneldan — barcha so'rovlar
         switchTab(el.dataset.tab);
         break;
       case 'cat':
         state.filters.category = el.dataset.id;
         root.querySelectorAll('#f-cats .chip').forEach((chip) => chip.setAttribute('aria-pressed', String(chip === el)));
+        saveFilters();
         loadCampaigns();
         break;
       case 'open':
@@ -1236,8 +1443,27 @@
         changeCampaignStatus(el.dataset.status, el);
         break;
       case 'req-filter':
-        state.requestFilter = el.dataset.id;
+        state.req.status = el.dataset.id;
         render();
+        break;
+      case 'campaign-requests': {
+        // E'lon sahifasidan: faqat shu e'londagi so'rovlar
+        const c = state.detail;
+        state.req = { status: c?.pending ? 'pending' : 'all', campaign: c?.id || 0, region: '', sort: 'new' };
+        switchTab('requests');
+        break;
+      }
+      case 'toggle-filters':
+        state.filtersOpen = !state.filtersOpen;
+        render();
+        break;
+      case 'sort':
+        state.filters.sort = el.dataset.id === 'value' ? 'value' : 'new';
+        filtersChanged();
+        break;
+      case 'reset-filters':
+        Object.assign(state.filters, { category: '', platform: '', q: '', region: '', sort: 'new', fit: false });
+        filtersChanged();
         break;
       case 'image-remove':
         removeImage(el.dataset.target, el);
@@ -1269,10 +1495,20 @@
       onImagePicked(event.target);
       return;
     }
-    if (event.target.id === 'f-platform') {
-      state.filters.platform = event.target.value;
-      loadCampaigns();
+    const { id, value } = event.target;
+    if (id === 'f-platform' || id === 'f-region') {
+      state.filters[id === 'f-platform' ? 'platform' : 'region'] = value;
+      filtersChanged();
     }
+    if (id === 'f-fit') {
+      state.filters.fit = event.target.checked;
+      filtersChanged();
+    }
+    if (id === 'me-region' && value) saveMyRegion(value);
+    if (id === 'rq-campaign') state.req.campaign = Number(value) || 0;
+    if (id === 'rq-region') state.req.region = value;
+    if (id === 'rq-sort') state.req.sort = value === 'followers' ? 'followers' : 'new';
+    if (id.startsWith('rq-')) render();
     if (event.target.id === 'nc-value') {
       const n = digits(event.target.value);
       if (Number.isInteger(n)) event.target.value = fmt(n);
@@ -1342,6 +1578,7 @@
         return;
       }
       state.role = me.user.role;
+      if (state.role === 'blogger') restoreFilters();
       const tabs = state.role === 'business' ? ['campaigns', 'requests'] : ['browse', 'mine'];
       const wanted = new URLSearchParams(window.location.search).get('tab');
       state.tab = tabs.includes(wanted) ? wanted : tabs[0];

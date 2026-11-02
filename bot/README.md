@@ -6,14 +6,15 @@ Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilova
 
 1. **Ro‘yxatdan o‘tish (bot ichida).** `/start` → til (o‘zbekcha / ruscha) → "Biznes egasiman" yoki "Blogerman".
    - **Biznes:** ism, do‘kon yoki kompaniya nomi, toifa, telefon ("Raqamni yuborish" tugmasi).
-   - **Bloger:** ism, asosiy tarmoq, profil havolasi yoki @username, obunachilar soni, yo‘nalish (21 ta variant, oxirgisi "Boshqa"), telefon.
-2. **Biznes** mini ilovada reklama e’loni joylaydi: rasm (ixtiyoriy), mahsulot, qiymati, platformalar, format, kerakli obunachilar, muddat, blogerlar soni.
-3. **Bloger** mini ilovada reklama e’lonlarini ko‘radi (toifa, platforma va qidiruv bo‘yicha) va so‘rov yuboradi.
-4. **Biznesga botda xabar keladi**, xabarda "✅ Qabul qilish" va "❌ Rad etish" tugmalari bor. Xuddi shuni mini ilovadagi "So‘rovlar" bo‘limida ham qilish mumkin.
+   - **Bloger:** ism, asosiy tarmoq, profil havolasi yoki @username, obunachilar soni, yo‘nalish (21 ta variant, oxirgisi "Boshqa"), yashash hududi (14 ta hudud), telefon.
+2. **Biznes** mini ilovada reklama e’loni joylaydi: rasm (ixtiyoriy), mahsulot, toifa, hudud (yoki butun O‘zbekiston), qiymati, platformalar, format, kerakli obunachilar, muddat, blogerlar soni.
+3. **Bloger** mini ilovada reklama e’lonlarini ko‘radi va so‘rov yuboradi. Filtrlar: qidiruv, toifa, hudud (standart holatda blogerning o‘z hududi va butun O‘zbekiston uchun e’lonlar), platforma, saralash (yangilari yoki qimmatroq) va "Faqat menga moslari" (obunachilar talabi, hudud, bo‘sh o‘rin va hali so‘rov yuborilmaganlar). Filtrlar blogerning qurilmasida eslab qolinadi.
+4. **Biznesga botda xabar keladi**, xabarda "✅ Qabul qilish" va "❌ Rad etish" tugmalari bor. Xuddi shuni mini ilovadagi "So‘rovlar" bo‘limida ham qilish mumkin. U yerda so‘rovlarni holat (yangi, qabul qilingan, hammasi), e’lon va blogerning hududi bo‘yicha filtrlash, obunachilar soni bo‘yicha saralash mumkin.
 5. **Blogerga javob botda keladi.** So‘rov qabul qilinsa, biznesning telefoni va Telegrami yuboriladi. Biznes ham blogerning telefonini ko‘radi.
 
 Qo‘shimcha:
 - Bo‘sh o‘rinlar soni hisobga olinadi: o‘rin to‘lsa, yangi so‘rov qabul qilinmaydi.
+- Hududi yo‘q eski blogerlardan mini ilova bir marta hududini so‘raydi.
 - Blogerning obunachilari e’lon talabidan kam bo‘lsa, so‘rov yuborib bo‘lmaydi.
 - Telefon raqamlar faqat so‘rov qabul qilingandan keyin ko‘rinadi.
 - Ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi (saytdagi `privacy.html`, manzil `wrangler.toml` dagi `PRIVACY_URL` da).
@@ -94,7 +95,7 @@ Tugagach, workflow sahifasidagi **Summary** da bot havolasi va mini ilova manzil
 
 - **Bot xabarlari:** `src/i18n.js` (o‘zbekcha va ruscha).
 - **Mini ilova matnlari:** `public/app.js` boshidagi `TEXT`.
-- **Biznes toifalari (`CATEGORIES`), bloger yo‘nalishlari (`NICHES`, 20 ta + "Boshqa"), platformalar, obunachilar oraliqlari:** `src/constants.js`.
+- **Biznes toifalari (`CATEGORIES`), bloger yo‘nalishlari (`NICHES`, 20 ta + "Boshqa"), hududlar (`REGIONS`), platformalar, obunachilar oraliqlari:** `src/constants.js`.
 - **Cheklovlar** (faol e’lonlar soni, matn uzunligi, rasm hajmi va boshqalar): `src/constants.js` dagi `LIMITS`.
 
 ## Kompyuterda ishlatish (dasturchilar uchun)

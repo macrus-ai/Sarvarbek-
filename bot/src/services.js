@@ -28,6 +28,12 @@ export function decisionKeyboard(T, appId, ctx) {
   };
 }
 
+// Blogerning obunachilari e'lon talabiga yetadimi (oraliqning yuqori chegarasi bo'yicha)
+export function followersOk(blogger, campaign) {
+  const range = findFollowers(blogger.followers);
+  return !(campaign.min_followers > 0 && range && range.max !== null && range.max < campaign.min_followers);
+}
+
 // Bloger reklama e'loniga so'rov yuboradi; biznesga bot orqali xabar boradi
 export async function applyToCampaign(ctx, blogger, campaignId, message) {
   if (!isRegistered(blogger) || blogger.role !== 'blogger') throw new AppError('forbidden', 403);
@@ -38,10 +44,7 @@ export async function applyToCampaign(ctx, blogger, campaignId, message) {
   if (c.my_status) throw new AppError('already_applied', 409);
   if (c.accepted >= c.slots) throw new AppError('campaign_full', 409);
 
-  const range = findFollowers(blogger.followers);
-  if (c.min_followers > 0 && range && range.max !== null && range.max < c.min_followers) {
-    throw new AppError('followers_low', 409, { min: c.min_followers });
-  }
+  if (!followersOk(blogger, c)) throw new AppError('followers_low', 409, { min: c.min_followers });
 
   const row = await insertApplication(ctx.db, c.id, blogger.tg_id, message);
   if (!row) throw new AppError('already_applied', 409);

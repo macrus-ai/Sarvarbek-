@@ -217,7 +217,11 @@ export async function registerBusiness(env, user, { company = 'Tabiiy kosmetika'
 }
 
 // Blogerni bot orqali to'liq ro'yxatdan o'tkazadi
-export async function registerBlogger(env, user, { followers = '10000-50000', lang = 'uz', niche = 'beauty' } = {}) {
+export async function registerBlogger(
+  env,
+  user,
+  { followers = '10000-50000', lang = 'uz', niche = 'beauty', region = 'tashkent_city' } = {}
+) {
   await say(env, user, '/start');
   await press(env, user, `lang:${lang}`);
   await press(env, user, 'role:blogger');
@@ -226,6 +230,7 @@ export async function registerBlogger(env, user, { followers = '10000-50000', la
   await say(env, user, '@dilnoza.blog');
   await press(env, user, `fol:${followers}`);
   await press(env, user, `niche:${niche}`);
+  await press(env, user, `rgn:${region}`);
   await shareContact(env, user, '+998935556677');
 }
 
