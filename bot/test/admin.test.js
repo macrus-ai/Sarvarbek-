@@ -15,6 +15,7 @@ beforeEach(() => {
 afterEach(() => tg.restore());
 
 const lastText = (chatId) => tg.sent(chatId).at(-1)?.body.text ?? '';
+const cards = (chatId, tag) => tg.sent(chatId).filter((c) => c.body.text.includes(tag));
 
 test('ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi', async () => {
   const user = tgUser(300);
@@ -69,10 +70,14 @@ test('admin yangi kampaniyani ko‘radi va yopa oladi', async () => {
   const { data } = await createCampaign(env, business, { title: 'Shubhali kampaniya' });
   const id = data.campaign.id;
 
-  const note = tg.sent(ADMIN).at(-1);
+  // Karta avval tasdiqlash tugmalari bilan keladi; tasdiqlangach "yopish" tugmasi qoladi
+  const note = cards(ADMIN, '#Yangi_elon').at(-1);
   assert.match(note.body.text, /Yangi reklama e’loni/);
   assert.match(note.body.text, /Shubhali kampaniya/);
-  assert.equal(note.body.reply_markup.inline_keyboard[0][0].callback_data, `adm:close:${id}`);
+  assert.equal(note.body.reply_markup.inline_keyboard[0][0].callback_data, `cm:a:${id}`);
+  const approvedCard = tg.calls.filter((c) => c.method === 'editMessageText').at(-1).body;
+  assert.match(approvedCard.text, /E’lon tasdiqlandi/);
+  assert.equal(approvedCard.reply_markup.inline_keyboard[0][0].callback_data, `adm:close:${id}`);
 
   // Admin bo'lmagan foydalanuvchi yopa olmaydi
   await press(env, blogger, `adm:close:${id}`);

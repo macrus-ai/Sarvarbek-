@@ -8,6 +8,10 @@ import { json } from './util.js';
 
 // /img/c/12-<kalit>.jpg — katta rasm, /img/c/12-<kalit>-s.jpg — kartalar uchun kichigi
 export const IMAGE_PATH = /^\/img\/c\/(\d+)-([0-9a-f]{16})(-s)?\.jpg$/;
+// /img/s/<bloger ID>-<kalit>.jpg — blogerning statistika skrinshoti (so'rov kelgan biznesga ko'rinadi)
+export const STATS_PATH = /^\/img\/s\/(\d+)-([0-9a-f]{16})\.jpg$/;
+
+export const statsImageUrl = (bloggerId, key) => (key ? `/img/s/${bloggerId}-${key}.jpg` : null);
 
 // Fayl boshidagi baytlar bo'yicha turini aniqlaydi (Content-Type ga ishonilmaydi)
 export function sniffImage(bytes) {
@@ -65,10 +69,32 @@ async function filePathOf(tg, fileId) {
 
 const notFound = () => new Response('Not found', { status: 404, headers: { 'cache-control': 'no-store' } });
 
-// GET /img/c/:id-:kalit(-s).jpg
-export async function serveImage(request, ctx, match, exec) {
-  if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
+// GET /img/c/:id-:kalit(-s).jpg — reklama e'loni rasmi
+export function serveImage(request, ctx, match, exec) {
   const [, id, key, small] = match;
+  return serveFile(request, ctx, exec, async () => {
+    const row = await ctx.db
+      .prepare('SELECT image_file_id, image_thumb_id, image_key FROM campaigns WHERE id = ?1')
+      .bind(Number(id))
+      .first();
+    if (!row || !row.image_file_id || row.image_key !== key) return null;
+    return small ? row.image_thumb_id || row.image_file_id : row.image_file_id;
+  });
+}
+
+// GET /img/s/:blogerId-:kalit.jpg — statistika skrinshoti (kalitni faqat so'rov kelgan biznes oladi)
+export function serveStatsImage(request, ctx, match, exec) {
+  const [, id, key] = match;
+  return serveFile(request, ctx, exec, async () => {
+    const row = await ctx.db.prepare('SELECT stats_file_id, stats_key FROM users WHERE tg_id = ?1').bind(Number(id)).first();
+    if (!row || !row.stats_file_id || row.stats_key !== key) return null;
+    return row.stats_file_id;
+  });
+}
+
+// Telegramdagi faylni olib beradi. findFileId() — bazadan file_id ni topadi (yo'q bo'lsa null).
+async function serveFile(request, ctx, exec, findFileId) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
 
   // Cloudflare keshi: bir xil rasm har safar Telegramdan olinmasin
   const cache = globalThis.caches?.default;
@@ -78,13 +104,8 @@ export async function serveImage(request, ctx, match, exec) {
     if (hit) return hit;
   }
 
-  const row = await ctx.db
-    .prepare('SELECT image_file_id, image_thumb_id, image_key FROM campaigns WHERE id = ?1')
-    .bind(Number(id))
-    .first();
-  if (!row || !row.image_file_id || row.image_key !== key) return notFound();
-
-  const fileId = small ? row.image_thumb_id || row.image_file_id : row.image_file_id;
+  const fileId = await findFileId();
+  if (!fileId) return notFound();
   let upstream;
   try {
     upstream = await fetch(ctx.tg.fileUrl(await filePathOf(ctx.tg, fileId)));

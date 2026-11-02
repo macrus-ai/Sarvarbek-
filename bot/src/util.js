@@ -1,6 +1,6 @@
 // Umumiy yordamchi funksiyalar
 
-import { DEFAULT_PRIVACY_URL } from './constants.js';
+import { DEFAULT_PRIVACY_URL, PLATFORM_HOSTS } from './constants.js';
 
 export const now = () => Math.floor(Date.now() / 1000);
 
@@ -35,6 +35,37 @@ export function formatPhone(phone) {
   if (/^998\d{9}$/.test(d)) return `+998 ${d.slice(3, 5)} ${d.slice(5, 8)} ${d.slice(8, 10)} ${d.slice(10, 12)}`;
   return d ? `+${d}` : '';
 }
+
+// Ro'yxatdan o'tishda yozilgan profilni to'liq havolaga aylantiradi: "@user", "user",
+// "instagram.com/user" yoki to'liq havola. Boshqa saytning havolasi bo'lsa — null.
+export function normalizeProfile(platform, input) {
+  const raw = String(input ?? '').trim();
+  if (!raw || raw.length > 200 || /\s/.test(raw)) return null;
+  const hosts = PLATFORM_HOSTS[platform] || [];
+
+  // Havola (sxemasiz ham): domen platformaga tegishli bo'lishi kerak
+  if (/^(https?:\/\/)?([\w-]+\.)+[a-z]{2,}(\/|$)/i.test(raw)) {
+    let url;
+    try {
+      url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    } catch {
+      return null;
+    }
+    const host = url.hostname.toLowerCase().replace(/^(www|m|vm|vt)\./, '');
+    if (!hosts.includes(host)) return null;
+    const path = url.pathname.replace(/\/+$/, '');
+    if (!path || path === '/') return null;
+    // Instagram ulashish havolasidagi ?igsh=... kabi qo'shimchalar kerak emas
+    const keepQuery = platform === 'YouTube' && url.searchParams.has('v');
+    return `https://${url.hostname.toLowerCase()}${path}${keepQuery ? url.search : ''}`;
+  }
+
+  // Faqat username
+  return profileUrl(platform, raw);
+}
+
+// Havolani qisqa ko'rinishda: "instagram.com/user"
+export const profileDisplay = (url) => String(url ?? '').replace(/^https?:\/\//i, '').replace(/^www\./i, '');
 
 // Bloger profiliga havola: to'liq havola yoki platforma + username
 export function profileUrl(platform, profile) {

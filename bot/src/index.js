@@ -9,7 +9,7 @@
 import { handleApi } from './api.js';
 import { handleUpdate } from './bot.js';
 import { tr } from './i18n.js';
-import { IMAGE_PATH, serveImage } from './images.js';
+import { IMAGE_PATH, STATS_PATH, serveImage, serveStatsImage } from './images.js';
 import { createTelegram, webhookSecret } from './telegram.js';
 import { json } from './util.js';
 
@@ -21,11 +21,13 @@ export default {
     if (path === '/health') return json({ ok: true });
 
     const image = path.match(IMAGE_PATH);
-    if (image || path === '/telegram/webhook' || path === '/setup' || path.startsWith('/api/')) {
+    const stats = path.match(STATS_PATH);
+    if (image || stats || path === '/telegram/webhook' || path === '/setup' || path.startsWith('/api/')) {
       if (!env.BOT_TOKEN || !env.DB) return json({ error: 'not_configured' }, 503);
       const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin: url.origin };
       try {
         if (image) return await serveImage(request, ctx, image, exec);
+        if (stats) return await serveStatsImage(request, ctx, stats, exec);
         if (path === '/telegram/webhook') return await webhook(request, ctx);
         if (path === '/setup') return await setup(request, ctx);
         return await handleApi(request, ctx);

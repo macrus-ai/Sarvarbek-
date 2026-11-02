@@ -1,25 +1,29 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
 import {
-  CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REGIONS, findFollowers, isCategory, isNiche, isPlatform, isRegion
+  CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REACH, REGIONS, findFollowers, findReach, isCategory, isNiche, isPlatform,
+  isRegion
 } from './constants.js';
 import {
-  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, listPendingUsers, setSetting,
-  touchUser, updateUser
+  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, listPendingCampaigns,
+  listPendingUsers, setSetting, touchUser, updateUser
 } from './db.js';
-import { catLabel, followersLabel, nicheLabel, regionLabel, tr } from './i18n.js';
+import { catLabel, followersLabel, nicheLabel, reachLabel, regionLabel, tr } from './i18n.js';
+import { newImageKey } from './images.js';
 import {
-  AppError, MOD_CHAT_KEYS, canModerate, decide, homeKeyboard, isModerationChat, moderate, moderationEnabled,
-  pendingKeyboard, resubmitKeyboard, sendModerationCard
+  AppError, MOD_CHAT_KEYS, adKeyboard, canModerate, decide, editMessage, homeKeyboard, isModerationChat, moderate,
+  moderateCampaign, moderationEnabled, pendingKeyboard, resubmitKeyboard, sendAdCard, sendModerationCard
 } from './services.js';
-import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, now, privacyUrl } from './util.js';
+import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, normalizeProfile, now, privacyUrl } from './util.js';
 
 // Ro'yxatdan o'tish qadamlari
 const FLOW = {
   business: ['name', 'company', 'category', 'phone'],
-  blogger: ['name', 'platform', 'profile', 'followers', 'niche', 'region', 'phone']
+  blogger: ['name', 'platform', 'profile', 'followers', 'reach', 'stats', 'niche', 'region', 'phone']
 };
-const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'niche', 'region']);
+const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'reach', 'niche', 'region']);
+
+const statsKeyboard = (T) => ({ inline_keyboard: [[{ text: T.statsSkip, callback_data: 'stats:skip' }]] });
 
 export async function handleUpdate(update, ctx) {
   if (update.message) return onMessage(update.message, ctx);
@@ -97,7 +101,13 @@ function ask(ctx, user, step) {
         reply_markup: { inline_keyboard: rows(PLATFORMS.map((p) => ({ text: p, callback_data: `plat:${p}` })), 2) }
       });
     case 'profile':
-      return ctx.tg.send(id, T.askProfile);
+      return ctx.tg.send(id, T.askProfile(user.platform));
+    case 'reach':
+      return ctx.tg.send(id, T.askReach(user.platform), {
+        reply_markup: { inline_keyboard: rows(REACH.map((r) => ({ text: reachLabel(r.id, lang), callback_data: `rch:${r.id}` })), 2) }
+      });
+    case 'stats':
+      return ctx.tg.send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
     case 'followers':
       return ctx.tg.send(id, T.askFollowers, {
         reply_markup: {
@@ -189,20 +199,48 @@ function parseBindTarget(arg) {
   return 'all';
 }
 
-// Tasdiq kutayotgan profillar: eng eskilari, kartalari bilan
-async function sendPendingList(ctx, chatId, lang = 'uz') {
+// Tasdiq kutayotgan profillar va reklama e'lonlari: eng eskilari, kartalari bilan.
+// what: { users, ads } — shu chatga qaysilari kerak (alohida guruhlar bo'lsa, har biriga o'zinikilari).
+async function sendPendingList(ctx, chatId, lang = 'uz', what = { users: true, ads: true }) {
   const T = tr(lang);
-  const { pending } = await getStats(ctx.db);
-  if (!pending) return ctx.tg.send(chatId, T.pendingNone);
-  await ctx.tg.send(chatId, T.pendingCount(pending));
-  for (const u of await listPendingUsers(ctx.db)) {
+  const { pending, pending_ads: pendingAds } = await getStats(ctx.db);
+  const users = what.users ? pending : 0;
+  const ads = what.ads ? pendingAds : 0;
+  if (!users && !ads) return ctx.tg.send(chatId, T.pendingNone);
+  const sendSafe = async (fn) => {
     try {
-      await sendModerationCard(ctx, u, 'new', { chatId, lang });
+      await fn();
     } catch (e) {
       console.warn('send pending card failed:', e.message);
     }
+  };
+  if (users) {
+    await ctx.tg.send(chatId, T.pendingCount(users));
+    for (const u of await listPendingUsers(ctx.db)) await sendSafe(() => sendModerationCard(ctx, u, 'new', { chatId, lang }));
+  }
+  if (ads) {
+    await ctx.tg.send(chatId, T.pendingAdsCount(ads));
+    for (const c of await listPendingCampaigns(ctx.db)) {
+      const owner = await getUser(ctx.db, c.business_id);
+      await sendSafe(() => sendAdCard(ctx, c, owner?.name || '', { chatId, lang }));
+    }
   }
   return undefined;
+}
+
+// Guruh qaysi oqimlarga ulangan: profillar (bloger/biznes) va e'lonlar
+async function chatKinds(ctx, chatId) {
+  const value = async (key) => Number(await getSetting(ctx.db, key)) || null;
+  const [blogger, business, ads] = await Promise.all([
+    value(MOD_CHAT_KEYS.blogger),
+    value(MOD_CHAT_KEYS.business),
+    value(MOD_CHAT_KEYS.ads)
+  ]);
+  return {
+    users: chatId === blogger || chatId === business,
+    // E'lonlar guruhi bo'lmasa, e'lonlar bizneslar guruhiga keladi
+    ads: chatId === ads || (!ads && chatId === business)
+  };
 }
 
 // Guruhdagi xabarlar: botni qo'shish, /ulash, /moderatsiya, /stats. Boshqa xabarlarga javob berilmaydi.
@@ -246,7 +284,9 @@ async function onGroupMessage(msg, ctx) {
   if (cmd === 'moderatsiya' || cmd === 'stats') {
     if (!admin && !(await isModerationChat(ctx, chatId))) return undefined;
     if (cmd === 'stats') return ctx.tg.send(chatId, T.stats(await getStats(ctx.db)));
-    return sendPendingList(ctx, chatId);
+    const kinds = await chatKinds(ctx, chatId);
+    // Hech qaysi oqimga ulanmagan guruhda admin so'rasa — hammasi
+    return sendPendingList(ctx, chatId, 'uz', kinds.users || kinds.ads ? kinds : { users: true, ads: true });
   }
   return undefined;
 }
@@ -309,9 +349,18 @@ async function onMessage(msg, ctx) {
     case 'company':
       if (text.length < 2 || text.length > 80 || text.startsWith('/')) return ctx.tg.send(id, T.errCompany);
       return advance(ctx, user, { company: text });
-    case 'profile':
-      if (text.length < 3 || text.length > 200 || text.startsWith('/') || /\s/.test(text)) return ctx.tg.send(id, T.errProfile);
-      return advance(ctx, user, { profile: text });
+    case 'profile': {
+      // Havola platformaga tegishli bo'lishi kerak; "@user" ham to'liq havolaga aylanadi
+      const url = text.startsWith('/') ? null : normalizeProfile(user.platform, text);
+      if (!url) return ctx.tg.send(id, T.errProfile(user.platform));
+      return advance(ctx, user, { profile: url });
+    }
+    case 'stats': {
+      // Statistika skrinshoti: rasm (Telegram file_id saqlanadi)
+      const photo = Array.isArray(msg.photo) ? msg.photo[msg.photo.length - 1] : null;
+      if (!photo?.file_id) return ctx.tg.send(id, T.errStats, { reply_markup: statsKeyboard(T) });
+      return advance(ctx, user, { stats_file_id: photo.file_id, stats_key: newImageKey() });
+    }
     case 'phone':
       return onPhone(ctx, user, msg, text);
     default:
@@ -417,6 +466,19 @@ async function onCallback(cq, ctx) {
       await markChosen(regionLabel(value, user.lang));
       return advance(ctx, user, { region: value });
     }
+    case 'rch': {
+      if (user.reg_step !== 'reach' || !findReach(value)) return stale();
+      await ack();
+      await markChosen(reachLabel(value, user.lang));
+      return advance(ctx, user, { reach: value });
+    }
+    case 'stats': {
+      // Skrinshotsiz davom etish (oldin yuborilgan bo'lsa, o'shanisi saqlanib qoladi)
+      if (value !== 'skip' || user.reg_step !== 'stats') return stale();
+      await ack();
+      await markChosen(T.statsSkip);
+      return advance(ctx, user, {});
+    }
     case 'plat': {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();
       await ack();
@@ -471,9 +533,36 @@ async function onCallback(cq, ctx) {
       // Qaror tugmalari olib tashlanadi, profil havolasi qoladi
       const keep = (cq.message.reply_markup?.inline_keyboard || []).map((row) => row.filter((b) => b.url)).filter((row) => row.length);
       try {
-        await ctx.tg.edit(chatId, messageId, `${esc(cq.message.text || '')}\n\n${line}`, { reply_markup: { inline_keyboard: keep } });
+        const original = esc(cq.message.text || cq.message.caption || '');
+        await editMessage(ctx, chatId, messageId, `${original}\n\n${line}`, { reply_markup: { inline_keyboard: keep } });
       } catch {
         /* xabar juda eski bo'lsa tahrirlab bo'lmaydi */
+      }
+      return undefined;
+    }
+    case 'cm': {
+      // Reklama e'lonini tasdiqlash yoki rad etish: adminlar va jamoa guruhi a'zolari
+      const campaignId = Number(extra);
+      if (!['a', 'r'].includes(value) || !Number.isSafeInteger(campaignId)) return stale();
+      if (!(await canModerate(ctx, user.tg_id, chatId))) return ack(T.modNoRights, true);
+      const TM = cq.message.chat.type === 'private' ? T : tr('uz');
+      let result;
+      try {
+        result = await moderateCampaign(ctx, user.tg_id, campaignId, value);
+      } catch (e) {
+        if (!(e instanceof AppError)) throw e;
+        return ack(e.code === 'already' ? TM.modAlready : TM.modGone, true);
+      }
+      await ack();
+      const who = user.name || user.first_name || '';
+      const line = value === 'a' ? TM.adApproved(who) : TM.adRejected(who);
+      // Tasdiqlansa "E'lonni yopish" tugmasi qoladi, rad etilsa tugma kerak emas
+      const keyboard = value === 'a' ? adKeyboard(TM, result.campaign) : { inline_keyboard: [] };
+      try {
+        const original = esc(cq.message.text || cq.message.caption || '');
+        await editMessage(ctx, chatId, messageId, `${original}\n\n${line}`, { reply_markup: keyboard });
+      } catch {
+        /* e'tiborsiz */
       }
       return undefined;
     }

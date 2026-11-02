@@ -8,8 +8,8 @@ import {
   listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser, updateUser
 } from './db.js';
 import { tr } from './i18n.js';
-import { forgetImage, imageOut, newImageKey, pickSizes, sniffImage } from './images.js';
-import { AppError, applyToCampaign, decide, followersOk, notifyAdmins } from './services.js';
+import { forgetImage, imageOut, newImageKey, pickSizes, sniffImage, statsImageUrl } from './images.js';
+import { AppError, adKeyboard, applyToCampaign, decide, followersOk, moderationEnabled, notifyAdmins, sendAdCard } from './services.js';
 import { TelegramError, validateInitData } from './telegram.js';
 import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } from './util.js';
 
@@ -59,6 +59,8 @@ function campaignOut(c, viewerId) {
     description: c.description || '',
     image: imageOut(c.id, c),
     status: c.status,
+    // pending — jamoa tasdiqlashini kutmoqda, rejected — rad etilgan (faqat egasi ko'radi)
+    moderation: c.moderation || 'approved',
     businessName: c.business_name || '',
     accepted,
     left: Math.max(0, c.slots - accepted),
@@ -105,14 +107,17 @@ function requestOut(r) {
     blogger: {
       id: r.blogger_id,
       name: r.name || '',
-      username: r.username || null,
+      // Telegram username va telefon faqat so'rov qabul qilingandan keyin (SQL'da ham shunday)
+      username: r.status === 'accepted' ? r.username || null : null,
       platform: r.platform,
       profile: r.profile,
       profileUrl: profileUrl(r.platform, r.profile),
       followers: r.followers,
+      reach: r.reach || null,
+      statsImage: statsImageUrl(r.blogger_id, r.stats_key),
       niche: r.niche,
       region: r.region || null,
-      phone: r.phone ? formatPhone(r.phone) : null
+      phone: r.status === 'accepted' && r.phone ? formatPhone(r.phone) : null
     }
   };
 }
@@ -284,17 +289,12 @@ async function route(ctx, user, method, path, url, request) {
     if ((await countActiveCampaigns(db, id)) >= LIMITS.activeCampaigns) {
       throw new AppError('too_many_campaigns', 409, { limit: LIMITS.activeCampaigns });
     }
-    const campaignId = await createCampaign(db, id, data);
+    // Jamoa bor bo'lsa, e'lon tasdiqlanguncha blogerlarga ko'rinmaydi
+    const moderation = (await moderationEnabled(ctx)) ? 'pending' : 'approved';
+    const campaignId = await createCampaign(db, id, { ...data, moderation });
     const created = await getCampaign(db, campaignId, id);
-    // Adminga yangi e'lon haqida xabar va "yopish" tugmasi (moderatsiya)
-    await notifyAdmins(
-      ctx,
-      (T) => ({
-        text: T.adminNewCampaign({ ...created, business_contact: user.name }),
-        extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${created.id}` }]] } }
-      }),
-      'ads'
-    );
+    // E'lonlar guruhiga karta: moderatsiyada — tasdiqlash/rad etish, aks holda — yopish tugmasi
+    await sendAdCard(ctx, created, user.name);
     return json({ campaign: campaignOut(created, id) }, 201);
   }
 
@@ -303,8 +303,10 @@ async function route(ctx, user, method, path, url, request) {
 
     if (method === 'GET') {
       const c = await getCampaign(db, campaignId, id);
-      // Yopilgan e'lonni faqat egasi va so'rov yuborganlar ko'radi
-      if (!c || (c.status !== 'active' && c.business_id !== id && !c.my_status)) throw new AppError('not_found', 404);
+      // Tasdiqlanmagan e'lonni faqat egasi ko'radi; yopilganini — egasi va so'rov yuborganlar
+      const own = c && c.business_id === id;
+      const hidden = !c || (!own && (c.moderation !== 'approved' || (c.status !== 'active' && !c.my_status)));
+      if (hidden) throw new AppError('not_found', 404);
       return json({ campaign: campaignOut(c, id) });
     }
 
@@ -315,6 +317,8 @@ async function route(ctx, user, method, path, url, request) {
       if (status !== 'active' && status !== 'closed') throw new AppError('invalid', 400);
       const current = await getCampaign(db, campaignId, id);
       if (!current || current.business_id !== id) throw new AppError('not_found', 404);
+      // Rad etilgan e'lonni qayta ochib bo'lmaydi: yangisini joylash kerak
+      if (status === 'active' && current.moderation === 'rejected') throw new AppError('campaign_rejected', 409);
       if (status === 'active' && current.status !== 'active' && (await countActiveCampaigns(db, id)) >= LIMITS.activeCampaigns) {
         throw new AppError('too_many_campaigns', 409, { limit: LIMITS.activeCampaigns });
       }
@@ -336,12 +340,13 @@ async function route(ctx, user, method, path, url, request) {
       const image = await uploadImage(ctx, user, current, await readImage(request));
       await setCampaignImage(db, campaignId, id, image);
       // Adminga rasm ham ko'rinsin: e'lon joylangandan keyin almashtirilgan rasmlar ham moderatsiyadan o'tadi
+      // Moderatsiyadagi e'lon rasmi tasdiqlash tugmalari bilan, tasdiqlangan e'lonniki — yopish tugmasi bilan
       await notifyAdmins(
         ctx,
         (T) => ({
           photo: image.fileId,
           text: T.adminNewImage({ ...current, business_contact: user.name }),
-          extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${campaignId}` }]] } }
+          extra: { reply_markup: adKeyboard(T, current) }
         }),
         'ads'
       );
