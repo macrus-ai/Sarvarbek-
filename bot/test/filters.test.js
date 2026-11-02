@@ -121,7 +121,7 @@ test('biznes so‘rovlarda va bot xabarida blogerning hududini ko‘radi', async
   const { business, blogger, ids } = await setup();
   tg.clear();
   await api(env, blogger, `/api/campaigns/${ids.all}/apply`, { method: 'POST', body: {} });
-  assert.match(tg.sent(600).at(-1).body.text, /📍 Samarqand/);
+  assert.match(tg.sent(600).at(-1).body.text, /📍 Auditoriya: Samarqand/);
   const reqs = await api(env, business, '/api/requests');
   assert.equal(reqs.data.requests[0].blogger.region, 'samarkand');
   const mine = await api(env, blogger, '/api/my/applications');

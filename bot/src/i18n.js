@@ -18,6 +18,10 @@ export function regionLabel(id, lang) {
 // Hudud ma'lum bo'lsa "📍 Samarqand" qatori, aks holda bo'sh
 const regionLine = (id, lang) => (regionLabel(id, lang) ? `📍 ${esc(regionLabel(id, lang))}` : '');
 
+// Blogerning auditoriyasi joylashgan hudud: "📍 Auditoriya: Samarqand"
+const audienceLine = (id, lang) =>
+  regionLabel(id, lang) ? `📍 ${lang === 'ru' ? 'Аудитория' : 'Auditoriya'}: ${esc(regionLabel(id, lang))}` : '';
+
 export function followersLabel(id) {
   const f = findFollowers(id);
   if (!f) return id ?? '';
@@ -27,6 +31,26 @@ export function followersLabel(id) {
 // Xabardagi foydalanuvchi nomi: Telegramdagi profiliga havola bilan
 const mention = (id, name) => `<a href="tg://user?id=${Number(id)}">${esc(name)}</a>`;
 const at = (username) => (username ? ` (@${esc(username)})` : '');
+
+// Moderatsiya kartasidagi profil qatorlari (guruhda ko'rinadi)
+function profileLines(u, lang) {
+  const ru = lang === 'ru';
+  const person = `👤 ${mention(u.tg_id, u.name || u.first_name || '')}${at(u.username)}`;
+  const phone = `📞 ${esc(formatPhone(u.phone))}`;
+  const language = `🌐 ${u.lang === 'ru' ? 'Русский' : 'O‘zbekcha'}`;
+  if (u.role === 'business') {
+    return [`🏪 <b>${esc(u.company)}</b> · ${esc(catLabel(u.category, lang))}`, person, phone, language];
+  }
+  return [
+    person,
+    phone,
+    `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} ${ru ? 'подписчиков' : 'obunachi'}`,
+    `🔗 ${esc(u.profile)}`,
+    `🏷 ${esc(nicheLabel(u.niche, lang))}`,
+    audienceLine(u.region, lang),
+    language
+  ].filter(Boolean);
+}
 
 const uz = {
   chooseLang: '🇺🇿 Tilni tanlang\n🇷🇺 Выберите язык',
@@ -43,7 +67,8 @@ const uz = {
   askProfile: 'Profilingiz havolasini yoki @username ni yozing:',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
-  askRegion: 'Qaysi hududda yashaysiz? Ilovada avvalo shu hududdagi reklama e’lonlari ko‘rsatiladi.',
+  askRegion:
+    '📍 Auditoriyangiz (obunachilaringizning asosiy qismi) qaysi hududda?\n\nBizneslar o‘z hududidagi auditoriyaga reklama qiladi. Masalan, Samarqanddagi kafe Samarqand auditoriyasiga ega blogerni qidiradi.',
   askPhone:
     'Oxirgi qadam: telefon raqamingizni yuboring. Pastdagi tugmani bosing 👇\n\nRaqamingiz faqat so‘rov qabul qilinganda ikkinchi tomonga ko‘rsatiladi.',
   phoneButton: '📱 Raqamni yuborish',
@@ -59,6 +84,17 @@ const uz = {
     `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nEndi ilovada reklama e’loni joylang. Blogerlar uni ko‘rib, so‘rov yuboradi, so‘rovlar shu botga keladi.`,
   doneBlogger: (summary) =>
     `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi.`,
+  donePending: (summary) =>
+    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\n⏳ <b>Profilingiz moderatsiyada.</b> Jamoamiz uni tez orada ko‘rib chiqadi va natijani shu yerga yozadi.`,
+  pendingHome: '⏳ Profilingiz moderatsiyada. Tasdiqlangach shu yerga xabar keladi.',
+  approvedBusiness:
+    '🎉 <b>Profilingiz tasdiqlandi!</b>\n\nEndi ilovada reklama e’loni joylang. Blogerlar uni ko‘rib, so‘rov yuboradi, so‘rovlar shu botga keladi.',
+  approvedBlogger:
+    '🎉 <b>Profilingiz tasdiqlandi!</b>\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi.',
+  rejectedNotice:
+    'Afsuski, profilingiz tasdiqlanmadi.\n\nMa’lumotlaringizni tekshirib (masalan, profil havolasi to‘g‘ri va ochiq ekanini), qayta yuborishingiz mumkin.',
+  resubmit: '🔄 Qayta yuborish',
+  editProfile: '✏️ Ma’lumotlarni o‘zgartirish',
   openApp: '🚀 Ilovani ochish',
   updateProfile: '✏️ Ma’lumotlarni yangilash',
   home: (name) => `Assalomu alaykum, ${esc(name)}! Reklama e’lonlari va so‘rovlar ilovada.`,
@@ -74,14 +110,51 @@ const uz = {
   deleteNo: 'Bekor qilish',
   deleted: 'Ma’lumotlaringiz o‘chirildi. Qaytadan foydalanish uchun /start yuboring.',
   deleteCancelled: 'Bekor qilindi. Ma’lumotlaringiz joyida.',
-  adminNewUser: (u) =>
+  // Moderatsiya guruhidagi kartalar
+  modNew: (u, resubmitted = false) =>
     [
-      `👤 <b>Yangi ${u.role === 'business' ? 'biznes' : 'bloger'}</b>`,
-      u.role === 'business'
-        ? `🏪 ${esc(u.company)} · ${esc(catLabel(u.category, 'uz'))}`
-        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(nicheLabel(u.niche, 'uz'))}\n🔗 ${esc(u.profile)}${u.region ? `\n${regionLine(u.region, 'uz')}` : ''}`,
-      `${mention(u.tg_id, u.name)}${at(u.username)} · ${esc(formatPhone(u.phone))}`
+      u.role === 'business' ? '#Yangi_biznes' : '#Yangi_bloger',
+      '',
+      ...profileLines(u, 'uz'),
+      '',
+      resubmitted ? '⏳ Moderatsiyada (qayta yuborildi)' : '⏳ Moderatsiyada'
     ].join('\n'),
+  modUpdated: (u) =>
+    [
+      '#Profil_yangilandi',
+      u.role === 'business' ? '🏪 Biznes' : '📸 Bloger',
+      '',
+      ...profileLines(u, 'uz'),
+      '',
+      '✅ Tasdiqlangan profil. Ma’lumotlar mos kelmasa, bloklang.'
+    ].join('\n'),
+  modApprove: '✅ Tasdiqlash',
+  modReject: '❌ Rad etish',
+  modBlock: '🚫 Bloklash',
+  modProfile: '🔗 Profilni ochish',
+  modApproved: (name) => `✅ <b>Tasdiqlandi</b> · ${esc(name)}`,
+  modRejected: (name) => `❌ <b>Rad etildi</b> · ${esc(name)}`,
+  modBlocked: (name) => `🚫 <b>Bloklandi</b> · ${esc(name)}`,
+  modAlready: 'Bu profil bo‘yicha qaror allaqachon qabul qilingan.',
+  modGone: 'Foydalanuvchi topilmadi: profil o‘chirilgan bo‘lishi mumkin.',
+  modNoRights: 'Bu tugma faqat moderatorlar uchun.',
+  pendingNone: 'Moderatsiyada profil yo‘q.',
+  pendingCount: (n) => `⏳ Moderatsiyada: ${n} ta profil. Eng eskilari:`,
+  groupBound: (which) =>
+    [
+      which === 'blogger'
+        ? '✅ Guruh ulandi: bu yerga yangi blogerlar keladi.'
+        : which === 'business'
+          ? '✅ Guruh ulandi: bu yerga yangi bizneslar va reklama e’lonlari keladi.'
+          : '✅ Guruh ulandi: bu yerga yangi blogerlar, bizneslar va reklama e’lonlari keladi.',
+      '',
+      'Tasdiqlash tugmalarini guruhning istalgan a’zosi bosa oladi, shuning uchun guruhga faqat jamoangizni qo‘shing.',
+      '',
+      '/moderatsiya — tasdiq kutayotgan profillar'
+    ].join('\n'),
+  groupHelp:
+    'Guruhni ulash uchun:\n/ulash — hammasi shu guruhga\n/ulash bloger — faqat yangi blogerlar\n/ulash biznes — yangi bizneslar va reklama e’lonlari\n\n/moderatsiya — tasdiq kutayotgan profillar',
+  groupNotAdmin: 'Guruhni faqat Ovoza adminlari ulay oladi.',
   adminNewCampaign: (c) =>
     [
       '📢 <b>Yangi reklama e’loni</b>',
@@ -109,7 +182,7 @@ const uz = {
       `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} obunachi`,
       `🔗 ${esc(a.profile)}`,
       `🏷 ${esc(nicheLabel(a.niche, 'uz'))}`,
-      ...(a.region ? [regionLine(a.region, 'uz')] : []),
+      ...(a.region ? [audienceLine(a.region, 'uz')] : []),
       a.message ? `\n💬 ${esc(a.message)}` : ''
     ].join('\n').trim(),
   accept: '✅ Qabul qilish',
@@ -136,7 +209,7 @@ const uz = {
   errCampaignFull: 'Bu reklama e’lonida bo‘sh o‘rin qolmagan.',
   errNotFound: 'So‘rov topilmadi.',
   stats: (s) =>
-    `📊 <b>Statistika</b>\nBizneslar: ${s.businesses}\nBlogerlar: ${s.bloggers}\nFaol e’lonlar: ${s.active}\nSo‘rovlar: ${s.applications} (qabul qilingan: ${s.accepted})`,
+    `📊 <b>Statistika</b>\nBizneslar: ${s.businesses}\nBlogerlar: ${s.bloggers}\nModeratsiyada: ${s.pending}\nFaol e’lonlar: ${s.active}\nSo‘rovlar: ${s.applications} (qabul qilingan: ${s.accepted})`,
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'uz'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
@@ -145,7 +218,7 @@ const uz = {
       `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} obunachi`,
       `🔗 ${esc(u.profile)}`,
       `🏷 ${esc(nicheLabel(u.niche, 'uz'))}`,
-      regionLine(u.region, 'uz'),
+      audienceLine(u.region, 'uz'),
       `📞 ${esc(formatPhone(u.phone))}`
     ].filter(Boolean).join('\n'),
   commands: [
@@ -154,6 +227,12 @@ const uz = {
     { command: 'lang', description: 'Tilni o‘zgartirish' },
     { command: 'privacy', description: 'Maxfiylik siyosati' },
     { command: 'help', description: 'Yordam' }
+  ],
+  // Moderatsiya guruhida ko'rinadigan buyruqlar
+  groupCommands: [
+    { command: 'ulash', description: 'Guruhni moderatsiya uchun ulash (adminlar)' },
+    { command: 'moderatsiya', description: 'Tasdiq kutayotgan profillar' },
+    { command: 'stats', description: 'Statistika' }
   ],
   description:
     'Ovoza — bizneslar va blogerlar uchun barter platformasi. Bizneslar reklama e’loni joylaydi, blogerlar so‘rov yuboradi, javoblar shu botga keladi.',
@@ -175,7 +254,8 @@ const ru = {
   askProfile: 'Напишите ссылку на профиль или @username:',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
-  askRegion: 'В каком регионе вы живёте? В приложении сначала будут показаны рекламные объявления вашего региона.',
+  askRegion:
+    '📍 В каком регионе ваша аудитория (большая часть подписчиков)?\n\nБизнес рекламируется для аудитории своего региона. Например, кафе в Самарканде ищет блогера с самаркандской аудиторией.',
   askPhone:
     'Последний шаг: отправьте номер телефона. Нажмите кнопку ниже 👇\n\nНомер увидит другая сторона только после того, как отклик будет принят.',
   phoneButton: '📱 Отправить номер',
@@ -191,6 +271,17 @@ const ru = {
     `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nТеперь разместите рекламное объявление в приложении. Блогеры увидят его и отправят отклики, а они придут в этот бот.`,
   doneBlogger: (summary) =>
     `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот.`,
+  donePending: (summary) =>
+    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\n⏳ <b>Ваш профиль на модерации.</b> Команда скоро его проверит и напишет результат сюда.`,
+  pendingHome: '⏳ Ваш профиль на модерации. Когда его одобрят, мы напишем сюда.',
+  approvedBusiness:
+    '🎉 <b>Ваш профиль одобрен!</b>\n\nТеперь разместите рекламное объявление в приложении. Блогеры увидят его и отправят отклики, а они придут в этот бот.',
+  approvedBlogger:
+    '🎉 <b>Ваш профиль одобрен!</b>\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот.',
+  rejectedNotice:
+    'К сожалению, ваш профиль не одобрен.\n\nПроверьте данные (например, что ссылка на профиль верная и профиль открыт) и отправьте их повторно.',
+  resubmit: '🔄 Отправить повторно',
+  editProfile: '✏️ Изменить данные',
   openApp: '🚀 Открыть приложение',
   updateProfile: '✏️ Обновить данные',
   home: (name) => `Здравствуйте, ${esc(name)}! Рекламные объявления и отклики — в приложении.`,
@@ -205,14 +296,50 @@ const ru = {
   deleteNo: 'Отмена',
   deleted: 'Ваши данные удалены. Чтобы снова пользоваться ботом, отправьте /start.',
   deleteCancelled: 'Отменено. Ваши данные на месте.',
-  adminNewUser: (u) =>
+  modNew: (u, resubmitted = false) =>
     [
-      `👤 <b>Новый ${u.role === 'business' ? 'бизнес' : 'блогер'}</b>`,
-      u.role === 'business'
-        ? `🏪 ${esc(u.company)} · ${esc(catLabel(u.category, 'ru'))}`
-        : `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} · ${esc(nicheLabel(u.niche, 'ru'))}\n🔗 ${esc(u.profile)}${u.region ? `\n${regionLine(u.region, 'ru')}` : ''}`,
-      `${mention(u.tg_id, u.name)}${at(u.username)} · ${esc(formatPhone(u.phone))}`
+      u.role === 'business' ? '#Yangi_biznes' : '#Yangi_bloger',
+      '',
+      ...profileLines(u, 'ru'),
+      '',
+      resubmitted ? '⏳ На модерации (отправлен повторно)' : '⏳ На модерации'
     ].join('\n'),
+  modUpdated: (u) =>
+    [
+      '#Profil_yangilandi',
+      u.role === 'business' ? '🏪 Бизнес' : '📸 Блогер',
+      '',
+      ...profileLines(u, 'ru'),
+      '',
+      '✅ Профиль одобрен. Если данные не подходят, заблокируйте.'
+    ].join('\n'),
+  modApprove: '✅ Одобрить',
+  modReject: '❌ Отклонить',
+  modBlock: '🚫 Заблокировать',
+  modProfile: '🔗 Открыть профиль',
+  modApproved: (name) => `✅ <b>Одобрено</b> · ${esc(name)}`,
+  modRejected: (name) => `❌ <b>Отклонено</b> · ${esc(name)}`,
+  modBlocked: (name) => `🚫 <b>Заблокировано</b> · ${esc(name)}`,
+  modAlready: 'Решение по этому профилю уже принято.',
+  modGone: 'Пользователь не найден: возможно, профиль удалён.',
+  modNoRights: 'Эта кнопка только для модераторов.',
+  pendingNone: 'Профилей на модерации нет.',
+  pendingCount: (n) => `⏳ На модерации: ${n}. Самые ранние:`,
+  groupBound: (which) =>
+    [
+      which === 'blogger'
+        ? '✅ Группа подключена: сюда будут приходить новые блогеры.'
+        : which === 'business'
+          ? '✅ Группа подключена: сюда будут приходить новые бизнесы и рекламные объявления.'
+          : '✅ Группа подключена: сюда будут приходить новые блогеры, бизнесы и рекламные объявления.',
+      '',
+      'Кнопки модерации может нажать любой участник группы, поэтому добавляйте в неё только свою команду.',
+      '',
+      '/moderatsiya — профили, ожидающие проверки'
+    ].join('\n'),
+  groupHelp:
+    'Чтобы подключить группу:\n/ulash — всё в эту группу\n/ulash bloger — только новые блогеры\n/ulash biznes — новые бизнесы и рекламные объявления\n\n/moderatsiya — профили, ожидающие проверки',
+  groupNotAdmin: 'Подключить группу могут только администраторы Ovoza.',
   adminNewCampaign: (c) =>
     [
       '📢 <b>Новое рекламное объявление</b>',
@@ -240,7 +367,7 @@ const ru = {
       `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} подписчиков`,
       `🔗 ${esc(a.profile)}`,
       `🏷 ${esc(nicheLabel(a.niche, 'ru'))}`,
-      ...(a.region ? [regionLine(a.region, 'ru')] : []),
+      ...(a.region ? [audienceLine(a.region, 'ru')] : []),
       a.message ? `\n💬 ${esc(a.message)}` : ''
     ].join('\n').trim(),
   accept: '✅ Принять',
@@ -267,7 +394,7 @@ const ru = {
   errCampaignFull: 'В этом объявлении не осталось свободных мест.',
   errNotFound: 'Отклик не найден.',
   stats: (s) =>
-    `📊 <b>Статистика</b>\nБизнесы: ${s.businesses}\nБлогеры: ${s.bloggers}\nАктивные объявления: ${s.active}\nОтклики: ${s.applications} (принято: ${s.accepted})`,
+    `📊 <b>Статистика</b>\nБизнесы: ${s.businesses}\nБлогеры: ${s.bloggers}\nНа модерации: ${s.pending}\nАктивные объявления: ${s.active}\nОтклики: ${s.applications} (принято: ${s.accepted})`,
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'ru'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
@@ -276,7 +403,7 @@ const ru = {
       `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} подписчиков`,
       `🔗 ${esc(u.profile)}`,
       `🏷 ${esc(nicheLabel(u.niche, 'ru'))}`,
-      regionLine(u.region, 'ru'),
+      audienceLine(u.region, 'ru'),
       `📞 ${esc(formatPhone(u.phone))}`
     ].filter(Boolean).join('\n'),
   commands: [
@@ -285,6 +412,11 @@ const ru = {
     { command: 'lang', description: 'Сменить язык' },
     { command: 'privacy', description: 'Политика конфиденциальности' },
     { command: 'help', description: 'Помощь' }
+  ],
+  groupCommands: [
+    { command: 'ulash', description: 'Подключить группу для модерации (админы)' },
+    { command: 'moderatsiya', description: 'Профили, ожидающие проверки' },
+    { command: 'stats', description: 'Статистика' }
   ],
   description:
     'Ovoza — бартерная платформа для бизнеса и блогеров. Бизнес размещает рекламные объявления, блогеры откликаются, ответы приходят в этот бот.',

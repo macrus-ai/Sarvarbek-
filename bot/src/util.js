@@ -62,6 +62,12 @@ export function isRegistered(user) {
   return Boolean(user && user.role && user.reg_step === 'done' && user.registered_at);
 }
 
+// Ro'yxatdan o'tgan va moderatsiyadan o'tgan: platformadan to'liq foydalanadi
+export const isApproved = (user) => isRegistered(user) && user.moderation === 'approved';
+
+// Bot tokenining boshidagi raqam — botning Telegram ID'si (guruhga qo'shilganini bilish uchun)
+export const botIdOf = (token) => Number(String(token || '').split(':')[0]) || 0;
+
 export function privacyUrl(env, lang) {
   const base = (env && env.PRIVACY_URL) || DEFAULT_PRIVACY_URL;
   return lang === 'ru' ? `${base}?lang=ru` : base;

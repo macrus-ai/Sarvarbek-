@@ -205,8 +205,18 @@ export const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 0x4a, 0x46, 0
 // Rasmni xuddi brauzer kabi oladi (initData'siz)
 export const getImage = (env, path) => worker.fetch(new Request(`${ORIGIN}${path}`), env);
 
-// Biznesni bot orqali to'liq ro'yxatdan o'tkazadi
-export async function registerBusiness(env, user, { company = 'Tabiiy kosmetika', category = 'beauty', lang = 'uz' } = {}) {
+// Admin (ADMIN_IDS dagi birinchisi) profilni tasdiqlaydi
+export async function approve(env, user) {
+  const admin = Number(String(env.ADMIN_IDS || '').split(/[\s,]+/)[0]);
+  if (admin) await press(env, tgUser(admin), `mod:a:${user.id}`, '#Yangi');
+}
+
+// Biznesni bot orqali to'liq ro'yxatdan o'tkazadi (approve: false — moderatsiyada qoldiradi)
+export async function registerBusiness(
+  env,
+  user,
+  { company = 'Tabiiy kosmetika', category = 'beauty', lang = 'uz', approve: approved = true } = {}
+) {
   await say(env, user, '/start');
   await press(env, user, `lang:${lang}`);
   await press(env, user, 'role:business');
@@ -214,13 +224,14 @@ export async function registerBusiness(env, user, { company = 'Tabiiy kosmetika'
   await say(env, user, company);
   await press(env, user, `cat:${category}`);
   await shareContact(env, user, '998901112233');
+  if (approved) await approve(env, user);
 }
 
 // Blogerni bot orqali to'liq ro'yxatdan o'tkazadi
 export async function registerBlogger(
   env,
   user,
-  { followers = '10000-50000', lang = 'uz', niche = 'beauty', region = 'tashkent_city' } = {}
+  { followers = '10000-50000', lang = 'uz', niche = 'beauty', region = 'tashkent_city', approve: approved = true } = {}
 ) {
   await say(env, user, '/start');
   await press(env, user, `lang:${lang}`);
@@ -232,6 +243,7 @@ export async function registerBlogger(
   await press(env, user, `niche:${niche}`);
   await press(env, user, `rgn:${region}`);
   await shareContact(env, user, '+998935556677');
+  if (approved) await approve(env, user);
 }
 
 // Ro'yxatdan o'tgan biznes nomidan reklama e'loni yaratadi

@@ -36,7 +36,8 @@ function userOut(u) {
     profile: u.profile || null,
     followers: u.followers || null,
     niche: u.niche || null,
-    region: u.region || null
+    region: u.region || null,
+    moderation: u.moderation || null
   };
 }
 
@@ -219,6 +220,10 @@ export async function handleApi(request, ctx) {
       return json({ user: userOut(user), registered: isRegistered(user), meta: META });
     }
     if (!isRegistered(user)) throw new AppError('not_registered', 403);
+    // Moderatsiyadan o'tmagan profil ilovadan foydalana olmaydi
+    if (user.moderation !== 'approved') {
+      throw new AppError(user.moderation === 'rejected' ? 'moderation_rejected' : 'moderation_pending', 403);
+    }
 
     // Profildagi hududni mini ilovadan o'zgartirish
     if (method === 'PATCH' && path === '/api/me') {

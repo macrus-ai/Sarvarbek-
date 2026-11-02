@@ -36,26 +36,29 @@ test('/privacy va /id', async () => {
   assert.match(lastText(302), /<code>302<\/code>/);
 });
 
-test('admin yangi foydalanuvchi haqida bir marta xabar oladi', async () => {
+test('admin yangi foydalanuvchini moderatsiya kartasi bilan bir marta oladi', async () => {
   const business = tgUser(310, { username: 'aziz_shop' });
   await registerBusiness(env, business);
-  const notes = tg.sent(ADMIN).filter((c) => /Yangi biznes/.test(c.body.text));
+  const notes = tg.sent(ADMIN).filter((c) => /#Yangi_biznes/.test(c.body.text));
   assert.equal(notes.length, 1);
   assert.match(notes[0].body.text, /Tabiiy kosmetika/);
   assert.match(notes[0].body.text, /\+998 90 111 22 33/);
 
-  // Ma'lumotlarni yangilash yangi foydalanuvchi deb hisoblanmaydi
+  // Tasdiqlangan profilni yangilash yangi foydalanuvchi deb hisoblanmaydi: "#Profil_yangilandi" keladi
   await press(env, business, 'reg:restart');
   await press(env, business, 'role:business');
   await say(env, business, 'Aziz');
   await say(env, business, 'Yangi nom');
   await press(env, business, 'cat:beauty');
   await say(env, business, undefined, { contact: { phone_number: '998901112233', user_id: 310 } });
-  assert.equal(tg.sent(ADMIN).filter((c) => /Yangi biznes/.test(c.body.text)).length, 1);
+  assert.equal(tg.sent(ADMIN).filter((c) => /#Yangi_biznes/.test(c.body.text)).length, 1);
+  assert.match(lastText(ADMIN), /#Profil_yangilandi/);
+  assert.match(lastText(ADMIN), /Yangi nom/);
+  assert.equal((await api(env, business, '/api/me')).data.user.moderation, 'approved');
 
   const blogger = tgUser(311);
-  await registerBlogger(env, blogger);
-  assert.match(lastText(ADMIN), /Yangi bloger/);
+  await registerBlogger(env, blogger, { approve: false });
+  assert.match(lastText(ADMIN), /#Yangi_bloger/);
 });
 
 test('admin yangi kampaniyani ko‘radi va yopa oladi', async () => {

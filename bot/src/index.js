@@ -82,6 +82,7 @@ async function setup(request, ctx) {
     const T = tr(lang);
     const scope = lang === 'ru' ? { language_code: 'ru' } : {};
     await tg.call('setMyCommands', { commands: T.commands, ...scope });
+    await tg.call('setMyCommands', { commands: T.groupCommands, scope: { type: 'all_group_chats' }, ...scope });
     await tg.call('setMyDescription', { description: T.description, ...scope });
     await tg.call('setMyShortDescription', { short_description: T.shortDescription, ...scope });
   }

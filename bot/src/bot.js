@@ -3,10 +3,16 @@
 import {
   CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REGIONS, findFollowers, isCategory, isNiche, isPlatform, isRegion
 } from './constants.js';
-import { closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getStats, touchUser, updateUser } from './db.js';
+import {
+  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, listPendingUsers, setSetting,
+  touchUser, updateUser
+} from './db.js';
 import { catLabel, followersLabel, nicheLabel, regionLabel, tr } from './i18n.js';
-import { AppError, appUrl, decide, notifyAdmins } from './services.js';
-import { esc, guessLang, isAdmin, isRegistered, normalizePhone, now, privacyUrl } from './util.js';
+import {
+  AppError, MOD_CHAT_KEYS, canModerate, decide, homeKeyboard, isModerationChat, moderate, moderationEnabled,
+  pendingKeyboard, resubmitKeyboard, sendModerationCard
+} from './services.js';
+import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, now, privacyUrl } from './util.js';
 
 // Ro'yxatdan o'tish qadamlari
 const FLOW = {
@@ -47,13 +53,6 @@ const phoneKeyboard = (T) => ({
   keyboard: [[{ text: T.phoneButton, request_contact: true }]],
   resize_keyboard: true,
   one_time_keyboard: true
-});
-
-const homeKeyboard = (T, ctx) => ({
-  inline_keyboard: [
-    [{ text: T.openApp, web_app: { url: appUrl(ctx) } }],
-    [{ text: T.updateProfile, callback_data: 'reg:restart' }]
-  ]
 });
 
 /* ---------- Savollar ---------- */
@@ -131,19 +130,115 @@ async function advance(ctx, user, fields) {
   return proceed(ctx, await save(ctx, user, fields));
 }
 
+// Ro'yxatdan o'tish tugadi. Yangi profil jamoa tasdiqlaguncha moderatsiyada turadi.
 async function finish(ctx, user) {
   const T = tr(user.lang);
-  const text = user.role === 'business' ? T.doneBusiness(T.summaryBusiness(user)) : T.doneBlogger(T.summaryBlogger(user));
+  const summary = user.role === 'business' ? T.summaryBusiness(user) : T.summaryBlogger(user);
+  const doneText = user.role === 'business' ? T.doneBusiness(summary) : T.doneBlogger(summary);
+
+  // Tasdiqlangan foydalanuvchi ma'lumotlarini yangiladi: kirish saqlanadi, jamoa o'zgarishni ko'radi
+  if (user.moderation === 'approved') {
+    try {
+      await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx) });
+    } finally {
+      await sendModerationCard(ctx, user, 'updated');
+    }
+    return;
+  }
+
+  // Moderatorlar sozlanmagan bo'lsa, profil darhol faollashadi
+  if (!(await moderationEnabled(ctx))) {
+    await updateUser(ctx.db, user.tg_id, { moderation: 'approved' });
+    await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx) });
+    return;
+  }
+
+  const resubmitted = Boolean(user.moderation);
+  await updateUser(ctx.db, user.tg_id, { moderation: 'pending' });
   try {
-    await ctx.tg.send(user.tg_id, text, { reply_markup: homeKeyboard(T, ctx) });
+    await ctx.tg.send(user.tg_id, T.donePending(summary), { reply_markup: pendingKeyboard(T) });
   } finally {
-    if (user.firstRegistration) await notifyAdmins(ctx, (TA) => ({ text: TA.adminNewUser(user) }));
+    await sendModerationCard(ctx, { ...user, moderation: 'pending' }, resubmitted ? 'resubmitted' : 'new');
   }
 }
 
+// Bosh menyu: faqat tasdiqlangan profil ilovani ocha oladi
 function sendHome(ctx, user) {
   const T = tr(user.lang);
-  return ctx.tg.send(user.tg_id, T.home(user.name || user.first_name || ''), { reply_markup: homeKeyboard(T, ctx) });
+  const id = user.tg_id;
+  if (user.moderation === 'rejected') return ctx.tg.send(id, T.rejectedNotice, { reply_markup: resubmitKeyboard(T) });
+  if (user.moderation !== 'approved') return ctx.tg.send(id, T.pendingHome, { reply_markup: pendingKeyboard(T) });
+  return ctx.tg.send(id, T.home(user.name || user.first_name || ''), { reply_markup: homeKeyboard(T, ctx) });
+}
+
+/* ---------- Moderatsiya guruhi ---------- */
+
+// which: 'all' | 'blogger' | 'business'
+async function bindModerationChat(ctx, chatId, which) {
+  if (which !== 'business') await setSetting(ctx.db, MOD_CHAT_KEYS.blogger, chatId);
+  if (which !== 'blogger') await setSetting(ctx.db, MOD_CHAT_KEYS.business, chatId);
+}
+
+// Tasdiq kutayotgan profillar: eng eskilari, kartalari bilan
+async function sendPendingList(ctx, chatId, lang = 'uz') {
+  const T = tr(lang);
+  const { pending } = await getStats(ctx.db);
+  if (!pending) return ctx.tg.send(chatId, T.pendingNone);
+  await ctx.tg.send(chatId, T.pendingCount(pending));
+  for (const u of await listPendingUsers(ctx.db)) {
+    try {
+      await sendModerationCard(ctx, u, 'new', { chatId, lang });
+    } catch (e) {
+      console.warn('send pending card failed:', e.message);
+    }
+  }
+  return undefined;
+}
+
+// Guruhdagi xabarlar: botni qo'shish, /ulash, /moderatsiya, /stats. Boshqa xabarlarga javob berilmaydi.
+async function onGroupMessage(msg, ctx) {
+  const chatId = msg.chat.id;
+  const T = tr('uz');
+
+  // Guruh supergroupga aylansa, Telegram yangi ID beradi
+  if (msg.migrate_to_chat_id) {
+    for (const key of Object.values(MOD_CHAT_KEYS)) {
+      if (Number(await getSetting(ctx.db, key)) === chatId) await setSetting(ctx.db, key, msg.migrate_to_chat_id);
+    }
+    return undefined;
+  }
+
+  const admin = isAdmin(msg.from.id, ctx.env);
+  const botId = botIdOf(ctx.env.BOT_TOKEN);
+  const added =
+    msg.group_chat_created || msg.supergroup_chat_created || (msg.new_chat_members || []).some((m) => m.id === botId);
+  if (added) {
+    if (!admin) return undefined;
+    // Birinchi guruh avtomatik ulanadi; keyingilari uchun qanday ulash ko'rsatiladi
+    const bound = (await getSetting(ctx.db, MOD_CHAT_KEYS.blogger)) || (await getSetting(ctx.db, MOD_CHAT_KEYS.business));
+    if (bound) return ctx.tg.send(chatId, T.groupHelp);
+    await bindModerationChat(ctx, chatId, 'all');
+    return ctx.tg.send(chatId, T.groupBound('all'));
+  }
+
+  const text = typeof msg.text === 'string' ? msg.text.trim() : '';
+  if (!text.startsWith('/')) return undefined;
+  const [head, arg = ''] = text.slice(1).split(/\s+/);
+  const cmd = head.split('@')[0].toLowerCase();
+
+  if (cmd === 'ulash') {
+    if (!admin) return ctx.tg.send(chatId, T.groupNotAdmin);
+    const a = arg.toLowerCase();
+    const which = a.startsWith('blog') ? 'blogger' : a.startsWith('biz') || a.startsWith('brend') ? 'business' : 'all';
+    await bindModerationChat(ctx, chatId, which);
+    return ctx.tg.send(chatId, T.groupBound(which));
+  }
+  if (cmd === 'moderatsiya' || cmd === 'stats') {
+    if (!admin && !(await isModerationChat(ctx, chatId))) return undefined;
+    if (cmd === 'stats') return ctx.tg.send(chatId, T.stats(await getStats(ctx.db)));
+    return sendPendingList(ctx, chatId);
+  }
+  return undefined;
 }
 
 async function start(ctx, user, payload) {
@@ -166,7 +261,9 @@ async function beginAs(ctx, user, role, lang) {
 /* ---------- Matnli xabarlar ---------- */
 
 async function onMessage(msg, ctx) {
-  if (msg.chat?.type !== 'private' || !msg.from || msg.from.is_bot) return undefined;
+  if (!msg.from || msg.from.is_bot) return undefined;
+  if (msg.chat?.type === 'group' || msg.chat?.type === 'supergroup') return onGroupMessage(msg, ctx);
+  if (msg.chat?.type !== 'private') return undefined;
 
   const user = await touchUser(ctx.db, msg.from, guessLang(msg.from.language_code));
   const T = tr(user.lang);
@@ -180,6 +277,7 @@ async function onMessage(msg, ctx) {
     if (cmd === 'help') return ctx.tg.send(id, T.help);
     if (cmd === 'app') return isRegistered(user) ? sendHome(ctx, user) : ctx.tg.send(id, T.notRegistered);
     if (cmd === 'stats' && isAdmin(id, ctx.env)) return ctx.tg.send(id, T.stats(await getStats(ctx.db)));
+    if (cmd === 'moderatsiya' && isAdmin(id, ctx.env)) return sendPendingList(ctx, id, user.lang);
     if (cmd === 'id') return ctx.tg.send(id, T.myId(id));
     if (cmd === 'privacy') return ctx.tg.send(id, T.privacy(privacyUrl(ctx.env, user.lang)));
     if (cmd === 'delete') {
@@ -345,9 +443,33 @@ async function onCallback(cq, ctx) {
       }
       return undefined;
     }
+    case 'mod': {
+      // Profilni tasdiqlash, rad etish yoki bloklash: adminlar va moderatsiya guruhi a'zolari
+      const targetId = Number(extra);
+      if (!['a', 'r', 'b'].includes(value) || !Number.isSafeInteger(targetId)) return stale();
+      if (!(await canModerate(ctx, user.tg_id, chatId))) return ack(T.modNoRights, true);
+      const TM = cq.message.chat.type === 'private' ? T : tr('uz');
+      try {
+        await moderate(ctx, user.tg_id, targetId, value);
+      } catch (e) {
+        if (!(e instanceof AppError)) throw e;
+        return ack(e.code === 'already' ? TM.modAlready : TM.modGone, true);
+      }
+      await ack();
+      const who = user.name || user.first_name || '';
+      const line = value === 'a' ? TM.modApproved(who) : value === 'b' ? TM.modBlocked(who) : TM.modRejected(who);
+      // Qaror tugmalari olib tashlanadi, profil havolasi qoladi
+      const keep = (cq.message.reply_markup?.inline_keyboard || []).map((row) => row.filter((b) => b.url)).filter((row) => row.length);
+      try {
+        await ctx.tg.edit(chatId, messageId, `${esc(cq.message.text || '')}\n\n${line}`, { reply_markup: { inline_keyboard: keep } });
+      } catch {
+        /* xabar juda eski bo'lsa tahrirlab bo'lmaydi */
+      }
+      return undefined;
+    }
     case 'adm': {
-      // Moderatsiya: faqat ADMIN_IDS dagilar uchun
-      if (value !== 'close' || !isAdmin(user.tg_id, ctx.env)) return stale();
+      // E'lonni yopish: adminlar va moderatsiya guruhi a'zolari
+      if (value !== 'close' || !(await canModerate(ctx, user.tg_id, chatId))) return stale();
       const { changed, campaign } = await closeCampaignByAdmin(ctx.db, Number(extra));
       if (!campaign) return stale();
       if (!changed) return ack(T.adminAlreadyClosed, true);

@@ -133,8 +133,10 @@
       fitOnly: 'Faqat menga moslari',
       fitHint: 'Obunachilar talabi, hudud va bo‘sh o‘rin bo‘yicha',
       resetFilters: 'Filtrni tozalash',
-      regionAskTitle: 'Hududingizni tanlang',
-      regionAskText: 'Sizga yaqin reklama e’lonlarini ko‘rsatamiz.',
+      regionAskTitle: 'Auditoriyangiz qaysi hududda?',
+      regionAskText: 'Obunachilaringizning asosiy qismi qayerda bo‘lsa, shuni tanlang. Bizneslar o‘z hududidagi auditoriyaga ega blogerlarni qidiradi.',
+      audience: 'Auditoriya',
+      audienceRegion: 'Auditoriya hududi',
       regionSaved: 'Hudud saqlandi',
       campaignFilter: 'E’lon',
       allCampaigns: 'Barcha e’lonlar',
@@ -151,6 +153,12 @@
       notTelegramText: 'Bu Ovoza botining mini ilovasi. Uni botdagi “Ilovani ochish” tugmasi orqali oching.',
       unregisteredTitle: 'Avval ro‘yxatdan o‘ting',
       unregisteredText: 'Botga /start yozing va bir nechta savolga javob bering. Shundan keyin ilova to‘liq ishlaydi.',
+      pendingTitle: 'Profilingiz tekshirilmoqda',
+      pendingText: 'Jamoamiz profilingizni ko‘rib chiqmoqda. Tasdiqlangach botga xabar keladi va ilova ochiladi.',
+      rejectedTitle: 'Profilingiz tasdiqlanmadi',
+      rejectedText: 'Botda ma’lumotlaringizni yangilab, qayta yuborishingiz mumkin.',
+      err_moderation_pending: 'Profilingiz hali moderatsiyada.',
+      err_moderation_rejected: 'Profilingiz tasdiqlanmagan.',
       toBot: 'Botga qaytish',
       authErrorTitle: 'Kirib bo‘lmadi',
       authErrorText: 'Ilovani yopib, botdan qayta oching.',
@@ -303,8 +311,10 @@
       fitOnly: 'Только подходящие мне',
       fitHint: 'По подписчикам, региону и свободным местам',
       resetFilters: 'Сбросить фильтры',
-      regionAskTitle: 'Укажите ваш регион',
-      regionAskText: 'Покажем рекламные объявления рядом с вами.',
+      regionAskTitle: 'Где ваша аудитория?',
+      regionAskText: 'Выберите регион, где большая часть ваших подписчиков. Бизнес ищет блогеров с аудиторией в своём регионе.',
+      audience: 'Аудитория',
+      audienceRegion: 'Регион аудитории',
       regionSaved: 'Регион сохранён',
       campaignFilter: 'Объявление',
       allCampaigns: 'Все объявления',
@@ -321,6 +331,12 @@
       notTelegramText: 'Это мини-приложение бота Ovoza. Откройте его кнопкой «Открыть приложение» в боте.',
       unregisteredTitle: 'Сначала пройдите регистрацию',
       unregisteredText: 'Напишите боту /start и ответьте на несколько вопросов. После этого приложение заработает полностью.',
+      pendingTitle: 'Профиль на проверке',
+      pendingText: 'Наша команда проверяет ваш профиль. Когда его одобрят, бот пришлёт сообщение и приложение откроется.',
+      rejectedTitle: 'Профиль не одобрен',
+      rejectedText: 'Обновите данные в боте и отправьте профиль повторно.',
+      err_moderation_pending: 'Ваш профиль ещё на модерации.',
+      err_moderation_rejected: 'Ваш профиль не одобрен.',
       toBot: 'Вернуться в бот',
       authErrorTitle: 'Не удалось войти',
       authErrorText: 'Закройте приложение и откройте его снова из бота.',
@@ -802,7 +818,7 @@
         </select>`
       : '';
     const regionSelect = regions.length > 1 || r.region
-      ? `<select id="rq-region" class="control" aria-label="${esc(t('region'))}">
+      ? `<select id="rq-region" class="control" aria-label="${esc(t('audienceRegion'))}">
           <option value="">${esc(t('allRegions'))}</option>
           ${regions.map((id) => `<option value="${esc(id)}" ${r.region === id ? 'selected' : ''}>${esc(regionName(id))}</option>`).join('')}
         </select>`
@@ -849,7 +865,7 @@
       <div class="person"><span class="ava">${esc(initial(b.name))}</span>
         <div><strong>${esc(b.name)}</strong>${b.username ? `<span class="muted">@${esc(b.username)}</span>` : ''}</div>
       </div>
-      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(nicheName(b.niche))}</span>${b.region ? `<span>${icon('pin')}${esc(regionName(b.region))}</span>` : ''}</div>
+      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(nicheName(b.niche))}</span>${b.region ? `<span>${icon('pin')}${esc(t('audience'))}: ${esc(regionName(b.region))}</span>` : ''}</div>
       ${profile}
       ${r.message ? `<blockquote class="quote">${esc(r.message)}</blockquote>` : ''}
       ${actions}${contact}
@@ -999,7 +1015,7 @@
 
   function screen(kind) {
     const button =
-      kind === 'unregistered'
+      kind === 'unregistered' || kind === 'pending' || kind === 'rejected'
         ? `<button type="button" class="btn btn-primary" data-act="close-app">${esc(t('toBot'))}</button>`
         : kind === 'loadError'
           ? `<button type="button" class="btn btn-primary" data-act="retry">${esc(t('retry'))}</button>`
@@ -1575,6 +1591,11 @@
       document.documentElement.lang = state.lang;
       if (!me.registered) {
         screen('unregistered');
+        return;
+      }
+      // Profil moderatsiyadan o'tmaguncha ilova yopiq
+      if (me.user.moderation !== 'approved') {
+        screen(me.user.moderation === 'rejected' ? 'rejected' : 'pending');
         return;
       }
       state.role = me.user.role;
