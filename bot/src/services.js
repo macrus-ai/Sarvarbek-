@@ -2,8 +2,8 @@
 
 import { findFollowers } from './constants.js';
 import {
-  closeBusinessCampaigns, decideApplication, getApplicationFull, getCampaign, getSetting, getUser, insertApplication,
-  setApplicationNotify, setModeration
+  closeBusinessCampaigns, closeCampaignByAdmin, decideApplication, getApplicationFull, getCampaign, getSetting, getUser,
+  insertApplication, setApplicationNotify, setCampaignModeration, setModeration
 } from './db.js';
 import { tr } from './i18n.js';
 import { TelegramError } from './telegram.js';
@@ -54,6 +54,7 @@ export async function applyToCampaign(ctx, blogger, campaignId, message) {
 
   const c = await getCampaign(ctx.db, campaignId, blogger.tg_id);
   if (!c) throw new AppError('not_found', 404);
+  if (c.moderation !== 'approved') throw new AppError('not_found', 404);
   if (c.status !== 'active') throw new AppError('campaign_closed', 409);
   if (c.my_status) throw new AppError('already_applied', 409);
   if (c.accepted >= c.slots) throw new AppError('campaign_full', 409);
@@ -67,15 +68,31 @@ export async function applyToCampaign(ctx, blogger, campaignId, message) {
   return { id: row.id, status: 'pending' };
 }
 
+// Biznesga yangi so'rov: blogerning profili va statistikasi (skrinshot bo'lsa — rasm bilan).
+// Telegram profili va telefon raqami faqat qabul qilinganda ochiladi.
 async function notifyBusiness(ctx, appId) {
   const a = await getApplicationFull(ctx.db, appId);
   const T = tr(a.business_lang);
   try {
-    const msg = await ctx.tg.send(a.business_id, T.newApplication(a), { reply_markup: decisionKeyboard(T, a.id, ctx) });
+    const msg = await deliver(ctx, a.business_id, {
+      text: T.newApplication(a),
+      photo: a.stats_file_id || null,
+      extra: { reply_markup: decisionKeyboard(T, a.id, ctx) }
+    });
     await setApplicationNotify(ctx.db, a.id, a.business_id, msg.message_id);
   } catch (e) {
     // Biznes botni bloklagan bo'lishi mumkin: so'rov baribir ilovada ko'rinadi
     console.warn('notify business failed:', e.message);
+  }
+}
+
+// Xabar matnini yoki (rasmli xabarda) rasm ostidagi matnni almashtiradi
+export async function editMessage(ctx, chatId, messageId, text, extra = {}) {
+  try {
+    return await ctx.tg.edit(chatId, messageId, text, extra);
+  } catch (e) {
+    if (!(e instanceof TelegramError) || e.code !== 400) throw e;
+    return ctx.tg.editCaption(chatId, messageId, text, extra);
   }
 }
 
@@ -94,7 +111,7 @@ export async function decide(ctx, business, appId, decision) {
   if (a.notify_message_id) {
     const status = decision === 'accepted' ? TB.statusAccepted(a) : TB.statusRejected;
     try {
-      await ctx.tg.edit(a.notify_chat_id, a.notify_message_id, `${TB.newApplication(a)}\n\n${status}`, {
+      await editMessage(ctx, a.notify_chat_id, a.notify_message_id, `${TB.newApplication(a, true)}\n\n${status}`, {
         reply_markup: { inline_keyboard: [] }
       });
     } catch (e) {
@@ -153,8 +170,17 @@ export async function moderationEnabled(ctx) {
 }
 
 // Xabarni yuboradi. Profil havolasi tugmasini Telegram qabul qilmasa, tugmasiz qayta yuboradi.
+// Rasm (file_id) bo'lsa — rasm ostida matn bilan; rasmni yuborib bo'lmasa — oddiy matn.
 export async function deliver(ctx, chatId, { text, extra = {}, photo }) {
-  if (photo) return ctx.tg.photo(chatId, photo, text, extra);
+  if (photo) {
+    try {
+      return await ctx.tg.photo(chatId, photo, text, extra);
+    } catch (e) {
+      // Masalan, matn rasm osti uchun juda uzun (1024 belgi) yoki rasm topilmadi
+      if (!(e instanceof TelegramError) || e.code !== 400) throw e;
+      console.warn('send photo failed, sending text:', e.message);
+    }
+  }
   try {
     return await ctx.tg.send(chatId, text, extra);
   } catch (e) {
@@ -203,8 +229,10 @@ export function moderationKeyboard(T, u, mode) {
   return { inline_keyboard: rows };
 }
 
+// Bloger kartasi statistika skrinshoti bilan keladi (bo'lsa)
 const moderationMessage = (T, u, mode) => ({
   text: mode === 'updated' ? T.modUpdated(u) : T.modNew(u, mode === 'resubmitted'),
+  photo: u.role === 'blogger' ? u.stats_file_id || null : null,
   extra: { reply_markup: moderationKeyboard(T, u, mode) }
 });
 
@@ -236,4 +264,54 @@ export async function moderate(ctx, moderatorId, targetId, action) {
     console.warn('notify moderated user failed:', e.message);
   }
   return { target, status };
+}
+
+/* ---------- Reklama e'lonlari moderatsiyasi ---------- */
+
+// E'lon kartasining tugmalari: moderatsiyada — tasdiqlash/rad etish, tasdiqlangan — yopish
+export function adKeyboard(T, c) {
+  if (c.moderation === 'pending') {
+    return {
+      inline_keyboard: [[
+        { text: T.modApprove, callback_data: `cm:a:${c.id}` },
+        { text: T.modReject, callback_data: `cm:r:${c.id}` }
+      ]]
+    };
+  }
+  return { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${c.id}` }]] };
+}
+
+// Yangi e'lon kartasi e'lonlar guruhiga (kontakt — biznes egasining ismi)
+export function sendAdCard(ctx, c, contact, { chatId = null, lang = 'uz' } = {}) {
+  const build = (T) => ({
+    text: T.adminNewCampaign({ ...c, business_contact: contact }),
+    extra: { reply_markup: adKeyboard(T, c) }
+  });
+  if (chatId) return deliver(ctx, chatId, build(tr(lang)));
+  return notifyAdmins(ctx, build, 'ads');
+}
+
+// Moderator qarori: action 'a' — tasdiqlash (blogerlarga ko'rinadi), 'r' — rad etish
+export async function moderateCampaign(ctx, moderatorId, campaignId, action) {
+  const status = action === 'a' ? 'approved' : 'rejected';
+  const c = await getCampaign(ctx.db, campaignId, 0);
+  if (!c) throw new AppError('gone', 404);
+  if (!(await setCampaignModeration(ctx.db, campaignId, status, moderatorId))) throw new AppError('already', 409);
+  // Rad etilgan e'lon yopiladi: faol e'lonlar limitidan joy egallamasin
+  if (status === 'rejected') await closeCampaignByAdmin(ctx.db, campaignId);
+
+  const owner = await getUser(ctx.db, c.business_id);
+  const T = tr(owner?.lang);
+  try {
+    if (status === 'approved') {
+      await ctx.tg.send(c.business_id, T.toBusinessAdApproved(c.title), {
+        reply_markup: { inline_keyboard: [[{ text: T.openApp, web_app: { url: appUrl(ctx, 'campaigns') } }]] }
+      });
+    } else {
+      await ctx.tg.send(c.business_id, T.toBusinessAdRejected(c.title));
+    }
+  } catch (e) {
+    console.warn('notify business about ad failed:', e.message);
+  }
+  return { campaign: { ...c, moderation: status } };
 }

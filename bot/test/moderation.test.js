@@ -236,7 +236,10 @@ test('reklama e’lonlari alohida guruhga keladi, ulanmagan bo‘lsa — biznesl
   assert.equal(cards(BIZ, '#Yangi_elon').length, 1);
   const [ad] = cards(ADS, '#Yangi_elon');
   assert.match(ad.body.text, /Ikkinchi e’lon/);
-  assert.equal(ad.body.reply_markup.inline_keyboard[0][0].callback_data, `adm:close:${data.campaign.id}`);
+  assert.deepEqual(ad.body.reply_markup.inline_keyboard[0].map((b) => b.callback_data), [
+    `cm:a:${data.campaign.id}`,
+    `cm:r:${data.campaign.id}`
+  ]);
 
   // Profillar e'lonlar guruhiga kelmaydi
   await registerBusiness(env, tgUser(771), { approve: false });

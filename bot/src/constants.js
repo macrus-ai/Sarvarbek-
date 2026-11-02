@@ -60,6 +60,24 @@ export const ALL_REGIONS = 'all';
 
 export const PLATFORMS = ['Instagram', 'Telegram', 'TikTok', 'YouTube'];
 
+// Blogerning o'rtacha ko'rishlari (Instagram — storis, Telegram — post, TikTok/YouTube — video)
+export const REACH = [
+  { id: '0-500', min: 0, max: 500 },
+  { id: '500-1000', min: 500, max: 1000 },
+  { id: '1000-3000', min: 1000, max: 3000 },
+  { id: '3000-10000', min: 3000, max: 10000 },
+  { id: '10000-50000', min: 10000, max: 50000 },
+  { id: '50000+', min: 50000, max: null }
+];
+
+// Profil havolasi qaysi saytda bo'lishi kerak
+export const PLATFORM_HOSTS = {
+  Instagram: ['instagram.com', 'instagr.am'],
+  TikTok: ['tiktok.com'],
+  YouTube: ['youtube.com', 'youtu.be'],
+  Telegram: ['t.me', 'telegram.me']
+};
+
 // max: null — yuqori chegara yo'q
 export const FOLLOWERS = [
   { id: '1000-5000', min: 1000, max: 5000 },
@@ -96,3 +114,4 @@ export const isRegion = (id) => REGIONS.some((r) => r.id === id);
 export const isCampaignRegion = (id) => id === ALL_REGIONS || isRegion(id);
 export const isPlatform = (p) => PLATFORMS.includes(p);
 export const findFollowers = (id) => FOLLOWERS.find((f) => f.id === id) || null;
+export const findReach = (id) => REACH.find((r) => r.id === id) || null;

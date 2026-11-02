@@ -137,6 +137,19 @@
       regionAskText: 'Obunachilaringizning asosiy qismi qayerda bo‘lsa, shuni tanlang. Bizneslar o‘z hududidagi auditoriyaga ega blogerlarni qidiradi.',
       audience: 'Auditoriya',
       audienceRegion: 'Auditoriya hududi',
+      adPending: 'Moderatsiyada',
+      adRejected: 'Rad etilgan',
+      adPendingNote: 'E’lon moderatsiyada. Jamoamiz tasdiqlagach blogerlar uni ko‘radi va botga xabar keladi.',
+      adRejectedNote: 'E’lon tasdiqlanmadi. Shartlar va rasmni tekshirib, yangi e’lon joylashingiz mumkin.',
+      publishedPending: 'E’lon moderatsiyaga yuborildi. Tasdiqlangach blogerlar ko‘radi.',
+      reach: (what) => `O‘rtacha ko‘rishlar (${what})`,
+      reachWhat: { Instagram: 'storis', Telegram: 'post' },
+      reachVideo: 'video',
+      upTo: (n) => `${n} gacha`,
+      stats: 'Statistika',
+      contactHidden: 'Telegram va telefon raqami so‘rovni qabul qilgach ko‘rinadi.',
+      close: 'Yopish',
+      err_campaign_rejected: 'Rad etilgan e’lonni qayta ochib bo‘lmaydi. Yangisini joylang.',
       regionSaved: 'Hudud saqlandi',
       campaignFilter: 'E’lon',
       allCampaigns: 'Barcha e’lonlar',
@@ -315,6 +328,19 @@
       regionAskText: 'Выберите регион, где большая часть ваших подписчиков. Бизнес ищет блогеров с аудиторией в своём регионе.',
       audience: 'Аудитория',
       audienceRegion: 'Регион аудитории',
+      adPending: 'На модерации',
+      adRejected: 'Отклонено',
+      adPendingNote: 'Объявление на модерации. После одобрения блогеры увидят его, а бот пришлёт сообщение.',
+      adRejectedNote: 'Объявление не одобрено. Проверьте условия и фото и разместите новое.',
+      publishedPending: 'Объявление отправлено на модерацию. После одобрения его увидят блогеры.',
+      reach: (what) => `Средние просмотры (${what})`,
+      reachWhat: { Instagram: 'сторис', Telegram: 'пост' },
+      reachVideo: 'видео',
+      upTo: (n) => `до ${n}`,
+      stats: 'Статистика',
+      contactHidden: 'Telegram и телефон будут видны после того, как вы примете отклик.',
+      close: 'Закрыть',
+      err_campaign_rejected: 'Отклонённое объявление нельзя открыть снова. Разместите новое.',
       regionSaved: 'Регион сохранён',
       campaignFilter: 'Объявление',
       allCampaigns: 'Все объявления',
@@ -409,6 +435,23 @@
   // Bloger yo'nalishi; eski profillarda biznes toifasi bo'lishi mumkin
   const nicheName = (id) => state.meta?.niches?.find((n) => n.id === id)?.[state.lang] ?? catName(id);
   const initial = (name) => (String(name || '?').trim()[0] || '?').toUpperCase();
+
+  // E'lon holati egasi uchun: moderatsiyada / rad etilgan / faol / yopiq
+  function adStatusPill(c) {
+    if (c.moderation === 'pending') return `<span class="pill pill-pending">${esc(t('adPending'))}</span>`;
+    if (c.moderation === 'rejected') return `<span class="pill pill-rejected">${esc(t('adRejected'))}</span>`;
+    return `<span class="pill pill-${c.status}">${esc(t(c.status))}</span>`;
+  }
+
+  // O'rtacha ko'rishlar: "500 gacha", "1 000 – 3 000", "50 000+"
+  function reachText(id) {
+    const m = /^(\d+)(?:-(\d+)|\+)$/.exec(String(id || ''));
+    if (!m) return '';
+    const min = Number(m[1]);
+    const max = m[2] ? Number(m[2]) : null;
+    if (!min && max) return t('upTo', fmt(max));
+    return max ? `${fmt(min)} – ${fmt(max)}` : `${fmt(min)}+`;
+  }
 
   function followersLabel(id) {
     const f = state.meta?.followers.find((x) => x.id === id);
@@ -785,7 +828,7 @@
     return head + list.map((c) => `
       <a class="card card-link" href="?c=${c.id}" data-act="open" data-id="${c.id}">
         ${cardImage(c)}
-        <div class="row"><span class="tag">${esc(catName(c.category))}</span><span class="pill pill-${c.status}">${esc(t(c.status))}</span></div>
+        <div class="row"><span class="tag">${esc(catName(c.category))}</span>${adStatusPill(c)}</div>
         <h3>${esc(c.title)}</h3>
         <div class="row"><span class="value">${money(c.value)}</span><span class="muted">${esc(t('acceptedOf', c.accepted, c.slots))}</span></div>
         ${c.pending ? `<span class="pending-note">${esc(t('pendingN', c.pending))}</span>` : ''}
@@ -856,7 +899,19 @@
             <button type="button" class="btn btn-quiet" data-act="decide" data-id="${r.id}" data-decision="reject">${esc(t('reject'))}</button>
           </div>`
         : '';
-    const contact = r.status === 'accepted' ? contactHTML(t('contactBlogger'), { phone: b.phone, username: b.username }) : '';
+    const contact =
+      r.status === 'accepted'
+        ? contactHTML(t('contactBlogger'), { phone: b.phone, username: b.username })
+        : r.status === 'pending'
+          ? `<p class="muted small">🔒 ${esc(t('contactHidden'))}</p>`
+          : '';
+    const reachWhat = t('reachWhat')[b.platform] || t('reachVideo');
+    const reach = b.reach ? `<span>${esc(t('reach', reachWhat))}: ${esc(reachText(b.reach))}</span>` : '';
+    const stats = b.statsImage
+      ? `<button type="button" class="stats-thumb" data-act="lightbox" data-src="${esc(b.statsImage)}" aria-label="${esc(t('stats'))}">
+          <img src="${esc(b.statsImage)}" alt="" loading="lazy" decoding="async"><span>${icon('image')}${esc(t('stats'))}</span>
+        </button>`
+      : '';
     const profile = b.profileUrl
       ? `<button type="button" class="link-btn" data-act="link" data-url="${esc(b.profileUrl)}">${icon('link')}<span>${esc(t('openProfile'))}</span></button>`
       : `<span class="muted">${esc(b.profile)}</span>`;
@@ -865,8 +920,9 @@
       <div class="person"><span class="ava">${esc(initial(b.name))}</span>
         <div><strong>${esc(b.name)}</strong>${b.username ? `<span class="muted">@${esc(b.username)}</span>` : ''}</div>
       </div>
-      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span><span>${esc(nicheName(b.niche))}</span>${b.region ? `<span>${icon('pin')}${esc(t('audience'))}: ${esc(regionName(b.region))}</span>` : ''}</div>
+      <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span>${reach}<span>${esc(nicheName(b.niche))}</span>${b.region ? `<span>${icon('pin')}${esc(t('audience'))}: ${esc(regionName(b.region))}</span>` : ''}</div>
       ${profile}
+      ${stats}
       ${r.message ? `<blockquote class="quote">${esc(r.message)}</blockquote>` : ''}
       ${actions}${contact}
       <span class="muted small">${date(r.createdAt)}</span>
@@ -887,7 +943,7 @@
       [t('platforms'), c.platforms.join(', ')]
     ];
     let top = `<span class="slots">${esc(t('slotsLeft', c.left))}</span>`;
-    if (c.own) top = `<span class="pill pill-${c.status}">${esc(t(c.status))}</span>`;
+    if (c.own) top = adStatusPill(c);
     else if (c.myStatus) top = statusPill(c.myStatus);
     else if (c.left <= 0) top = `<span class="pill pill-muted">${esc(t('full'))}</span>`;
 
@@ -899,9 +955,11 @@
         </div>`
       : '';
     const status = c.myStatus ? `<div class="notice"><span>${esc(t('yourStatus'))}:</span>${statusPill(c.myStatus)}</div>` : '';
-    const ownStats = c.own
+    let ownStats = c.own
       ? `<div class="notice"><span>${esc(t('acceptedOf', c.accepted, c.slots))}</span>${c.pending ? `<span class="pending-note">${esc(t('pendingN', c.pending))}</span>` : ''}</div>`
       : '';
+    if (c.own && c.moderation === 'pending') ownStats = `<div class="notice notice-warn">${esc(t('adPendingNote'))}</div>`;
+    if (c.own && c.moderation === 'rejected') ownStats = `<div class="notice notice-danger">${esc(t('adRejectedNote'))}</div>`;
 
     let image = '';
     if (c.own) image = c.image ? imageEditorHTML('detail', c.image.url, c.title) : imagePickerHTML('detail');
@@ -926,10 +984,12 @@
     const c = state.detail;
     if (!c) return '';
     if (c.own) {
-      const toggle =
+      // Rad etilgan e'lonni qayta ochib bo'lmaydi
+      let toggle =
         c.status === 'active'
           ? `<button type="button" class="btn btn-quiet" data-act="campaign-status" data-status="closed">${esc(t('closeCampaign'))}</button>`
           : `<button type="button" class="btn btn-secondary" data-act="campaign-status" data-status="active">${esc(t('reopenCampaign'))}</button>`;
+      if (c.moderation === 'rejected' && c.status !== 'active') toggle = '';
       return `${toggle}<button type="button" class="btn btn-primary" data-act="campaign-requests">${esc(t('viewRequests'))}</button>`;
     }
     if (state.role !== 'blogger') return '';
@@ -1245,7 +1305,8 @@
         URL.revokeObjectURL(f.image.url);
       }
       haptic(imageFailed ? 'warning' : 'success');
-      toast(imageFailed ? t('imageAfterFail') : t('published'));
+      const pendingReview = created.campaign.moderation === 'pending';
+      toast(imageFailed ? t('imageAfterFail') : pendingReview ? t('publishedPending') : t('published'));
       state.form = null;
       state.view = null;
       state.tab = 'campaigns';
@@ -1410,6 +1471,22 @@
     }
   }
 
+  /* ---------- Rasmni katta ko'rish ---------- */
+  function openLightbox(src) {
+    closeLightbox();
+    const box = document.createElement('div');
+    box.className = 'lightbox';
+    box.dataset.act = 'lightbox-close';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-label', t('stats'));
+    box.innerHTML = `<img src="${esc(src)}" alt=""><button type="button" class="lightbox-close" data-act="lightbox-close" aria-label="${esc(t('close'))}">✕</button>`;
+    root.appendChild(box);
+  }
+
+  function closeLightbox() {
+    root.querySelector('.lightbox')?.remove();
+  }
+
   /* ---------- Hodisalar ---------- */
   let searchTimer;
 
@@ -1483,6 +1560,12 @@
         break;
       case 'image-remove':
         removeImage(el.dataset.target, el);
+        break;
+      case 'lightbox':
+        openLightbox(el.dataset.src);
+        break;
+      case 'lightbox-close':
+        closeLightbox();
         break;
       case 'link':
         openLink(el.dataset.url);

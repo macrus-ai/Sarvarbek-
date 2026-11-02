@@ -48,6 +48,10 @@ export function fakeTelegram() {
   let nextMessageId = 1000;
   const original = globalThis.fetch;
   let nextFile = 1;
+  // Haqiqiy Telegram kabi: rasmli xabarning matnini editMessageText bilan o'zgartirib bo'lmaydi
+  const photoMessages = new Set();
+  const badRequest = (description) =>
+    new Response(JSON.stringify({ ok: false, error_code: 400, description }), { status: 400 });
   globalThis.fetch = async (input, init = {}) => {
     const url = String(input);
     if (!url.startsWith('https://api.telegram.org/')) return original(input, init);
@@ -74,6 +78,12 @@ export function fakeTelegram() {
       body = JSON.parse(init.body || '{}');
     }
     calls.push({ method, body });
+    if (method === 'editMessageText' && photoMessages.has(body.message_id)) {
+      return badRequest('Bad Request: there is no text in the message to edit');
+    }
+    if (method === 'editMessageCaption' && !photoMessages.has(body.message_id)) {
+      return badRequest('Bad Request: there is no caption in the message to edit');
+    }
     if (failing.has(method)) {
       return new Response(JSON.stringify({ ok: false, error_code: 400, description: 'Bad Request: query is too old' }), { status: 400 });
     }
@@ -82,6 +92,7 @@ export function fakeTelegram() {
     if (method === 'sendPhoto') {
       // Yangi fayl yuklansa Telegram yangi file_id'lar beradi, file_id yuborilsa o'shani qaytaradi
       const id = typeof body.photo === 'string' ? body.photo.replace(/-[sml]$/, '') : `photo${nextFile++}`;
+      photoMessages.add(nextMessageId);
       result = {
         message_id: nextMessageId++,
         chat: { id: Number(body.chat_id) },
@@ -168,6 +179,15 @@ export const press = (env, from, data, text = 'savol') =>
     }
   });
 
+// Foydalanuvchi botga rasm yuboradi (Telegram file_id bilan)
+export const sendPhoto = (env, from, fileId) =>
+  say(env, from, undefined, {
+    photo: [
+      { file_id: `${fileId}-small`, width: 90, height: 160 },
+      { file_id: fileId, width: 720, height: 1280 }
+    ]
+  });
+
 export const shareContact = (env, from, phone) =>
   say(env, from, undefined, { contact: { phone_number: phone, user_id: from.id, first_name: from.first_name } });
 
@@ -231,7 +251,15 @@ export async function registerBusiness(
 export async function registerBlogger(
   env,
   user,
-  { followers = '10000-50000', lang = 'uz', niche = 'beauty', region = 'tashkent_city', approve: approved = true } = {}
+  {
+    followers = '10000-50000',
+    lang = 'uz',
+    niche = 'beauty',
+    region = 'tashkent_city',
+    reach = '1000-3000',
+    stats = false, // true — statistika skrinshotini yuboradi
+    approve: approved = true
+  } = {}
 ) {
   await say(env, user, '/start');
   await press(env, user, `lang:${lang}`);
@@ -240,14 +268,18 @@ export async function registerBlogger(
   await press(env, user, 'plat:Instagram');
   await say(env, user, '@dilnoza.blog');
   await press(env, user, `fol:${followers}`);
+  await press(env, user, `rch:${reach}`);
+  if (stats) await sendPhoto(env, user, `stats-${user.id}`);
+  else await press(env, user, 'stats:skip');
   await press(env, user, `niche:${niche}`);
   await press(env, user, `rgn:${region}`);
   await shareContact(env, user, '+998935556677');
   if (approved) await approve(env, user);
 }
 
-// Ro'yxatdan o'tgan biznes nomidan reklama e'loni yaratadi
-export async function createCampaign(env, business, overrides = {}) {
+// Ro'yxatdan o'tgan biznes nomidan reklama e'loni yaratadi.
+// Jamoa bo'lsa e'lon moderatsiyaga tushadi; approve: true (standart) — admin darhol tasdiqlaydi.
+export async function createCampaign(env, business, { approve: approved = true, ...overrides } = {}) {
   const res = await api(env, business, '/api/campaigns', {
     method: 'POST',
     body: {
@@ -264,5 +296,11 @@ export async function createCampaign(env, business, overrides = {}) {
       ...overrides
     }
   });
+  const campaign = res.data?.campaign;
+  if (approved && campaign?.moderation === 'pending') {
+    const admin = Number(String(env.ADMIN_IDS || '').split(/[\s,]+/)[0]);
+    await press(env, tgUser(admin), `cm:a:${campaign.id}`, '#Yangi_elon');
+    campaign.moderation = 'approved';
+  }
   return res;
 }

@@ -89,10 +89,19 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   await press(env, user, 'role:blogger');
   await say(env, user, 'Мадина');
   await press(env, user, 'plat:TikTok');
+  assert.match(lastText(20), /ссылку на ваш профиль в TikTok/);
   await say(env, user, 'madina blog');
-  assert.match(lastText(20), /ссылку или @username/);
+  assert.match(lastText(20), /Это не похоже на ссылку TikTok/);
+  await say(env, user, 'https://instagram.com/madina'); // boshqa platforma
+  assert.match(lastText(20), /Это не похоже на ссылку TikTok/);
   await say(env, user, '@madina');
   await press(env, user, 'fol:5000-10000');
+  assert.match(lastText(20), /просмотров набирают ваши видео/);
+  await press(env, user, 'rch:3000-10000');
+  assert.match(lastText(20), /скриншот статистики/);
+  await say(env, user, 'нет скриншота');
+  assert.match(lastText(20), /отправьте скриншот как фото/);
+  await press(env, user, 'stats:skip');
   await press(env, user, 'cat:food');
   assert.match(lastText(20), /В каком регионе ваша аудитория/);
   await say(env, user, 'Самарканд'); // matn emas, tugma kerak
@@ -119,8 +128,14 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   await press(env, user, 'role:blogger');
   await say(env, user, 'Jasur');
   await press(env, user, 'plat:YouTube');
-  await say(env, user, '@jasur_travel');
+  assert.match(lastText(21), /YouTube kanalingiz havolasini yuboring/);
+  await say(env, user, 'https://www.youtube.com/@jasur_travel?si=abc');
   await press(env, user, 'fol:10000-50000');
+  const reach = tg.last('sendMessage').body;
+  assert.match(reach.text, /Videolaringiz o‘rtacha nechta ko‘rish/);
+  assert.deepEqual(reach.reply_markup.inline_keyboard.flat().map((b) => b.text)[0], '500 gacha');
+  await press(env, user, 'rch:1000-3000');
+  await press(env, user, 'stats:skip');
 
   const buttons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
   assert.equal(buttons.length, 21);

@@ -5,7 +5,7 @@ import { now } from './util.js';
 const USER_FIELDS = [
   'first_name', 'username', 'lang', 'role', 'reg_step', 'name', 'phone', 'company',
   'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at',
-  'moderation', 'moderated_by', 'moderated_at'
+  'moderation', 'moderated_by', 'moderated_at', 'reach', 'stats_file_id', 'stats_key'
 ];
 
 /* ---------- Foydalanuvchilar ---------- */
@@ -56,6 +56,26 @@ export async function setModeration(db, id, status, moderatorId) {
   return res.meta.changes > 0;
 }
 
+// E'lon bo'yicha qaror (holat haqiqatan o'zgarsagina)
+export async function setCampaignModeration(db, id, status, moderatorId) {
+  const res = await db
+    .prepare(
+      `UPDATE campaigns SET moderation = ?1, moderated_by = ?2, moderated_at = ?3, updated_at = ?3
+       WHERE id = ?4 AND (moderation IS NULL OR moderation != ?1)`
+    )
+    .bind(status, moderatorId ?? null, now(), id)
+    .run();
+  return res.meta.changes > 0;
+}
+
+export async function listPendingCampaigns(db, limit = 15) {
+  const { results } = await db
+    .prepare(`${CAMPAIGN_SELECT} WHERE c.moderation = 'pending' AND c.status = 'active' ORDER BY c.created_at, c.id LIMIT ?2`)
+    .bind(0, limit)
+    .all();
+  return results;
+}
+
 export async function listPendingUsers(db, limit = 15) {
   const { results } = await db
     .prepare(
@@ -102,7 +122,7 @@ const CAMPAIGN_ORDER = {
 
 // region: shu hudud uchun e'lonlar va butun O'zbekiston uchun e'lonlar ('all')
 export async function listActiveCampaigns(db, { viewerId, category, platform, region, sort = 'new' }) {
-  const where = ["c.status = 'active'"];
+  const where = ["c.status = 'active'", "c.moderation = 'approved'"];
   const args = [viewerId];
   if (category) {
     args.push(category);
@@ -149,13 +169,14 @@ export async function createCampaign(db, businessId, c) {
     .prepare(
       `INSERT INTO campaigns
          (business_id, title, category, value, platforms, format, min_followers, days, slots, city, description,
-          region, status, created_at, updated_at)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, 'active', ?13, ?13)
+          region, moderation, status, created_at, updated_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, 'active', ?14, ?14)
        RETURNING id`
     )
     .bind(
       businessId, c.title, c.category, c.value, c.platforms.join(','), c.format,
-      c.minFollowers, c.days, c.slots, c.city || null, c.description || null, c.region || 'all', ts
+      c.minFollowers, c.days, c.slots, c.city || null, c.description || null, c.region || 'all',
+      c.moderation || 'pending', ts
     )
     .first();
   return row.id;
@@ -197,7 +218,7 @@ export function getApplicationFull(db, id) {
       `SELECT a.*, c.title, c.business_id, c.slots, c.format, c.status AS campaign_status,
          b.name AS business_contact, b.company, b.phone AS business_phone, b.username AS business_username, b.lang AS business_lang,
          g.name AS blogger_name, g.phone AS blogger_phone, g.username AS blogger_username, g.lang AS blogger_lang,
-         g.platform, g.profile, g.followers, g.niche, g.region
+         g.platform, g.profile, g.followers, g.niche, g.region, g.reach, g.stats_file_id
        FROM applications a
        JOIN campaigns c ON c.id = a.campaign_id
        JOIN users b ON b.tg_id = c.business_id
@@ -270,7 +291,9 @@ export async function listBusinessRequests(db, businessId) {
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at,
          c.id AS campaign_id, c.title,
-         g.tg_id AS blogger_id, g.name, g.username, g.platform, g.profile, g.followers, g.niche, g.region,
+         g.tg_id AS blogger_id, g.name, g.platform, g.profile, g.followers, g.niche, g.region, g.reach,
+         CASE WHEN g.stats_file_id IS NOT NULL THEN g.stats_key END AS stats_key,
+         CASE WHEN a.status = 'accepted' THEN g.username END AS username,
          CASE WHEN a.status = 'accepted' THEN g.phone END AS phone
        FROM applications a
        JOIN campaigns c ON c.id = a.campaign_id
@@ -293,7 +316,8 @@ export function getStats(db) {
          (SELECT COUNT(*) FROM campaigns WHERE status = 'active') AS active,
          (SELECT COUNT(*) FROM applications) AS applications,
          (SELECT COUNT(*) FROM applications WHERE status = 'accepted') AS accepted,
-         (SELECT COUNT(*) FROM users WHERE moderation = 'pending' AND reg_step = 'done') AS pending`
+         (SELECT COUNT(*) FROM users WHERE moderation = 'pending' AND reg_step = 'done') AS pending,
+         (SELECT COUNT(*) FROM campaigns WHERE moderation = 'pending' AND status = 'active') AS pending_ads`
     )
     .first();
 }

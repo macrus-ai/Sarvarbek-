@@ -1,7 +1,7 @@
 // Bot matnlari (o'zbekcha va ruscha)
 
-import { ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findFollowers } from './constants.js';
-import { esc, fmtNum, formatPhone } from './util.js';
+import { ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findFollowers, findReach } from './constants.js';
+import { esc, fmtNum, formatPhone, profileDisplay, profileUrl } from './util.js';
 
 export const catLabel = (id, lang) => CATEGORIES.find((c) => c.id === id)?.[lang === 'ru' ? 'ru' : 'uz'] ?? id ?? '';
 // Bloger yo'nalishi. Eski profillarda biznes toifasi (masalan, "services") bo'lishi mumkin.
@@ -28,9 +28,41 @@ export function followersLabel(id) {
   return f.max ? `${fmtNum(f.min)} – ${fmtNum(f.max)}` : `${fmtNum(f.min)}+`;
 }
 
+// O'rtacha ko'rishlar: "500 – 1 000", "500 gacha", "50 000+"
+export function reachLabel(id, lang) {
+  const r = findReach(id);
+  if (!r) return '';
+  if (!r.min) return lang === 'ru' ? `до ${fmtNum(r.max)}` : `${fmtNum(r.max)} gacha`;
+  return r.max ? `${fmtNum(r.min)} – ${fmtNum(r.max)}` : `${fmtNum(r.min)}+`;
+}
+
+// Ko'rishlar nimaniki: Instagram — storis, Telegram — post, TikTok va YouTube — video
+const reachWhat = (platform, lang) =>
+  ({ Instagram: lang === 'ru' ? 'сторис' : 'storis', Telegram: lang === 'ru' ? 'пост' : 'post' })[platform] ||
+  (lang === 'ru' ? 'видео' : 'video');
+
+const reachLine = (u, lang) =>
+  u.reach ? `👁 ${lang === 'ru' ? 'Просмотры' : 'Ko‘rishlar'} (${reachWhat(u.platform, lang)}): ${reachLabel(u.reach, lang)}` : '';
+
+const PLATFORM_ICON = { Instagram: '📸', TikTok: '🎵', YouTube: '▶️', Telegram: '✈️' };
+
+// "📸 Instagram: instagram.com/user" — havolani bosib profilni ochish mumkin
+const profileLine = (platform, profile) => {
+  const url = profileUrl(platform, profile);
+  const shown = url ? `<a href="${esc(url)}">${esc(profileDisplay(url))}</a>` : esc(profile);
+  return `${PLATFORM_ICON[platform] || '🔗'} ${esc(platform)}: ${shown}`;
+};
+
 // Xabardagi foydalanuvchi nomi: Telegramdagi profiliga havola bilan
 const mention = (id, name) => `<a href="tg://user?id=${Number(id)}">${esc(name)}</a>`;
 const at = (username) => (username ? ` (@${esc(username)})` : '');
+
+const EXAMPLE = {
+  Instagram: 'https://instagram.com/username',
+  TikTok: 'https://www.tiktok.com/@username',
+  YouTube: 'https://youtube.com/@kanal',
+  Telegram: 'https://t.me/kanal'
+};
 
 // Moderatsiya kartasidagi profil qatorlari (guruhda ko'rinadi)
 function profileLines(u, lang) {
@@ -41,13 +73,18 @@ function profileLines(u, lang) {
   if (u.role === 'business') {
     return [`🏪 <b>${esc(u.company)}</b> · ${esc(catLabel(u.category, lang))}`, person, phone, language];
   }
+  const stats = u.stats_file_id
+    ? (ru ? '📊 Скриншот статистики — на фото' : '📊 Statistika skrinshoti — rasmda')
+    : (ru ? '📊 Скриншот статистики не отправлен' : '📊 Statistika skrinshoti yuborilmagan');
   return [
     person,
     phone,
-    `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} ${ru ? 'подписчиков' : 'obunachi'}`,
-    `🔗 ${esc(u.profile)}`,
+    profileLine(u.platform, u.profile),
+    `👥 ${followersLabel(u.followers)} ${ru ? 'подписчиков' : 'obunachi'}`,
+    reachLine(u, lang),
     `🏷 ${esc(nicheLabel(u.niche, lang))}`,
     audienceLine(u.region, lang),
+    stats,
     language
   ].filter(Boolean);
 }
@@ -64,7 +101,25 @@ const uz = {
   askCompany: 'Do‘kon yoki kompaniyangiz nomini yozing:',
   askCategory: 'Mahsulot yoki xizmatingiz qaysi toifaga kiradi?',
   askPlatform: 'Asosiy ijtimoiy tarmog‘ingizni tanlang:',
-  askProfile: 'Profilingiz havolasini yoki @username ni yozing:',
+  askProfile: (platform) =>
+    `${PLATFORM_ICON[platform] || '🔗'} ${esc(platform)} ${platform === 'Instagram' || platform === 'TikTok' ? 'profilingiz' : 'kanalingiz'} havolasini yuboring.\n\nMasalan: ${EXAMPLE[platform] || 'https://…'}`,
+  askReach: (platform) =>
+    `👁 ${{ Instagram: 'Storislaringiz', Telegram: 'Postlaringiz' }[platform] || 'Videolaringiz'} o‘rtacha nechta ko‘rish to‘playdi?`,
+  askStats: (platform) =>
+    [
+      '📊 Statistika skrinshotini rasm qilib yuboring.',
+      '',
+      {
+        Instagram: 'Instagram: Professional panel → Statistika → Auditoriya (shaharlar, yosh, jins).',
+        TikTok: 'TikTok: Analitika → Obunachilar (shaharlar, yosh, jins).',
+        YouTube: 'YouTube Studio → Analitika → Auditoriya.',
+        Telegram: 'Telegram: kanal → Statistika (obunachilar va ko‘rishlar).'
+      }[platform] || '',
+      '',
+      'Bizneslar shu rasm orqali auditoriyangizni ko‘radi.'
+    ].join('\n'),
+  statsSkip: 'O‘tkazib yuborish',
+  errStats: 'Iltimos, skrinshotni rasm (foto) sifatida yuboring yoki “O‘tkazib yuborish” tugmasini bosing.',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
   askRegion:
@@ -75,7 +130,8 @@ const uz = {
   phoneSaved: '✓ Raqam saqlandi.',
   errName: 'Ism 2–60 belgidan iborat bo‘lsin. Qaytadan yozing:',
   errCompany: 'Nom 2–80 belgidan iborat bo‘lsin. Qaytadan yozing:',
-  errProfile: 'Havola yoki @username ni to‘g‘ri yozing (3–200 belgi):',
+  errProfile: (platform) =>
+    `Bu ${esc(platform)} havolasiga o‘xshamaydi. Havolani yoki @username ni yuboring.\n\nMasalan: ${EXAMPLE[platform] || 'https://…'}`,
   errPhone: 'Raqamni pastdagi tugma orqali yuboring yoki +998 90 123 45 67 ko‘rinishida yozing.',
   errContactNotOwn: 'Iltimos, o‘zingizning raqamingizni yuboring.',
   useButtons: 'Iltimos, yuqoridagi tugmalardan birini tanlang.',
@@ -138,8 +194,9 @@ const uz = {
   modAlready: 'Bu profil bo‘yicha qaror allaqachon qabul qilingan.',
   modGone: 'Foydalanuvchi topilmadi: profil o‘chirilgan bo‘lishi mumkin.',
   modNoRights: 'Bu tugma faqat moderatorlar uchun.',
-  pendingNone: 'Moderatsiyada profil yo‘q.',
+  pendingNone: 'Moderatsiyada profil yoki e’lon yo‘q.',
   pendingCount: (n) => `⏳ Moderatsiyada: ${n} ta profil. Eng eskilari:`,
+  pendingAdsCount: (n) => `⏳ Moderatsiyada: ${n} ta reklama e’loni. Eng eskilari:`,
   groupBound: (which) =>
     [
       {
@@ -164,32 +221,51 @@ const uz = {
       `💰 ${fmtNum(c.value)} so‘m · ${esc(String(c.platforms).split(',').join(', '))}`,
       `📝 ${esc(c.format)} · ${c.slots} o‘rin · ${c.days} kun`,
       regionLine(c.region, 'uz'),
-      c.description ? `\n${esc(c.description)}` : ''
-    ].join('\n').trim(),
+      c.description ? `\n${esc(c.description)}` : '',
+      c.moderation === 'pending' ? '\n⏳ Moderatsiyada: tasdiqlangach blogerlarga ko‘rinadi.' : ''
+    ].filter(Boolean).join('\n').trim(),
   adminNewImage: (c) =>
-    `#Elon_rasmi\n🖼 <b>Reklama e’loniga rasm qo‘shildi</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+    `#Elon_rasmi\n🖼 <b>Reklama e’loniga rasm qo‘shildi</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})${c.moderation === 'pending' ? '\n\n⏳ Moderatsiyada: tasdiqlangach blogerlarga ko‘rinadi.' : ''}`,
+  adApproved: (name) => `✅ <b>E’lon tasdiqlandi</b> · ${esc(name)}`,
+  adRejected: (name) => `❌ <b>E’lon rad etildi</b> · ${esc(name)}`,
+  toBusinessAdPending: (title) =>
+    `⏳ «${esc(title)}» reklama e’loningiz moderatsiyaga yuborildi. Jamoamiz tasdiqlagach blogerlar uni ilovada ko‘radi.`,
+  toBusinessAdApproved: (title) => `✅ «${esc(title)}» reklama e’loningiz tasdiqlandi. Endi blogerlar uni ilovada ko‘radi.`,
+  toBusinessAdRejected: (title) =>
+    `«${esc(title)}» reklama e’loningiz tasdiqlanmadi. Shartlar va rasmni tekshirib, yangi e’lon joylashingiz mumkin.`,
   imageSaved: (title) => `🖼 «${esc(title)}» reklama e’loniga rasm qo‘shildi. Blogerlar uni ilovada ko‘radi.`,
   adminClose: '🚫 E’lonni yopish',
   adminClosed: '🚫 <b>Siz yopdingiz.</b>',
   adminAlreadyClosed: 'E’lon allaqachon yopilgan.',
   toBusinessClosed: (title) =>
     `«${esc(title)}» reklama e’loningiz moderator tomonidan yopildi. Savollar bo‘lsa, shu botga yozing.`,
-  newApplication: (a) =>
+  // Telegram profili va telefon raqami faqat qabul qilingach ko'rsatiladi (statusAccepted)
+  newApplication: (a, decided = false) =>
     [
       '🆕 <b>Yangi so‘rov</b>',
       `Reklama e’loni: «${esc(a.title)}»`,
       '',
-      `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
-      `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} obunachi`,
-      `🔗 ${esc(a.profile)}`,
-      `🏷 ${esc(nicheLabel(a.niche, 'uz'))}`,
-      ...(a.region ? [audienceLine(a.region, 'uz')] : []),
-      a.message ? `\n💬 ${esc(a.message)}` : ''
+      ...[
+        `👤 ${esc(a.blogger_name)}`,
+        profileLine(a.platform, a.profile),
+        `👥 ${followersLabel(a.followers)} obunachi`,
+        reachLine(a, 'uz'),
+        `🏷 ${esc(nicheLabel(a.niche, 'uz'))}`,
+        audienceLine(a.region, 'uz'),
+        a.stats_file_id ? '📊 Statistika skrinshoti — rasmda' : ''
+      ].filter(Boolean),
+      a.message ? `\n💬 ${esc(a.message)}` : '',
+      decided ? '' : '\n🔒 Blogerning Telegrami va telefon raqami so‘rovni qabul qilganingizdan keyin ko‘rinadi.'
     ].join('\n').trim(),
   accept: '✅ Qabul qilish',
   reject: '❌ Rad etish',
   openRequests: '📋 Barcha so‘rovlar',
-  statusAccepted: (a) => `✅ <b>Qabul qilindi.</b> Blogerning telefoni: ${esc(formatPhone(a.blogger_phone))}`,
+  statusAccepted: (a) =>
+    [
+      '✅ <b>Qabul qilindi.</b> Bloger bilan bog‘laning:',
+      `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
+      `📞 ${esc(formatPhone(a.blogger_phone))}`
+    ].join('\n'),
   statusRejected: '❌ <b>Rad etildi.</b>',
   decidedAccepted: 'Qabul qilindi',
   decidedRejected: 'Rad etildi',
@@ -210,16 +286,18 @@ const uz = {
   errCampaignFull: 'Bu reklama e’lonida bo‘sh o‘rin qolmagan.',
   errNotFound: 'So‘rov topilmadi.',
   stats: (s) =>
-    `📊 <b>Statistika</b>\nBizneslar: ${s.businesses}\nBlogerlar: ${s.bloggers}\nModeratsiyada: ${s.pending}\nFaol e’lonlar: ${s.active}\nSo‘rovlar: ${s.applications} (qabul qilingan: ${s.accepted})`,
+    `📊 <b>Statistika</b>\nBizneslar: ${s.businesses}\nBlogerlar: ${s.bloggers}\nModeratsiyada: ${s.pending} profil, ${s.pending_ads} e’lon\nFaol e’lonlar: ${s.active}\nSo‘rovlar: ${s.applications} (qabul qilingan: ${s.accepted})`,
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'uz'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
     [
       `👤 ${esc(u.name)}`,
-      `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} obunachi`,
-      `🔗 ${esc(u.profile)}`,
+      profileLine(u.platform, u.profile),
+      `👥 ${followersLabel(u.followers)} obunachi`,
+      reachLine(u, 'uz'),
       `🏷 ${esc(nicheLabel(u.niche, 'uz'))}`,
       audienceLine(u.region, 'uz'),
+      `📊 Statistika: ${u.stats_file_id ? 'yuborildi ✅' : 'yuborilmadi'}`,
       `📞 ${esc(formatPhone(u.phone))}`
     ].filter(Boolean).join('\n'),
   commands: [
@@ -252,7 +330,25 @@ const ru = {
   askCompany: 'Напишите название магазина или компании:',
   askCategory: 'К какой категории относится ваш товар или услуга?',
   askPlatform: 'Выберите основную соцсеть:',
-  askProfile: 'Напишите ссылку на профиль или @username:',
+  askProfile: (platform) =>
+    `${PLATFORM_ICON[platform] || '🔗'} Отправьте ссылку на ${platform === 'Instagram' || platform === 'TikTok' ? 'ваш профиль' : 'ваш канал'} в ${esc(platform)}.\n\nНапример: ${EXAMPLE[platform] || 'https://…'}`,
+  askReach: (platform) =>
+    `👁 Сколько в среднем просмотров набирают ваши ${{ Instagram: 'сторис', Telegram: 'посты' }[platform] || 'видео'}?`,
+  askStats: (platform) =>
+    [
+      '📊 Отправьте скриншот статистики фотографией.',
+      '',
+      {
+        Instagram: 'Instagram: Профессиональная панель → Статистика → Аудитория (города, возраст, пол).',
+        TikTok: 'TikTok: Аналитика → Подписчики (города, возраст, пол).',
+        YouTube: 'YouTube Studio → Аналитика → Аудитория.',
+        Telegram: 'Telegram: канал → Статистика (подписчики и просмотры).'
+      }[platform] || '',
+      '',
+      'По этому скриншоту бизнес увидит вашу аудиторию.'
+    ].join('\n'),
+  statsSkip: 'Пропустить',
+  errStats: 'Пожалуйста, отправьте скриншот как фото или нажмите «Пропустить».',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
   askRegion:
@@ -263,7 +359,8 @@ const ru = {
   phoneSaved: '✓ Номер сохранён.',
   errName: 'Имя должно быть от 2 до 60 символов. Напишите ещё раз:',
   errCompany: 'Название должно быть от 2 до 80 символов. Напишите ещё раз:',
-  errProfile: 'Укажите ссылку или @username правильно (3–200 символов):',
+  errProfile: (platform) =>
+    `Это не похоже на ссылку ${esc(platform)}. Отправьте ссылку или @username.\n\nНапример: ${EXAMPLE[platform] || 'https://…'}`,
   errPhone: 'Отправьте номер кнопкой ниже или напишите в формате +998 90 123 45 67.',
   errContactNotOwn: 'Пожалуйста, отправьте свой собственный номер.',
   useButtons: 'Пожалуйста, выберите один из вариантов выше.',
@@ -324,8 +421,9 @@ const ru = {
   modAlready: 'Решение по этому профилю уже принято.',
   modGone: 'Пользователь не найден: возможно, профиль удалён.',
   modNoRights: 'Эта кнопка только для модераторов.',
-  pendingNone: 'Профилей на модерации нет.',
-  pendingCount: (n) => `⏳ На модерации: ${n}. Самые ранние:`,
+  pendingNone: 'На модерации нет ни профилей, ни объявлений.',
+  pendingCount: (n) => `⏳ Профилей на модерации: ${n}. Самые ранние:`,
+  pendingAdsCount: (n) => `⏳ Объявлений на модерации: ${n}. Самые ранние:`,
   groupBound: (which) =>
     [
       {
@@ -350,32 +448,50 @@ const ru = {
       `💰 ${fmtNum(c.value)} сум · ${esc(String(c.platforms).split(',').join(', '))}`,
       `📝 ${esc(c.format)} · мест: ${c.slots} · дней: ${c.days}`,
       regionLine(c.region, 'ru'),
-      c.description ? `\n${esc(c.description)}` : ''
-    ].join('\n').trim(),
+      c.description ? `\n${esc(c.description)}` : '',
+      c.moderation === 'pending' ? '\n⏳ На модерации: блогеры увидят после одобрения.' : ''
+    ].filter(Boolean).join('\n').trim(),
   adminNewImage: (c) =>
-    `#Elon_rasmi\n🖼 <b>К рекламному объявлению добавлено фото</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+    `#Elon_rasmi\n🖼 <b>К рекламному объявлению добавлено фото</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})${c.moderation === 'pending' ? '\n\n⏳ На модерации: блогеры увидят после одобрения.' : ''}`,
+  adApproved: (name) => `✅ <b>Объявление одобрено</b> · ${esc(name)}`,
+  adRejected: (name) => `❌ <b>Объявление отклонено</b> · ${esc(name)}`,
+  toBusinessAdPending: (title) =>
+    `⏳ Ваше рекламное объявление «${esc(title)}» отправлено на модерацию. После одобрения блогеры увидят его в приложении.`,
+  toBusinessAdApproved: (title) => `✅ Ваше рекламное объявление «${esc(title)}» одобрено. Теперь блогеры видят его в приложении.`,
+  toBusinessAdRejected: (title) =>
+    `Ваше рекламное объявление «${esc(title)}» не одобрено. Проверьте условия и фото и разместите новое объявление.`,
   imageSaved: (title) => `🖼 Фото добавлено к рекламному объявлению «${esc(title)}». Блогеры увидят его в приложении.`,
   adminClose: '🚫 Закрыть объявление',
   adminClosed: '🚫 <b>Вы закрыли объявление.</b>',
   adminAlreadyClosed: 'Объявление уже закрыто.',
   toBusinessClosed: (title) =>
     `Ваше рекламное объявление «${esc(title)}» закрыто модератором. Если есть вопросы, напишите в этот бот.`,
-  newApplication: (a) =>
+  newApplication: (a, decided = false) =>
     [
       '🆕 <b>Новый отклик</b>',
       `Объявление: «${esc(a.title)}»`,
       '',
-      `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
-      `📱 ${esc(a.platform)} · ${followersLabel(a.followers)} подписчиков`,
-      `🔗 ${esc(a.profile)}`,
-      `🏷 ${esc(nicheLabel(a.niche, 'ru'))}`,
-      ...(a.region ? [audienceLine(a.region, 'ru')] : []),
-      a.message ? `\n💬 ${esc(a.message)}` : ''
+      ...[
+        `👤 ${esc(a.blogger_name)}`,
+        profileLine(a.platform, a.profile),
+        `👥 ${followersLabel(a.followers)} подписчиков`,
+        reachLine(a, 'ru'),
+        `🏷 ${esc(nicheLabel(a.niche, 'ru'))}`,
+        audienceLine(a.region, 'ru'),
+        a.stats_file_id ? '📊 Скриншот статистики — на фото' : ''
+      ].filter(Boolean),
+      a.message ? `\n💬 ${esc(a.message)}` : '',
+      decided ? '' : '\n🔒 Telegram и телефон блогера будут видны после того, как вы примете отклик.'
     ].join('\n').trim(),
   accept: '✅ Принять',
   reject: '❌ Отклонить',
   openRequests: '📋 Все отклики',
-  statusAccepted: (a) => `✅ <b>Принято.</b> Телефон блогера: ${esc(formatPhone(a.blogger_phone))}`,
+  statusAccepted: (a) =>
+    [
+      '✅ <b>Принято.</b> Свяжитесь с блогером:',
+      `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
+      `📞 ${esc(formatPhone(a.blogger_phone))}`
+    ].join('\n'),
   statusRejected: '❌ <b>Отклонено.</b>',
   decidedAccepted: 'Принято',
   decidedRejected: 'Отклонено',
@@ -396,16 +512,18 @@ const ru = {
   errCampaignFull: 'В этом объявлении не осталось свободных мест.',
   errNotFound: 'Отклик не найден.',
   stats: (s) =>
-    `📊 <b>Статистика</b>\nБизнесы: ${s.businesses}\nБлогеры: ${s.bloggers}\nНа модерации: ${s.pending}\nАктивные объявления: ${s.active}\nОтклики: ${s.applications} (принято: ${s.accepted})`,
+    `📊 <b>Статистика</b>\nБизнесы: ${s.businesses}\nБлогеры: ${s.bloggers}\nНа модерации: профилей ${s.pending}, объявлений ${s.pending_ads}\nАктивные объявления: ${s.active}\nОтклики: ${s.applications} (принято: ${s.accepted})`,
   summaryBusiness: (u) =>
     `🏪 ${esc(u.company)}\n👤 ${esc(u.name)}\n🏷 ${esc(catLabel(u.category, 'ru'))}\n📞 ${esc(formatPhone(u.phone))}`,
   summaryBlogger: (u) =>
     [
       `👤 ${esc(u.name)}`,
-      `📱 ${esc(u.platform)} · ${followersLabel(u.followers)} подписчиков`,
-      `🔗 ${esc(u.profile)}`,
+      profileLine(u.platform, u.profile),
+      `👥 ${followersLabel(u.followers)} подписчиков`,
+      reachLine(u, 'ru'),
       `🏷 ${esc(nicheLabel(u.niche, 'ru'))}`,
       audienceLine(u.region, 'ru'),
+      `📊 Статистика: ${u.stats_file_id ? 'отправлена ✅' : 'не отправлена'}`,
       `📞 ${esc(formatPhone(u.phone))}`
     ].filter(Boolean).join('\n'),
   commands: [
