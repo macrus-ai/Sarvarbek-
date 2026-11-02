@@ -173,10 +173,20 @@ function sendHome(ctx, user) {
 
 /* ---------- Moderatsiya guruhi ---------- */
 
-// which: 'all' | 'blogger' | 'business'
+// which: 'all' | 'blogger' | 'business' | 'ads'
 async function bindModerationChat(ctx, chatId, which) {
-  if (which !== 'business') await setSetting(ctx.db, MOD_CHAT_KEYS.blogger, chatId);
-  if (which !== 'blogger') await setSetting(ctx.db, MOD_CHAT_KEYS.business, chatId);
+  for (const [kind, key] of Object.entries(MOD_CHAT_KEYS)) {
+    if (which === 'all' || which === kind) await setSetting(ctx.db, key, chatId);
+  }
+}
+
+// "/ulash bloger", "/ulash biznes", "/ulash elon" (e'lon, reklama), argumentsiz — hammasi
+function parseBindTarget(arg) {
+  const a = String(arg || '').toLowerCase().replace(/[‘’'ʻʼ`]/g, '');
+  if (a.startsWith('blog')) return 'blogger';
+  if (a.startsWith('biz') || a.startsWith('brend')) return 'business';
+  if (a.startsWith('elon') || a.startsWith('rek') || a.startsWith('ads') || a.startsWith('объяв')) return 'ads';
+  return 'all';
 }
 
 // Tasdiq kutayotgan profillar: eng eskilari, kartalari bilan
@@ -215,8 +225,9 @@ async function onGroupMessage(msg, ctx) {
   if (added) {
     if (!admin) return undefined;
     // Birinchi guruh avtomatik ulanadi; keyingilari uchun qanday ulash ko'rsatiladi
-    const bound = (await getSetting(ctx.db, MOD_CHAT_KEYS.blogger)) || (await getSetting(ctx.db, MOD_CHAT_KEYS.business));
-    if (bound) return ctx.tg.send(chatId, T.groupHelp);
+    for (const key of Object.values(MOD_CHAT_KEYS)) {
+      if (await getSetting(ctx.db, key)) return ctx.tg.send(chatId, T.groupHelp);
+    }
     await bindModerationChat(ctx, chatId, 'all');
     return ctx.tg.send(chatId, T.groupBound('all'));
   }
@@ -228,8 +239,7 @@ async function onGroupMessage(msg, ctx) {
 
   if (cmd === 'ulash') {
     if (!admin) return ctx.tg.send(chatId, T.groupNotAdmin);
-    const a = arg.toLowerCase();
-    const which = a.startsWith('blog') ? 'blogger' : a.startsWith('biz') || a.startsWith('brend') ? 'business' : 'all';
+    const which = parseBindTarget(arg);
     await bindModerationChat(ctx, chatId, which);
     return ctx.tg.send(chatId, T.groupBound(which));
   }

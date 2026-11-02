@@ -116,19 +116,29 @@ export async function decide(ctx, business, appId, decision) {
 
 /* ---------- Jamoaga xabarlar va moderatsiya ---------- */
 
-// Moderatsiya guruhlari (botni guruhga qo'shib, /ulash bilan bog'lanadi).
-// Bloger kartalari va biznes kartalari (reklama e'lonlari bilan) alohida guruhlarga ketishi mumkin.
-export const MOD_CHAT_KEYS = { blogger: 'chat_blogger', business: 'chat_business' };
+// Jamoa guruhlari (botni guruhga qo'shib, /ulash bilan bog'lanadi). Har biri alohida guruh bo'lishi mumkin:
+//   blogger — yangi blogerlar, business — yangi bizneslar, ads — yangi reklama e'lonlari
+export const MOD_CHAT_KEYS = { blogger: 'chat_blogger', business: 'chat_business', ads: 'chat_ads' };
+
+// E'lonlar guruhi ulanmagan bo'lsa, e'lonlar bizneslar guruhiga keladi
+const CHAT_ROUTES = {
+  blogger: [MOD_CHAT_KEYS.blogger],
+  business: [MOD_CHAT_KEYS.business],
+  ads: [MOD_CHAT_KEYS.ads, MOD_CHAT_KEYS.business]
+};
 
 export async function moderationChat(ctx, kind) {
-  const value = await getSetting(ctx.db, kind === 'blogger' ? MOD_CHAT_KEYS.blogger : MOD_CHAT_KEYS.business);
-  return value ? Number(value) : null;
+  for (const key of CHAT_ROUTES[kind] || CHAT_ROUTES.business) {
+    const value = await getSetting(ctx.db, key);
+    if (value) return Number(value);
+  }
+  return null;
 }
 
 export async function isModerationChat(ctx, chatId) {
   if (chatId == null) return false;
-  const chats = await Promise.all([moderationChat(ctx, 'blogger'), moderationChat(ctx, 'business')]);
-  return chats.includes(Number(chatId));
+  const chats = await Promise.all(Object.values(MOD_CHAT_KEYS).map((key) => getSetting(ctx.db, key)));
+  return chats.some((value) => value && Number(value) === Number(chatId));
 }
 
 // Moderator: ADMIN_IDS dagi admin yoki moderatsiya guruhidagi tugmani bosgan a'zo
@@ -155,7 +165,7 @@ export async function deliver(ctx, chatId, { text, extra = {}, photo }) {
   }
 }
 
-// Jamoaga xabar. build(T) => { text, extra, photo? }. kind: 'blogger' | 'business' (qaysi guruhga).
+// Jamoaga xabar. build(T) => { text, extra, photo? }. kind: 'blogger' | 'business' | 'ads' (qaysi guruhga).
 // Guruh ulangan bo'lsa — guruhga (o'zbekcha), aks holda ADMIN_IDS dagilarga shaxsan.
 // Xato bo'lsa ham asosiy ish to'xtamaydi.
 export async function notifyAdmins(ctx, build, kind = 'business') {
