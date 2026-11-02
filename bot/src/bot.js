@@ -1,17 +1,19 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
-import { CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, findFollowers, isCategory, isNiche, isPlatform } from './constants.js';
+import {
+  CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REGIONS, findFollowers, isCategory, isNiche, isPlatform, isRegion
+} from './constants.js';
 import { closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getStats, touchUser, updateUser } from './db.js';
-import { catLabel, followersLabel, nicheLabel, tr } from './i18n.js';
+import { catLabel, followersLabel, nicheLabel, regionLabel, tr } from './i18n.js';
 import { AppError, appUrl, decide, notifyAdmins } from './services.js';
 import { esc, guessLang, isAdmin, isRegistered, normalizePhone, now, privacyUrl } from './util.js';
 
 // Ro'yxatdan o'tish qadamlari
 const FLOW = {
   business: ['name', 'company', 'category', 'phone'],
-  blogger: ['name', 'platform', 'profile', 'followers', 'niche', 'phone']
+  blogger: ['name', 'platform', 'profile', 'followers', 'niche', 'region', 'phone']
 };
-const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'niche']);
+const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'niche', 'region']);
 
 export async function handleUpdate(update, ctx) {
   if (update.message) return onMessage(update.message, ctx);
@@ -87,6 +89,10 @@ function ask(ctx, user, step) {
       return ctx.tg.send(id, T.askCategory, { reply_markup: categoryButtons() });
     case 'niche':
       return ctx.tg.send(id, T.askNiche, { reply_markup: nicheButtons() });
+    case 'region':
+      return ctx.tg.send(id, T.askRegion, {
+        reply_markup: { inline_keyboard: rows(REGIONS.map((r) => ({ text: r[lang], callback_data: `rgn:${r.id}` })), 2) }
+      });
     case 'platform':
       return ctx.tg.send(id, T.askPlatform, {
         reply_markup: { inline_keyboard: rows(PLATFORMS.map((p) => ({ text: p, callback_data: `plat:${p}` })), 2) }
@@ -296,6 +302,12 @@ async function onCallback(cq, ctx) {
       await ack();
       await markChosen(step === 'niche' ? nicheLabel(value, user.lang) : catLabel(value, user.lang));
       return advance(ctx, user, { [step]: value });
+    }
+    case 'rgn': {
+      if (user.reg_step !== 'region' || !isRegion(value)) return stale();
+      await ack();
+      await markChosen(regionLabel(value, user.lang));
+      return advance(ctx, user, { region: value });
     }
     case 'plat': {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();

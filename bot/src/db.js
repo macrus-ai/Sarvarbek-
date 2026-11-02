@@ -4,7 +4,7 @@ import { now } from './util.js';
 
 const USER_FIELDS = [
   'first_name', 'username', 'lang', 'role', 'reg_step', 'name', 'phone', 'company',
-  'category', 'platform', 'profile', 'followers', 'niche', 'registered_at'
+  'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at'
 ];
 
 /* ---------- Foydalanuvchilar ---------- */
@@ -52,7 +52,13 @@ const CAMPAIGN_SELECT = `
   FROM campaigns c
   JOIN users u ON u.tg_id = c.business_id`;
 
-export async function listActiveCampaigns(db, { viewerId, category, platform }) {
+const CAMPAIGN_ORDER = {
+  new: 'c.created_at DESC, c.id DESC',
+  value: 'c.value DESC, c.created_at DESC, c.id DESC'
+};
+
+// region: shu hudud uchun e'lonlar va butun O'zbekiston uchun e'lonlar ('all')
+export async function listActiveCampaigns(db, { viewerId, category, platform, region, sort = 'new' }) {
   const where = ["c.status = 'active'"];
   const args = [viewerId];
   if (category) {
@@ -63,8 +69,13 @@ export async function listActiveCampaigns(db, { viewerId, category, platform }) 
     args.push(platform);
     where.push(`instr(',' || c.platforms || ',', ',' || ?${args.length} || ',') > 0`);
   }
+  if (region) {
+    args.push(region);
+    where.push(`(c.region = ?${args.length} OR c.region = 'all')`);
+  }
+  const order = CAMPAIGN_ORDER[sort] || CAMPAIGN_ORDER.new;
   const { results } = await db
-    .prepare(`${CAMPAIGN_SELECT} WHERE ${where.join(' AND ')} ORDER BY c.created_at DESC, c.id DESC LIMIT 300`)
+    .prepare(`${CAMPAIGN_SELECT} WHERE ${where.join(' AND ')} ORDER BY ${order} LIMIT 300`)
     .bind(...args)
     .all();
   return results;
@@ -94,13 +105,14 @@ export async function createCampaign(db, businessId, c) {
   const row = await db
     .prepare(
       `INSERT INTO campaigns
-         (business_id, title, category, value, platforms, format, min_followers, days, slots, city, description, status, created_at, updated_at)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, 'active', ?12, ?12)
+         (business_id, title, category, value, platforms, format, min_followers, days, slots, city, description,
+          region, status, created_at, updated_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, 'active', ?13, ?13)
        RETURNING id`
     )
     .bind(
       businessId, c.title, c.category, c.value, c.platforms.join(','), c.format,
-      c.minFollowers, c.days, c.slots, c.city || null, c.description || null, ts
+      c.minFollowers, c.days, c.slots, c.city || null, c.description || null, c.region || 'all', ts
     )
     .first();
   return row.id;
@@ -142,7 +154,7 @@ export function getApplicationFull(db, id) {
       `SELECT a.*, c.title, c.business_id, c.slots, c.format, c.status AS campaign_status,
          b.name AS business_contact, b.company, b.phone AS business_phone, b.username AS business_username, b.lang AS business_lang,
          g.name AS blogger_name, g.phone AS blogger_phone, g.username AS blogger_username, g.lang AS blogger_lang,
-         g.platform, g.profile, g.followers, g.niche
+         g.platform, g.profile, g.followers, g.niche, g.region
        FROM applications a
        JOIN campaigns c ON c.id = a.campaign_id
        JOIN users b ON b.tg_id = c.business_id
@@ -191,7 +203,7 @@ export async function listBloggerApplications(db, bloggerId) {
   const { results } = await db
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at, a.updated_at,
-         c.id AS campaign_id, c.title, c.value, c.format, c.days, c.city, c.status AS campaign_status,
+         c.id AS campaign_id, c.title, c.value, c.format, c.days, c.city, c.region, c.status AS campaign_status,
          c.image_file_id, c.image_key,
          b.company,
          CASE WHEN a.status = 'accepted' THEN b.name END AS contact_name,
@@ -215,7 +227,7 @@ export async function listBusinessRequests(db, businessId) {
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at,
          c.id AS campaign_id, c.title,
-         g.tg_id AS blogger_id, g.name, g.username, g.platform, g.profile, g.followers, g.niche,
+         g.tg_id AS blogger_id, g.name, g.username, g.platform, g.profile, g.followers, g.niche, g.region,
          CASE WHEN a.status = 'accepted' THEN g.phone END AS phone
        FROM applications a
        JOIN campaigns c ON c.id = a.campaign_id

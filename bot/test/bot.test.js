@@ -87,6 +87,10 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   await say(env, user, '@madina');
   await press(env, user, 'fol:5000-10000');
   await press(env, user, 'cat:food');
+  assert.match(lastText(20), /В каком регионе вы живёте/);
+  await say(env, user, 'Самарканд'); // matn emas, tugma kerak
+  assert.match(lastText(20), /выберите один из вариантов/);
+  await press(env, user, 'rgn:samarkand');
   await say(env, user, '12345');
   assert.match(lastText(20), /\+998 90 123 45 67/);
   await say(env, user, '+998 93 555 66 77');
@@ -98,6 +102,7 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   assert.equal(me.data.user.lang, 'ru');
   assert.equal(me.data.user.platform, 'TikTok');
   assert.equal(me.data.user.niche, 'food'); // eski "cat:" tugmasi ham ishlaydi
+  assert.equal(me.data.user.region, 'samarkand');
 });
 
 test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohida', async () => {
@@ -118,8 +123,15 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   assert.equal(new Set(buttons.map((b) => b.callback_data)).size, 21);
 
   await press(env, user, 'niche:travel');
+  const regions = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  assert.equal(regions.length, 14);
+  assert.deepEqual(regions[0], { text: 'Toshkent shahri', callback_data: 'rgn:tashkent_city' });
+  await press(env, user, 'rgn:all'); // e'lon uchun bor, bloger uchun yo'q
+  assert.match(tg.last('answerCallbackQuery').body.text, /eskirgan/);
+  await press(env, user, 'rgn:bukhara');
   await shareContact(env, user, '998901234567');
   assert.match(lastText(21), /🏷 Sayohat/);
+  assert.match(lastText(21), /📍 Buxoro/);
   assert.equal((await api(env, user, '/api/me')).data.user.niche, 'travel');
 
   // Ruscha nomlar va mini ilova uchun ro'yxat

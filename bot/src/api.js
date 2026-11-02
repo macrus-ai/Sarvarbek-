@@ -1,19 +1,22 @@
 // Mini ilova uchun API. Har bir so'rov Telegram initData bilan tekshiriladi.
 
-import { CATEGORIES, FOLLOWERS, LIMITS, NICHES, PLATFORMS, isCategory, isPlatform } from './constants.js';
+import {
+  ALL_REGIONS, CATEGORIES, FOLLOWERS, LIMITS, NICHES, PLATFORMS, REGIONS, isCampaignRegion, isCategory, isPlatform, isRegion
+} from './constants.js';
 import {
   countActiveCampaigns, createCampaign, getCampaign, listActiveCampaigns, listBloggerApplications,
-  listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser
+  listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser, updateUser
 } from './db.js';
 import { tr } from './i18n.js';
 import { forgetImage, imageOut, newImageKey, pickSizes, sniffImage } from './images.js';
-import { AppError, applyToCampaign, decide, notifyAdmins } from './services.js';
+import { AppError, applyToCampaign, decide, followersOk, notifyAdmins } from './services.js';
 import { TelegramError, validateInitData } from './telegram.js';
 import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } from './util.js';
 
 const META = {
   categories: CATEGORIES,
   niches: NICHES,
+  regions: REGIONS,
   platforms: PLATFORMS,
   followers: FOLLOWERS
 };
@@ -32,7 +35,8 @@ function userOut(u) {
     platform: u.platform || null,
     profile: u.profile || null,
     followers: u.followers || null,
-    niche: u.niche || null
+    niche: u.niche || null,
+    region: u.region || null
   };
 }
 
@@ -50,6 +54,7 @@ function campaignOut(c, viewerId) {
     days: c.days,
     slots: c.slots,
     city: c.city || '',
+    region: c.region || null,
     description: c.description || '',
     image: imageOut(c.id, c),
     status: c.status,
@@ -77,6 +82,7 @@ function myApplicationOut(a) {
       format: a.format,
       days: a.days,
       city: a.city || '',
+      region: a.region || null,
       status: a.campaign_status,
       businessName: a.company || '',
       image: imageOut(a.campaign_id, a)
@@ -104,6 +110,7 @@ function requestOut(r) {
       profileUrl: profileUrl(r.platform, r.profile),
       followers: r.followers,
       niche: r.niche,
+      region: r.region || null,
       phone: r.phone ? formatPhone(r.phone) : null
     }
   };
@@ -141,6 +148,8 @@ function validateCampaign(b) {
   const days = toInt(b.days);
   const slots = toInt(b.slots);
   const platforms = Array.isArray(b.platforms) ? [...new Set(b.platforms)] : [];
+  // Eski mini ilova hududsiz yuborishi mumkin: unda butun O'zbekiston uchun
+  const region = b.region == null || b.region === '' ? ALL_REGIONS : b.region;
 
   if (title.length < LIMITS.titleMin || title.length > LIMITS.titleMax) errors.push('title');
   if (!isCategory(b.category)) errors.push('category');
@@ -150,11 +159,12 @@ function validateCampaign(b) {
   if (!between(minFollowers, 0, LIMITS.followersMax)) errors.push('minFollowers');
   if (!between(days, 1, LIMITS.daysMax)) errors.push('days');
   if (!between(slots, 1, LIMITS.slotsMax)) errors.push('slots');
+  if (!isCampaignRegion(region)) errors.push('region');
   if (city.length > LIMITS.cityMax) errors.push('city');
   if (description.length > LIMITS.descriptionMax) errors.push('description');
 
   if (errors.length) throw new AppError('invalid', 400, { fields: errors });
-  return { title, category: b.category, value, platforms, format, minFollowers, days, slots, city, description };
+  return { title, category: b.category, value, platforms, format, minFollowers, days, slots, city, region, description };
 }
 
 function requireRole(user, role) {
@@ -209,6 +219,14 @@ export async function handleApi(request, ctx) {
       return json({ user: userOut(user), registered: isRegistered(user), meta: META });
     }
     if (!isRegistered(user)) throw new AppError('not_registered', 403);
+
+    // Profildagi hududni mini ilovadan o'zgartirish
+    if (method === 'PATCH' && path === '/api/me') {
+      const { region } = await readBody(request);
+      if (!isRegion(region)) throw new AppError('invalid', 400, { fields: ['region'] });
+      await updateUser(ctx.db, user.tg_id, { region });
+      return json({ user: userOut({ ...user, region }) });
+    }
     return await route(ctx, user, method, path, url, request);
   } catch (e) {
     if (e instanceof AppError) return json({ error: e.code, ...e.extra }, e.status);
@@ -221,19 +239,34 @@ async function route(ctx, user, method, path, url, request) {
   const id = user.tg_id;
   let m;
 
-  // Faol reklama e'lonlari ro'yxati (filtrlar bilan)
+  // Faol reklama e'lonlari ro'yxati. Filtrlar: toifa, platforma, hudud, qidiruv,
+  // saralash (new | value) va fit=1 — faqat blogerning o'zi so'rov yubora oladiganlari.
   if (method === 'GET' && path === '/api/campaigns') {
-    const category = url.searchParams.get('category') || null;
-    const platform = url.searchParams.get('platform') || null;
-    const q = normSearch(url.searchParams.get('q'));
+    const params = url.searchParams;
+    const category = params.get('category') || null;
+    const platform = params.get('platform') || null;
+    const region = params.get('region') || null;
+    const sort = params.get('sort') === 'value' ? 'value' : 'new';
+    const q = normSearch(params.get('q'));
     let rows = await listActiveCampaigns(db, {
       viewerId: id,
       category: isCategory(category) ? category : null,
-      platform: isPlatform(platform) ? platform : null
+      platform: isPlatform(platform) ? platform : null,
+      region: isRegion(region) ? region : null,
+      sort
     });
     if (q) {
       rows = rows.filter((c) =>
         normSearch(`${c.title} ${c.business_name} ${c.city} ${c.format} ${c.description}`).includes(q)
+      );
+    }
+    if (params.get('fit') === '1' && user.role === 'blogger') {
+      rows = rows.filter(
+        (c) =>
+          !c.my_status &&
+          c.accepted < c.slots &&
+          followersOk(user, c) &&
+          (!user.region || !c.region || c.region === ALL_REGIONS || c.region === user.region)
       );
     }
     return json({ campaigns: rows.map((c) => campaignOut(c, id)) });
