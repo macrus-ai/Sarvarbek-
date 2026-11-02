@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import worker from '../src/index.js';
 import {
-  ORIGIN, api, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, sendUpdate,
-  shareContact, tgUser
+  ORIGIN, api, approve, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say,
+  sendUpdate, shareContact, tgUser
 } from './helpers.js';
 
 let tg;
@@ -65,7 +65,14 @@ test('biznes bot orqali ro‘yxatdan o‘tadi', async () => {
   const done = tg.sent(10).at(-1);
   assert.match(done.body.text, /Ro‘yxatdan o‘tdingiz/);
   assert.match(done.body.text, /\+998 90 111 22 33/);
-  assert.equal(done.body.reply_markup.inline_keyboard[0][0].web_app.url, `${ORIGIN}/`);
+  assert.match(done.body.text, /moderatsiyada/);
+  assert.equal(done.body.reply_markup.inline_keyboard[0][0].callback_data, 'reg:restart'); // ilova tugmasi hali yo'q
+
+  // Admin tasdiqlagach ilova ochiladi
+  await approve(env, user);
+  const approved = tg.sent(10).at(-1);
+  assert.match(approved.body.text, /Profilingiz tasdiqlandi/);
+  assert.equal(approved.body.reply_markup.inline_keyboard[0][0].web_app.url, `${ORIGIN}/`);
 
   const me = await api(env, user, '/api/me');
   assert.equal(me.data.registered, true);
@@ -87,7 +94,7 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   await say(env, user, '@madina');
   await press(env, user, 'fol:5000-10000');
   await press(env, user, 'cat:food');
-  assert.match(lastText(20), /В каком регионе вы живёте/);
+  assert.match(lastText(20), /В каком регионе ваша аудитория/);
   await say(env, user, 'Самарканд'); // matn emas, tugma kerak
   assert.match(lastText(20), /выберите один из вариантов/);
   await press(env, user, 'rgn:samarkand');
@@ -131,13 +138,14 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   await press(env, user, 'rgn:bukhara');
   await shareContact(env, user, '998901234567');
   assert.match(lastText(21), /🏷 Sayohat/);
-  assert.match(lastText(21), /📍 Buxoro/);
+  assert.match(lastText(21), /📍 Auditoriya: Buxoro/);
   assert.equal((await api(env, user, '/api/me')).data.user.niche, 'travel');
 
   // Ruscha nomlar va mini ilova uchun ro'yxat
   const ru = tgUser(22, { language_code: 'ru' });
-  await registerBlogger(env, ru, { lang: 'ru', niche: 'other' });
+  await registerBlogger(env, ru, { lang: 'ru', niche: 'other', approve: false });
   assert.match(lastText(22), /🏷 Другое/);
+  assert.match(lastText(22), /на модерации/);
   const meta = (await api(env, ru, '/api/me')).data.meta;
   assert.equal(meta.niches.length, 21);
   assert.equal(meta.niches.at(-1).ru, 'Другое');
@@ -241,7 +249,10 @@ test('/setup webhook, menyu tugmasi va buyruqlarni sozlaydi', async () => {
   assert.equal(hook.body.url, `${ORIGIN}/telegram/webhook`);
   assert.equal(hook.body.secret_token, await webhookSecret(env.BOT_TOKEN));
   assert.equal(tg.last('setChatMenuButton').body.menu_button.web_app.url, `${ORIGIN}/`);
-  assert.equal(tg.calls.filter((c) => c.method === 'setMyCommands').length, 2);
+  const commands = tg.calls.filter((c) => c.method === 'setMyCommands');
+  assert.equal(commands.length, 4); // shaxsiy chat va guruhlar uchun, ikki tilda
+  const group = commands.find((c) => c.body.scope?.type === 'all_group_chats' && !c.body.language_code);
+  assert.deepEqual(group.body.commands.map((c) => c.command), ['ulash', 'moderatsiya', 'stats']);
 });
 
 test('Telegram tugma signaliga xato qaytarsa ham javob saqlanadi', async () => {

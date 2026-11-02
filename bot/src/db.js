@@ -4,7 +4,8 @@ import { now } from './util.js';
 
 const USER_FIELDS = [
   'first_name', 'username', 'lang', 'role', 'reg_step', 'name', 'phone', 'company',
-  'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at'
+  'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at',
+  'moderation', 'moderated_by', 'moderated_at'
 ];
 
 /* ---------- Foydalanuvchilar ---------- */
@@ -38,6 +39,48 @@ export async function updateUser(db, id, fields) {
   await db
     .prepare(`UPDATE users SET ${sets}, updated_at = ?${keys.length + 1} WHERE tg_id = ?${keys.length + 2}`)
     .bind(...values, now(), id)
+    .run();
+}
+
+/* ---------- Moderatsiya ---------- */
+
+// Qaror faqat holat haqiqatan o'zgarsa yoziladi: ikki moderator bir vaqtda bossa, biri "allaqachon" oladi.
+export async function setModeration(db, id, status, moderatorId) {
+  const res = await db
+    .prepare(
+      `UPDATE users SET moderation = ?1, moderated_by = ?2, moderated_at = ?3, updated_at = ?3
+       WHERE tg_id = ?4 AND reg_step = 'done' AND (moderation IS NULL OR moderation != ?1)`
+    )
+    .bind(status, moderatorId ?? null, now(), id)
+    .run();
+  return res.meta.changes > 0;
+}
+
+export async function listPendingUsers(db, limit = 15) {
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM users WHERE moderation = 'pending' AND reg_step = 'done'
+       ORDER BY registered_at, tg_id LIMIT ?1`
+    )
+    .bind(limit)
+    .all();
+  return results;
+}
+
+/* ---------- Sozlamalar ---------- */
+
+export async function getSetting(db, key) {
+  const row = await db.prepare('SELECT value FROM settings WHERE key = ?1').bind(key).first();
+  return row ? row.value : null;
+}
+
+export async function setSetting(db, key, value) {
+  await db
+    .prepare(
+      `INSERT INTO settings (key, value, updated_at) VALUES (?1, ?2, ?3)
+       ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+    )
+    .bind(key, String(value), now())
     .run();
 }
 
@@ -249,7 +292,8 @@ export function getStats(db) {
          (SELECT COUNT(*) FROM users WHERE role = 'blogger' AND reg_step = 'done') AS bloggers,
          (SELECT COUNT(*) FROM campaigns WHERE status = 'active') AS active,
          (SELECT COUNT(*) FROM applications) AS applications,
-         (SELECT COUNT(*) FROM applications WHERE status = 'accepted') AS accepted`
+         (SELECT COUNT(*) FROM applications WHERE status = 'accepted') AS accepted,
+         (SELECT COUNT(*) FROM users WHERE moderation = 'pending' AND reg_step = 'done') AS pending`
     )
     .first();
 }
