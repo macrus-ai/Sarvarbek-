@@ -142,21 +142,22 @@ const uz = {
   pendingCount: (n) => `⏳ Moderatsiyada: ${n} ta profil. Eng eskilari:`,
   groupBound: (which) =>
     [
-      which === 'blogger'
-        ? '✅ Guruh ulandi: bu yerga yangi blogerlar keladi.'
-        : which === 'business'
-          ? '✅ Guruh ulandi: bu yerga yangi bizneslar va reklama e’lonlari keladi.'
-          : '✅ Guruh ulandi: bu yerga yangi blogerlar, bizneslar va reklama e’lonlari keladi.',
+      {
+        blogger: '✅ Guruh ulandi: bu yerga yangi blogerlar keladi.',
+        business: '✅ Guruh ulandi: bu yerga yangi bizneslar keladi.',
+        ads: '✅ Guruh ulandi: bu yerga yangi reklama e’lonlari keladi.'
+      }[which] || '✅ Guruh ulandi: bu yerga yangi blogerlar, bizneslar va reklama e’lonlari keladi.',
       '',
       'Tasdiqlash tugmalarini guruhning istalgan a’zosi bosa oladi, shuning uchun guruhga faqat jamoangizni qo‘shing.',
       '',
       '/moderatsiya — tasdiq kutayotgan profillar'
     ].join('\n'),
   groupHelp:
-    'Guruhni ulash uchun:\n/ulash — hammasi shu guruhga\n/ulash bloger — faqat yangi blogerlar\n/ulash biznes — yangi bizneslar va reklama e’lonlari\n\n/moderatsiya — tasdiq kutayotgan profillar',
+    'Guruhni ulash uchun:\n/ulash — hammasi shu guruhga\n/ulash bloger — yangi blogerlar\n/ulash biznes — yangi bizneslar\n/ulash elon — yangi reklama e’lonlari\n\n/moderatsiya — tasdiq kutayotgan profillar',
   groupNotAdmin: 'Guruhni faqat Ovoza adminlari ulay oladi.',
   adminNewCampaign: (c) =>
     [
+      '#Yangi_elon',
       '📢 <b>Yangi reklama e’loni</b>',
       `«${esc(c.title)}» · ${esc(catLabel(c.category, 'uz'))}`,
       `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
@@ -166,7 +167,7 @@ const uz = {
       c.description ? `\n${esc(c.description)}` : ''
     ].join('\n').trim(),
   adminNewImage: (c) =>
-    `🖼 <b>Reklama e’loniga rasm qo‘shildi</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+    `#Elon_rasmi\n🖼 <b>Reklama e’loniga rasm qo‘shildi</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
   imageSaved: (title) => `🖼 «${esc(title)}» reklama e’loniga rasm qo‘shildi. Blogerlar uni ilovada ko‘radi.`,
   adminClose: '🚫 E’lonni yopish',
   adminClosed: '🚫 <b>Siz yopdingiz.</b>',
@@ -327,21 +328,22 @@ const ru = {
   pendingCount: (n) => `⏳ На модерации: ${n}. Самые ранние:`,
   groupBound: (which) =>
     [
-      which === 'blogger'
-        ? '✅ Группа подключена: сюда будут приходить новые блогеры.'
-        : which === 'business'
-          ? '✅ Группа подключена: сюда будут приходить новые бизнесы и рекламные объявления.'
-          : '✅ Группа подключена: сюда будут приходить новые блогеры, бизнесы и рекламные объявления.',
+      {
+        blogger: '✅ Группа подключена: сюда будут приходить новые блогеры.',
+        business: '✅ Группа подключена: сюда будут приходить новые бизнесы.',
+        ads: '✅ Группа подключена: сюда будут приходить новые рекламные объявления.'
+      }[which] || '✅ Группа подключена: сюда будут приходить новые блогеры, бизнесы и рекламные объявления.',
       '',
       'Кнопки модерации может нажать любой участник группы, поэтому добавляйте в неё только свою команду.',
       '',
       '/moderatsiya — профили, ожидающие проверки'
     ].join('\n'),
   groupHelp:
-    'Чтобы подключить группу:\n/ulash — всё в эту группу\n/ulash bloger — только новые блогеры\n/ulash biznes — новые бизнесы и рекламные объявления\n\n/moderatsiya — профили, ожидающие проверки',
+    'Чтобы подключить группу:\n/ulash — всё в эту группу\n/ulash bloger — новые блогеры\n/ulash biznes — новые бизнесы\n/ulash elon — новые рекламные объявления\n\n/moderatsiya — профили, ожидающие проверки',
   groupNotAdmin: 'Подключить группу могут только администраторы Ovoza.',
   adminNewCampaign: (c) =>
     [
+      '#Yangi_elon',
       '📢 <b>Новое рекламное объявление</b>',
       `«${esc(c.title)}» · ${esc(catLabel(c.category, 'ru'))}`,
       `🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
@@ -351,7 +353,7 @@ const ru = {
       c.description ? `\n${esc(c.description)}` : ''
     ].join('\n').trim(),
   adminNewImage: (c) =>
-    `🖼 <b>К рекламному объявлению добавлено фото</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
+    `#Elon_rasmi\n🖼 <b>К рекламному объявлению добавлено фото</b>\n«${esc(c.title)}» · 🏪 ${esc(c.business_name)} (${mention(c.business_id, c.business_contact)})`,
   imageSaved: (title) => `🖼 Фото добавлено к рекламному объявлению «${esc(title)}». Блогеры увидят его в приложении.`,
   adminClose: '🚫 Закрыть объявление',
   adminClosed: '🚫 <b>Вы закрыли объявление.</b>',

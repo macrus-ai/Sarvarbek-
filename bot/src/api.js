@@ -287,10 +287,14 @@ async function route(ctx, user, method, path, url, request) {
     const campaignId = await createCampaign(db, id, data);
     const created = await getCampaign(db, campaignId, id);
     // Adminga yangi e'lon haqida xabar va "yopish" tugmasi (moderatsiya)
-    await notifyAdmins(ctx, (T) => ({
-      text: T.adminNewCampaign({ ...created, business_contact: user.name }),
-      extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${created.id}` }]] } }
-    }));
+    await notifyAdmins(
+      ctx,
+      (T) => ({
+        text: T.adminNewCampaign({ ...created, business_contact: user.name }),
+        extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${created.id}` }]] } }
+      }),
+      'ads'
+    );
     return json({ campaign: campaignOut(created, id) }, 201);
   }
 
@@ -332,11 +336,15 @@ async function route(ctx, user, method, path, url, request) {
       const image = await uploadImage(ctx, user, current, await readImage(request));
       await setCampaignImage(db, campaignId, id, image);
       // Adminga rasm ham ko'rinsin: e'lon joylangandan keyin almashtirilgan rasmlar ham moderatsiyadan o'tadi
-      await notifyAdmins(ctx, (T) => ({
-        photo: image.fileId,
-        text: T.adminNewImage({ ...current, business_contact: user.name }),
-        extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${campaignId}` }]] } }
-      }));
+      await notifyAdmins(
+        ctx,
+        (T) => ({
+          photo: image.fileId,
+          text: T.adminNewImage({ ...current, business_contact: user.name }),
+          extra: { reply_markup: { inline_keyboard: [[{ text: T.adminClose, callback_data: `adm:close:${campaignId}` }]] } }
+        }),
+        'ads'
+      );
     }
     await forgetImage(ctx.origin, campaignId, current.image_key);
     return json({ campaign: campaignOut(await getCampaign(db, campaignId, id), id) });

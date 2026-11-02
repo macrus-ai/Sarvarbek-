@@ -27,7 +27,7 @@ Yangi bloger va biznes ro‘yxatdan o‘tgach **moderatsiyada** turadi: ilova oc
 - Har bir yangi profil haqida jamoaga karta keladi: `#Yangi_bloger` yoki `#Yangi_biznes`. Kartada "✅ Tasdiqlash" va "❌ Rad etish" tugmalari, blogerda esa "🔗 Profilni ochish" tugmasi bor.
 - Tasdiqlansa, foydalanuvchiga "Profilingiz tasdiqlandi" xabari va ilova tugmasi boradi. Rad etilsa, "Qayta yuborish" tugmasi bilan xabar boradi: ma’lumotlarni to‘g‘rilab, qayta yuborsa, yana moderatsiyaga tushadi.
 - Tasdiqlangan foydalanuvchi ma’lumotlarini yangilasa, `#Profil_yangilandi` kartasi "🚫 Bloklash" tugmasi bilan keladi. Bloklangan biznesning faol e’lonlari yopiladi.
-- Yangi reklama e’loni "🚫 E’lonni yopish" tugmasi bilan keladi. E’longa rasm qo‘shilsa, rasmning o‘zi keladi.
+- Yangi reklama e’loni `#Yangi_elon` kartasi va "🚫 E’lonni yopish" tugmasi bilan keladi. E’longa rasm qo‘shilsa, rasmning o‘zi `#Elon_rasmi` bilan keladi.
 - `/moderatsiya` — tasdiq kutayotgan profillar kartalarini qayta yuboradi. `/stats` — foydalanuvchilar, moderatsiyadagilar, e’lonlar va so‘rovlar soni.
 - Bu yangilanishdan oldin ro‘yxatdan o‘tganlar tasdiqlangan hisoblanadi.
 
@@ -37,7 +37,7 @@ Yangi bloger va biznes ro‘yxatdan o‘tgach **moderatsiyada** turadi: ilova oc
 2. Guruhga @Ovozauz_bot ni qo‘shing. Qo‘shgan odam `ADMIN_IDS` da bo‘lsa, guruh avtomatik ulanadi va bot "✅ Guruh ulandi" deb yozadi.
 3. Agar ulanmagan bo‘lsa, guruhda `/ulash` yozing (yoki ro‘yxatdan `/ulash@Ovozauz_bot` ni tanlang).
 
-Alohida guruhlar ham mumkin: blogerlar guruhida `/ulash bloger`, bizneslar guruhida `/ulash biznes` (yangi bizneslar va reklama e’lonlari). Guruhdagi tugmalarni guruhning istalgan a’zosi bosa oladi, shuning uchun guruhga faqat jamoani qo‘shing.
+Har bir oqim uchun alohida guruh ham mumkin: blogerlar guruhida `/ulash bloger`, bizneslar guruhida `/ulash biznes`, reklama e’lonlari guruhida `/ulash elon`. E’lonlar guruhi ulanmagan bo‘lsa, e’lonlar bizneslar guruhiga keladi. Guruhdagi tugmalarni guruhning istalgan a’zosi bosa oladi, shuning uchun guruhga faqat jamoani qo‘shing.
 
 Guruh ulanmagan bo‘lsa, kartalar `ADMIN_IDS` dagi adminlarga shaxsan keladi. Moderatorlar umuman bo‘lmasa (na guruh, na `ADMIN_IDS`), yangi profillar avtomatik tasdiqlanadi.
 

@@ -199,7 +199,7 @@ test('guruhni ulash: /ulash bloger va /ulash biznes, faqat adminlar', async () =
   await groupMessage(admin, { text: '/ulash@Ovozauz_bot bloger' }, A);
   assert.match(lastText(A), /yangi blogerlar keladi/);
   await groupMessage(admin, { text: '/ulash biznes' }, B);
-  assert.match(lastText(B), /bizneslar va reklama e’lonlari/);
+  assert.match(lastText(B), /yangi bizneslar keladi/);
 
   // Uchinchi guruhga qo'shilsa, ulash usuli ko'rsatiladi, mavjud bog'lanish o'zgarmaydi
   await addBotToGroup(admin, -1002003);
@@ -215,6 +215,47 @@ test('guruhni ulash: /ulash bloger va /ulash biznes, faqat adminlar', async () =
   await groupMessage(admin, { migrate_to_chat_id: -1009999 }, A);
   await registerBlogger(env, tgUser(742), { approve: false });
   assert.equal(cards(-1009999, '#Yangi_bloger').length, 1);
+});
+
+test('reklama e’lonlari alohida guruhga keladi, ulanmagan bo‘lsa — bizneslar guruhiga', async () => {
+  const BIZ = -1003001;
+  const ADS = -1003002;
+  const admin = tgUser(ADMIN);
+  await groupMessage(admin, { text: '/ulash biznes' }, BIZ);
+
+  const business = tgUser(770);
+  await registerBusiness(env, business);
+  await createCampaign(env, business, { title: 'Birinchi e’lon' });
+  // E'lonlar guruhi hali yo'q: e'lon bizneslar guruhiga keladi
+  assert.equal(cards(BIZ, '#Yangi_elon').length, 1);
+
+  // "/ulash e'lon" (apostrof bilan ham) — e'lonlar endi alohida guruhga
+  await groupMessage(admin, { text: "/ulash e'lon" }, ADS);
+  assert.match(lastText(ADS), /yangi reklama e’lonlari keladi/);
+  const { data } = await createCampaign(env, business, { title: 'Ikkinchi e’lon' });
+  assert.equal(cards(BIZ, '#Yangi_elon').length, 1);
+  const [ad] = cards(ADS, '#Yangi_elon');
+  assert.match(ad.body.text, /Ikkinchi e’lon/);
+  assert.equal(ad.body.reply_markup.inline_keyboard[0][0].callback_data, `adm:close:${data.campaign.id}`);
+
+  // Profillar e'lonlar guruhiga kelmaydi
+  await registerBusiness(env, tgUser(771), { approve: false });
+  assert.equal(cards(ADS, '#Yangi_biznes').length, 0);
+  assert.equal(cards(BIZ, '#Yangi_biznes').length, 2);
+
+  // E'lonlar guruhining a'zosi e'lonni yopa oladi
+  const blogger = tgUser(772);
+  await registerBlogger(env, blogger);
+  assert.equal((await api(env, blogger, '/api/campaigns')).data.campaigns.length, 2);
+  await groupPress(tgUser(4343), `adm:close:${data.campaign.id}`, ADS);
+  assert.deepEqual(
+    (await api(env, blogger, '/api/campaigns')).data.campaigns.map((c) => c.title),
+    ['Birinchi e’lon']
+  );
+
+  // Ruscha buyruq ham ishlaydi
+  await groupMessage(admin, { text: '/ulash объявления' }, -1003003);
+  assert.match(lastText(-1003003), /yangi reklama e’lonlari keladi/);
 });
 
 test('/moderatsiya kutayotgan profillarni qayta yuboradi, /stats sonini ko‘rsatadi', async () => {
