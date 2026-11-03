@@ -86,17 +86,26 @@ test('so‘rovga qaror: ro‘yxatdan o‘tish yarim qolgan yoki profil tasdiqlan
   assert.match(tg.last('answerCallbackQuery').body.text, /Qabul qilindi/);
 });
 
-test('Instagram blogerining reels ko‘rishlari biznesga keladi', async () => {
+test('Instagram blogerining to‘rtta ko‘rsatkichi biznesga keladi', async () => {
   const business = tgUser(920);
   const blogger = tgUser(921);
   await registerBusiness(env, business);
-  await registerBlogger(env, blogger, { reach: '1000-3000', reels: '100000-500000' });
+  await registerBlogger(env, blogger, {
+    reels: '100000-500000', posts: '10000-50000', reach: '1000-3000', accounts: '500000-1000000'
+  });
   const { data } = await createCampaign(env, business, { minFollowers: 0 });
   tg.clear();
   await api(env, blogger, `/api/campaigns/${data.campaign.id}/apply`, { method: 'POST', body: {} });
   const note = lastText(920);
-  assert.match(note, /Ko‘rishlar \(storis\): 1\s000 – 3\s000/);
-  assert.match(note, /Reels va postlar: 100\s000 – 500\s000/);
+  assert.match(
+    note,
+    /Reels \(o‘rtacha\): 100\s000 – 500\s000\n.*Postlar \(o‘rtacha\): 10\s000 – 50\s000\n.*Istoriya \(o‘rtacha\): 1\s000 – 3\s000\n.*Qamrov \(30 kun\): 500\s000 – 1\s000\s000/
+  );
+  assert.doesNotMatch(note, /eski|kiritilmagan/);
   const [request] = (await api(env, business, '/api/requests')).data.requests;
-  assert.equal(request.blogger.reelsReach, '100000-500000');
+  assert.equal(request.blogger.reelsViews, '100000-500000');
+  assert.equal(request.blogger.postsViews, '10000-50000');
+  assert.equal(request.blogger.reach, '1000-3000');
+  assert.equal(request.blogger.accountsReached, '500000-1000000');
+  assert.equal(request.blogger.reelsReach, null);
 });

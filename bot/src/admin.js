@@ -4,7 +4,7 @@
 //   - /api/admin/* — panel API'si (faqat ADMIN_IDS dagilar uchun).
 
 import { closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, setSetting } from './db.js';
-import { catLabel, followersLabel, nicheLabel, reachLabel, reelsLabel, regionLabel, tr } from './i18n.js';
+import { catLabel, followersLabel, nicheLabel, regionLabel, tr, viewsFacts } from './i18n.js';
 import { imageOut, statsImageUrl } from './images.js';
 import { AppError, MOD_CHAT_KEYS, moderate, moderateCampaign } from './services.js';
 import { sha256Hex } from './telegram.js';
@@ -120,6 +120,12 @@ async function getBotUsername(ctx) {
 
 const UZ = 'uz';
 
+function bloggerViews(u) {
+  return viewsFacts(u, UZ)
+    .filter((f) => f.value || u.platform === 'Instagram')
+    .map((f) => ({ key: f.key, label: f.label, value: f.value || null }));
+}
+
 function userOut(u) {
   const business = u.role === 'business';
   return {
@@ -140,8 +146,8 @@ function userOut(u) {
     profile: business ? null : u.profile || null,
     profileUrl: business ? null : profileUrl(u.platform, u.profile),
     followers: business ? null : followersLabel(u.followers),
-    reach: u.reach ? reachLabel(u.reach, UZ) : null,
-    reels: u.reels_reach ? reelsLabel(u.reels_reach, UZ) : null,
+    // Ko'rishlar va qamrov, ko'rsatish tartibida. value: null — kiritilmagan (Instagramda panel shunday yozadi).
+    views: business ? null : bloggerViews(u),
     niche: business ? null : nicheLabel(u.niche, UZ) || null,
     region: u.region ? regionLabel(u.region, UZ) : null,
     statsImage: u.stats_file_id ? statsImageUrl(u.tg_id, u.stats_key) : null,

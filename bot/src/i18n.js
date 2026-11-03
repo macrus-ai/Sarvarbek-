@@ -1,6 +1,8 @@
 // Bot matnlari (o'zbekcha va ruscha)
 
-import { ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findFollowers, findReach, findReelsReach } from './constants.js';
+import {
+  ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findAccountsReached, findFollowers, findReach, findReelsReach
+} from './constants.js';
 import { esc, fmtNum, formatPhone, profileDisplay, profileUrl } from './util.js';
 
 export const catLabel = (id, lang) => CATEGORIES.find((c) => c.id === id)?.[lang === 'ru' ? 'ru' : 'uz'] ?? id ?? '';
@@ -37,18 +39,59 @@ function rangeLabel(r, lang) {
 
 export const reachLabel = (id, lang) => rangeLabel(findReach(id), lang);
 export const reelsLabel = (id, lang) => rangeLabel(findReelsReach(id), lang);
+export const accountsLabel = (id, lang) => rangeLabel(findAccountsReached(id), lang);
 
-// Ko'rishlar nimaniki: Instagram — storis, Telegram — post, TikTok va YouTube — video
-const reachWhat = (platform, lang) =>
-  ({ Instagram: lang === 'ru' ? 'сторис' : 'storis', Telegram: lang === 'ru' ? 'пост' : 'post' })[platform] ||
-  (lang === 'ru' ? 'видео' : 'video');
+const VIEWS_LABELS = {
+  uz: {
+    reels: 'Reels (o‘rtacha)',
+    posts: 'Postlar (o‘rtacha)',
+    stories: 'Istoriya (o‘rtacha)',
+    accounts: 'Qamrov (30 kun)',
+    legacy: 'Reels va postlar (eski)',
+    telegram: 'Postlar (o‘rtacha)',
+    video: 'Videolar (o‘rtacha)',
+    notSet: 'kiritilmagan'
+  },
+  ru: {
+    reels: 'Reels (в среднем)',
+    posts: 'Посты (в среднем)',
+    stories: 'Сторис (в среднем)',
+    accounts: 'Охват за 30 дней',
+    legacy: 'Reels и посты (старое)',
+    telegram: 'Посты (в среднем)',
+    video: 'Видео (в среднем)',
+    notSet: 'не указано'
+  }
+};
 
-const reachLine = (u, lang) =>
-  u.reach ? `👁 ${lang === 'ru' ? 'Просмотры' : 'Ko‘rishlar'} (${reachWhat(u.platform, lang)}): ${reachLabel(u.reach, lang)}` : '';
+// Blogerning ko'rishlari va qamrovi, ko'rsatish tartibida. value: '' — kiritilmagan.
+// Instagram: reels, postlar, istoriya (users.reach), qamrov (30 kun). Boshqa platformalar: bitta o'rtacha ko'rishlar.
+// Eski "Reels va postlar" (users.reels_reach) faqat yangi reels va postlar bo'sh bo'lsa ko'rsatiladi.
+export function viewsFacts(u, lang) {
+  const L = VIEWS_LABELS[lang === 'ru' ? 'ru' : 'uz'];
+  if (u.platform !== 'Instagram') {
+    const label = u.platform === 'Telegram' ? L.telegram : L.video;
+    return [{ key: 'reach', icon: '👁', label, value: reachLabel(u.reach, lang) }];
+  }
+  const facts = [
+    { key: 'reels', icon: '🎬', label: L.reels, value: reelsLabel(u.reels_views, lang) },
+    { key: 'posts', icon: '🖼', label: L.posts, value: reachLabel(u.posts_views, lang) },
+    { key: 'stories', icon: '📱', label: L.stories, value: reachLabel(u.reach, lang) },
+    { key: 'accounts', icon: '📈', label: L.accounts, value: accountsLabel(u.accounts_reached, lang) }
+  ];
+  if (u.reels_reach && !u.reels_views && !u.posts_views) {
+    facts.push({ key: 'legacy', icon: '🎬', label: L.legacy, value: reelsLabel(u.reels_reach, lang) });
+  }
+  return facts;
+}
 
-// Instagram: reels va postlarning o'rtacha ko'rishlari
-const reelsLine = (u, lang) =>
-  u.reels_reach ? `🎬 ${lang === 'ru' ? 'Reels и посты' : 'Reels va postlar'}: ${reelsLabel(u.reels_reach, lang)}` : '';
+export const notSetLabel = (lang) => VIEWS_LABELS[lang === 'ru' ? 'ru' : 'uz'].notSet;
+
+// Xabardagi ko'rishlar qatorlari. all: true — moderatorlar uchun: Instagramda kiritilmaganlari ham ko'rinadi.
+const viewsLines = (u, lang, { all = false } = {}) =>
+  viewsFacts(u, lang)
+    .filter((f) => f.value || (all && u.platform === 'Instagram'))
+    .map((f) => `${f.icon} ${f.label}: ${f.value || notSetLabel(lang)}`);
 
 const PLATFORM_ICON = { Instagram: '📸', TikTok: '🎵', YouTube: '▶️', Telegram: '✈️' };
 
@@ -87,8 +130,7 @@ function profileLines(u, lang) {
     phone,
     profileLine(u.platform, u.profile),
     `👥 ${followersLabel(u.followers)} ${ru ? 'подписчиков' : 'obunachi'}`,
-    reachLine(u, lang),
-    reelsLine(u, lang),
+    ...viewsLines(u, lang, { all: true }),
     `🏷 ${esc(nicheLabel(u.niche, lang))}`,
     audienceLine(u.region, lang),
     stats,
@@ -111,7 +153,9 @@ const uz = {
   askProfile: (platform) =>
     `${PLATFORM_ICON[platform] || '🔗'} ${esc(platform)} ${platform === 'Instagram' || platform === 'TikTok' ? 'profilingiz' : 'kanalingiz'} havolasini yuboring.\n\nMasalan: ${EXAMPLE[platform] || 'https://…'}`,
   askReach: (platform) =>
-    `👁 ${{ Instagram: 'Storislaringiz', Telegram: 'Postlaringiz' }[platform] || 'Videolaringiz'} o‘rtacha nechta ko‘rish to‘playdi?`,
+    platform === 'Instagram'
+      ? '📱 Istoriyalaringiz (storis) o‘rtacha nechta ko‘rish to‘playdi?'
+      : `👁 ${platform === 'Telegram' ? 'Postlaringiz' : 'Videolaringiz'} o‘rtacha nechta ko‘rish to‘playdi?`,
   askStats: (platform) =>
     [
       '📊 Statistika skrinshotini rasm qilib yuboring.',
@@ -125,7 +169,10 @@ const uz = {
       '',
       'Bizneslar shu rasm orqali auditoriyangizni ko‘radi.'
     ].join('\n'),
-  askReels: '🎬 Reels va postlaringiz o‘rtacha nechta ko‘rish to‘playdi?',
+  askReels: '🎬 Reels videolaringiz o‘rtacha nechta ko‘rish to‘playdi?',
+  askPosts: '🖼 Postlaringiz (rasm va karusellar) o‘rtacha nechta ko‘rish to‘playdi?',
+  askAccounts:
+    '📈 Qamrov: oxirgi 30 kunda kontentingizni nechta akkaunt ko‘rgan?\n\nInstagram: Professional panel → Statistika → “Qamrab olingan akkauntlar” (Accounts reached), oxirgi 30 kun.',
   statsSkip: 'O‘tkazib yuborish',
   errStats: 'Iltimos, skrinshotni rasm (foto) sifatida yuboring yoki “O‘tkazib yuborish” tugmasini bosing.',
   askFollowers: 'Obunachilaringiz soni qancha?',
@@ -267,8 +314,7 @@ const uz = {
         `👤 ${esc(a.blogger_name)}`,
         profileLine(a.platform, a.profile),
         `👥 ${followersLabel(a.followers)} obunachi`,
-        reachLine(a, 'uz'),
-        reelsLine(a, 'uz'),
+        ...viewsLines(a, 'uz'),
         `🏷 ${esc(nicheLabel(a.niche, 'uz'))}`,
         audienceLine(a.region, 'uz'),
         a.stats_file_id ? '📊 Statistika skrinshoti — rasmda' : ''
@@ -313,8 +359,7 @@ const uz = {
       `👤 ${esc(u.name)}`,
       profileLine(u.platform, u.profile),
       `👥 ${followersLabel(u.followers)} obunachi`,
-      reachLine(u, 'uz'),
-      reelsLine(u, 'uz'),
+      ...viewsLines(u, 'uz'),
       `🏷 ${esc(nicheLabel(u.niche, 'uz'))}`,
       audienceLine(u.region, 'uz'),
       `📊 Statistika: ${u.stats_file_id ? 'yuborildi ✅' : 'yuborilmadi'}`,
@@ -353,7 +398,9 @@ const ru = {
   askProfile: (platform) =>
     `${PLATFORM_ICON[platform] || '🔗'} Отправьте ссылку на ${platform === 'Instagram' || platform === 'TikTok' ? 'ваш профиль' : 'ваш канал'} в ${esc(platform)}.\n\nНапример: ${EXAMPLE[platform] || 'https://…'}`,
   askReach: (platform) =>
-    `👁 Сколько в среднем просмотров набирают ваши ${{ Instagram: 'сторис', Telegram: 'посты' }[platform] || 'видео'}?`,
+    platform === 'Instagram'
+      ? '📱 Сколько в среднем просмотров набирают ваши сторис?'
+      : `👁 Сколько в среднем просмотров набирают ваши ${platform === 'Telegram' ? 'посты' : 'видео'}?`,
   askStats: (platform) =>
     [
       '📊 Отправьте скриншот статистики фотографией.',
@@ -367,7 +414,10 @@ const ru = {
       '',
       'По этому скриншоту бизнес увидит вашу аудиторию.'
     ].join('\n'),
-  askReels: '🎬 Сколько в среднем просмотров набирают ваши reels и посты?',
+  askReels: '🎬 Сколько в среднем просмотров набирают ваши reels?',
+  askPosts: '🖼 Сколько в среднем просмотров набирают ваши посты (фото и карусели)?',
+  askAccounts:
+    '📈 Охват: сколько аккаунтов увидели ваш контент за последние 30 дней?\n\nInstagram: Профессиональная панель → Статистика → «Охваченные аккаунты» (Accounts reached), последние 30 дней.',
   statsSkip: 'Пропустить',
   errStats: 'Пожалуйста, отправьте скриншот как фото или нажмите «Пропустить».',
   askFollowers: 'Сколько у вас подписчиков?',
@@ -506,8 +556,7 @@ const ru = {
         `👤 ${esc(a.blogger_name)}`,
         profileLine(a.platform, a.profile),
         `👥 ${followersLabel(a.followers)} подписчиков`,
-        reachLine(a, 'ru'),
-        reelsLine(a, 'ru'),
+        ...viewsLines(a, 'ru'),
         `🏷 ${esc(nicheLabel(a.niche, 'ru'))}`,
         audienceLine(a.region, 'ru'),
         a.stats_file_id ? '📊 Скриншот статистики — на фото' : ''
@@ -552,8 +601,7 @@ const ru = {
       `👤 ${esc(u.name)}`,
       profileLine(u.platform, u.profile),
       `👥 ${followersLabel(u.followers)} подписчиков`,
-      reachLine(u, 'ru'),
-      reelsLine(u, 'ru'),
+      ...viewsLines(u, 'ru'),
       `🏷 ${esc(nicheLabel(u.niche, 'ru'))}`,
       audienceLine(u.region, 'ru'),
       `📊 Статистика: ${u.stats_file_id ? 'отправлена ✅' : 'не отправлена'}`,

@@ -58,7 +58,7 @@ test('admin yangi foydalanuvchini moderatsiya kartasi bilan bir marta oladi', as
   await press(env, blogger, 'plat:TikTok');
   await say(env, blogger, '@dilnoza_tt');
   await press(env, blogger, 'fol:10000-50000');
-  await press(env, blogger, 'rch:3000-10000'); // TikTok: reels savoli yo'q
+  await press(env, blogger, 'rch:3000-10000'); // TikTok: reels, postlar va qamrov savollari yo'q
   await press(env, blogger, 'stats:skip');
   await press(env, blogger, 'niche:beauty');
   await press(env, blogger, 'rgn:tashkent_city');
@@ -66,7 +66,13 @@ test('admin yangi foydalanuvchini moderatsiya kartasi bilan bir marta oladi', as
   assert.equal(tg.sent(ADMIN).filter((c) => /#Yangi_bloger/.test(c.body.text)).length, 1);
   assert.match(lastText(ADMIN), /#Profil_yangilandi/);
   assert.match(lastText(ADMIN), /Dilnoza Yangi/);
-  assert.doesNotMatch(lastText(ADMIN), /Reels/); // Instagramdan TikTokka o'tdi — eski reels ma'lumoti o'chdi
+  // Instagramdan TikTokka o'tdi — Instagram ko'rsatkichlari o'chdi, bitta "Videolar" qoldi
+  assert.match(lastText(ADMIN), /Videolar \(o‘rtacha\): 3\s000 – 10\s000/);
+  assert.doesNotMatch(lastText(ADMIN), /Reels|Postlar|Istoriya|Qamrov|kiritilmagan/);
+  const row = await env.DB.prepare('SELECT reels_views, posts_views, accounts_reached, reels_reach FROM users WHERE tg_id = ?1')
+    .bind(311)
+    .first();
+  assert.deepEqual(row, { reels_views: null, posts_views: null, accounts_reached: null, reels_reach: null });
   assert.equal((await api(env, blogger, '/api/me')).data.user.moderation, 'approved');
 });
 

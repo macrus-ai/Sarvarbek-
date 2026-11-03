@@ -1,15 +1,15 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
 import {
-  CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REACH, REELS_REACH, REGIONS, findFollowers, findReach, findReelsReach,
-  isCategory, isNiche, isPlatform, isRegion
+  ACCOUNTS_REACHED, CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REACH, REELS_REACH, REGIONS, findAccountsReached,
+  findFollowers, findReach, findReelsReach, isCategory, isNiche, isPlatform, isRegion
 } from './constants.js';
 import {
   closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, listPendingCampaigns,
   listPendingUsers, setSetting, touchUser, updateUser
 } from './db.js';
 import { createLoginLink } from './admin.js';
-import { catLabel, followersLabel, nicheLabel, reachLabel, reelsLabel, regionLabel, tr } from './i18n.js';
+import { accountsLabel, catLabel, followersLabel, nicheLabel, reachLabel, reelsLabel, regionLabel, tr } from './i18n.js';
 import { newImageKey } from './images.js';
 import {
   AppError, MOD_CHAT_KEYS, adKeyboard, canModerate, decide, editMessage, homeKeyboard, isModerationChat, moderate,
@@ -17,15 +17,24 @@ import {
 } from './services.js';
 import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, normalizeProfile, now, privacyUrl } from './util.js';
 
-// Ro'yxatdan o'tish qadamlari
+// Ro'yxatdan o'tish qadamlari.
+// Bloger ko'rishlari: Instagram — reels, postlar, istoriya (reach), qamrov (accounts); boshqalar — faqat reach.
 const FLOW = {
   business: ['name', 'company', 'category', 'phone'],
-  blogger: ['name', 'platform', 'profile', 'followers', 'reach', 'reels', 'stats', 'niche', 'region', 'phone']
+  blogger: [
+    'name', 'platform', 'profile', 'followers', 'reels', 'posts', 'reach', 'accounts', 'stats', 'niche', 'region', 'phone'
+  ]
 };
-const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'reach', 'reels', 'niche', 'region']);
+const BUTTON_STEPS = new Set([
+  'lang', 'role', 'category', 'platform', 'followers', 'reels', 'posts', 'reach', 'accounts', 'niche', 'region'
+]);
 
-// Reels va postlar savoli faqat Instagram blogerlari uchun
-const stepApplies = (step, user) => step !== 'reels' || user.platform === 'Instagram';
+// Reels, postlar va qamrov savollari faqat Instagram blogerlari uchun
+const INSTAGRAM_STEPS = new Set(['reels', 'posts', 'accounts']);
+const stepApplies = (step, user) => !INSTAGRAM_STEPS.has(step) || user.platform === 'Instagram';
+
+// Platforma Instagram bo'lmasa, Instagramga xos javoblar tozalanadi (eski reels_reach ham)
+const NOT_INSTAGRAM = { reels_reach: null, reels_views: null, posts_views: null, accounts_reached: null };
 
 const statsKeyboard = (T) => ({ inline_keyboard: [[{ text: T.statsSkip, callback_data: 'stats:skip' }]] });
 
@@ -56,6 +65,11 @@ export function parseStartPayload(payload) {
   const m = String(payload || '').toLowerCase().match(/^(business|blogger)(?:[-_](uz|ru))?$/);
   return { role: m ? m[1] : null, lang: m && m[2] ? m[2] : null };
 }
+
+// Oraliq tugmalari (ko'rishlar, qamrov), ikki ustunda
+const rangeButtons = (ranges, label, prefix, lang) => ({
+  inline_keyboard: rows(ranges.map((r) => ({ text: label(r.id, lang), callback_data: `${prefix}:${r.id}` })), 2)
+});
 
 const phoneKeyboard = (T) => ({
   keyboard: [[{ text: T.phoneButton, request_contact: true }]],
@@ -106,16 +120,14 @@ function ask(ctx, user, step) {
       });
     case 'profile':
       return ctx.tg.send(id, T.askProfile(user.platform));
-    case 'reach':
-      return ctx.tg.send(id, T.askReach(user.platform), {
-        reply_markup: { inline_keyboard: rows(REACH.map((r) => ({ text: reachLabel(r.id, lang), callback_data: `rch:${r.id}` })), 2) }
-      });
     case 'reels':
-      return ctx.tg.send(id, T.askReels, {
-        reply_markup: {
-          inline_keyboard: rows(REELS_REACH.map((r) => ({ text: reelsLabel(r.id, lang), callback_data: `rls:${r.id}` })), 2)
-        }
-      });
+      return ctx.tg.send(id, T.askReels, { reply_markup: rangeButtons(REELS_REACH, reelsLabel, 'rls', lang) });
+    case 'posts':
+      return ctx.tg.send(id, T.askPosts, { reply_markup: rangeButtons(REACH, reachLabel, 'pst', lang) });
+    case 'reach':
+      return ctx.tg.send(id, T.askReach(user.platform), { reply_markup: rangeButtons(REACH, reachLabel, 'rch', lang) });
+    case 'accounts':
+      return ctx.tg.send(id, T.askAccounts, { reply_markup: rangeButtons(ACCOUNTS_REACHED, accountsLabel, 'acc', lang) });
     case 'stats':
       return ctx.tg.send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
     case 'followers':
@@ -506,11 +518,24 @@ async function onCallback(cq, ctx) {
       await markChosen(regionLabel(value, user.lang));
       return advance(ctx, user, { region: value });
     }
+    // Instagram: reels, postlar va qamrov (istoriya — "rch:")
     case 'rls': {
       if (user.reg_step !== 'reels' || !findReelsReach(value)) return stale();
       await ack();
       await markChosen(reelsLabel(value, user.lang));
-      return advance(ctx, user, { reels_reach: value });
+      return advance(ctx, user, { reels_views: value });
+    }
+    case 'pst': {
+      if (user.reg_step !== 'posts' || !findReach(value)) return stale();
+      await ack();
+      await markChosen(reachLabel(value, user.lang));
+      return advance(ctx, user, { posts_views: value });
+    }
+    case 'acc': {
+      if (user.reg_step !== 'accounts' || !findAccountsReached(value)) return stale();
+      await ack();
+      await markChosen(accountsLabel(value, user.lang));
+      return advance(ctx, user, { accounts_reached: value });
     }
     case 'biz': {
       if (user.role !== 'business' || !isRegistered(user)) return stale();
@@ -557,7 +582,7 @@ async function onCallback(cq, ctx) {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();
       await ack();
       await markChosen(value);
-      return advance(ctx, user, { platform: value, ...(value === 'Instagram' ? {} : { reels_reach: null }) });
+      return advance(ctx, user, { platform: value, ...(value === 'Instagram' ? {} : NOT_INSTAGRAM) });
     }
     case 'fol': {
       if (user.reg_step !== 'followers' || !findFollowers(value)) return stale();
