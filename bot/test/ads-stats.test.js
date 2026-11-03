@@ -47,6 +47,12 @@ test('bloger: Instagram havolasi, o‘rtacha ko‘rishlar va statistika skrinsho
   await press(env, blogger, 'fol:10000-50000');
   assert.match(lastText(800), /Storislaringiz o‘rtacha nechta ko‘rish/);
   await press(env, blogger, 'rch:3000-10000');
+  // Instagram: storisdan keyin reels va postlar
+  assert.match(lastText(800), /Reels va postlaringiz o‘rtacha nechta ko‘rish/);
+  const reelsButtons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  assert.equal(reelsButtons.length, 6);
+  assert.equal(reelsButtons[0].text, '1\u00a0000 gacha');
+  await press(env, blogger, 'rls:20000-100000');
   assert.match(lastText(800), /Statistika skrinshotini rasm qilib yuboring/);
   assert.match(lastText(800), /Professional panel/);
   await sendPhoto(env, blogger, 'stats-800');
@@ -57,6 +63,7 @@ test('bloger: Instagram havolasi, o‘rtacha ko‘rishlar va statistika skrinsho
   const done = lastText(800);
   assert.match(done, /instagram\.com\/dilnoza\.blog/);
   assert.match(done, /Ko‘rishlar \(storis\): 3\s000 – 10\s000/);
+  assert.match(done, /Reels va postlar: 20\s000 – 100\s000/);
   assert.match(done, /Statistika: yuborildi/);
 
   // Moderatsiya kartasi statistika rasmi bilan keladi

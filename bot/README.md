@@ -6,7 +6,7 @@ Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilova
 
 1. **Ro‘yxatdan o‘tish (bot ichida).** `/start` → til (o‘zbekcha / ruscha) → "Biznes egasiman" yoki "Blogerman".
    - **Biznes:** ism, do‘kon yoki kompaniya nomi, toifa, telefon ("Raqamni yuborish" tugmasi).
-   - **Bloger:** ism, asosiy tarmoq, profil havolasi ("Instagram profilingiz havolasini yuboring"; @username ham bo‘ladi, bot uni to‘liq havolaga aylantiradi va boshqa saytning havolasini qabul qilmaydi), obunachilar soni, o‘rtacha ko‘rishlar (storis, post yoki video), statistika skrinshoti (ixtiyoriy), yo‘nalish (21 ta variant, oxirgisi "Boshqa"), auditoriyasi joylashgan hudud (14 ta hudud), telefon.
+   - **Bloger:** ism, asosiy tarmoq, profil havolasi ("Instagram profilingiz havolasini yuboring"; @username ham bo‘ladi, bot uni to‘liq havolaga aylantiradi va boshqa saytning havolasini qabul qilmaydi), obunachilar soni, o‘rtacha ko‘rishlar (Instagram: storis hamda reels va postlar; Telegram: post; TikTok va YouTube: video), statistika skrinshoti (ixtiyoriy), yo‘nalish (21 ta variant, oxirgisi "Boshqa"), auditoriyasi joylashgan hudud (14 ta hudud), telefon.
 2. **Biznes** mini ilovada reklama e’loni joylaydi: rasm (ixtiyoriy), mahsulot, toifa, hudud (yoki butun O‘zbekiston), qiymati, platformalar, format, kerakli obunachilar, muddat, blogerlar soni.
 3. **Bloger** mini ilovada reklama e’lonlarini ko‘radi va so‘rov yuboradi. Filtrlar: qidiruv, toifa, hudud (standart holatda blogerning o‘z hududi va butun O‘zbekiston uchun e’lonlar), platforma, saralash (yangilari yoki qimmatroq) va "Faqat menga moslari" (obunachilar talabi, hudud, bo‘sh o‘rin va hali so‘rov yuborilmaganlar). Filtrlar blogerning qurilmasida eslab qolinadi.
 4. **Biznesga botda xabar keladi**, xabarda "✅ Qabul qilish" va "❌ Rad etish" tugmalari bor. Xuddi shuni mini ilovadagi "So‘rovlar" bo‘limida ham qilish mumkin. U yerda so‘rovlarni holat (yangi, qabul qilingan, hammasi), e’lon va blogerning hududi bo‘yicha filtrlash, obunachilar soni bo‘yicha saralash mumkin.
@@ -18,6 +18,7 @@ Qo‘shimcha:
 - Blogerning obunachilari e’lon talabidan kam bo‘lsa, so‘rov yuborib bo‘lmaydi.
 - Biznesga kelgan so‘rovda blogerning profil havolasi, obunachilari, o‘rtacha ko‘rishlari, yo‘nalishi, auditoriya hududi va statistika skrinshoti (rasm bo‘lib) bor. Blogerning Telegram profili va telefon raqami faqat so‘rov qabul qilingandan keyin ko‘rinadi.
 - Ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi (saytdagi `privacy.html`, manzil `wrangler.toml` dagi `PRIVACY_URL` da).
+- Bloger ma’lumotlarini botdagi "✏️ Ma’lumotlarni yangilash" tugmasi bilan yangilaydi. Biznesda bu tugma yo‘q: o‘rniga "🗑 Biznesni o‘chirish" bor. U tasdiqdan keyin biznesning profili, barcha e’lonlari va ularga kelgan so‘rovlarni o‘chiradi, so‘ng biznes qaytadan ro‘yxatdan o‘tadi va yana moderatsiyadan o‘tadi (eski e’lonlar qolmaydi).
 - `/delete` foydalanuvchining profili, e’lonlari va so‘rovlarini tasdiqdan keyin butunlay o‘chiradi. `/privacy` siyosat havolasini yuboradi.
 
 ### Moderatsiya

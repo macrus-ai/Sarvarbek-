@@ -1,6 +1,6 @@
 // Bot matnlari (o'zbekcha va ruscha)
 
-import { ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findFollowers, findReach } from './constants.js';
+import { ALL_REGIONS, CATEGORIES, NICHES, REGIONS, findFollowers, findReach, findReelsReach } from './constants.js';
 import { esc, fmtNum, formatPhone, profileDisplay, profileUrl } from './util.js';
 
 export const catLabel = (id, lang) => CATEGORIES.find((c) => c.id === id)?.[lang === 'ru' ? 'ru' : 'uz'] ?? id ?? '';
@@ -28,13 +28,15 @@ export function followersLabel(id) {
   return f.max ? `${fmtNum(f.min)} – ${fmtNum(f.max)}` : `${fmtNum(f.min)}+`;
 }
 
-// O'rtacha ko'rishlar: "500 – 1 000", "500 gacha", "50 000+"
-export function reachLabel(id, lang) {
-  const r = findReach(id);
+// O'rtacha ko'rishlar oralig'i: "500 – 1 000", "500 gacha", "50 000+"
+function rangeLabel(r, lang) {
   if (!r) return '';
   if (!r.min) return lang === 'ru' ? `до ${fmtNum(r.max)}` : `${fmtNum(r.max)} gacha`;
   return r.max ? `${fmtNum(r.min)} – ${fmtNum(r.max)}` : `${fmtNum(r.min)}+`;
 }
+
+export const reachLabel = (id, lang) => rangeLabel(findReach(id), lang);
+export const reelsLabel = (id, lang) => rangeLabel(findReelsReach(id), lang);
 
 // Ko'rishlar nimaniki: Instagram — storis, Telegram — post, TikTok va YouTube — video
 const reachWhat = (platform, lang) =>
@@ -43,6 +45,10 @@ const reachWhat = (platform, lang) =>
 
 const reachLine = (u, lang) =>
   u.reach ? `👁 ${lang === 'ru' ? 'Просмотры' : 'Ko‘rishlar'} (${reachWhat(u.platform, lang)}): ${reachLabel(u.reach, lang)}` : '';
+
+// Instagram: reels va postlarning o'rtacha ko'rishlari
+const reelsLine = (u, lang) =>
+  u.reels_reach ? `🎬 ${lang === 'ru' ? 'Reels и посты' : 'Reels va postlar'}: ${reelsLabel(u.reels_reach, lang)}` : '';
 
 const PLATFORM_ICON = { Instagram: '📸', TikTok: '🎵', YouTube: '▶️', Telegram: '✈️' };
 
@@ -82,6 +88,7 @@ function profileLines(u, lang) {
     profileLine(u.platform, u.profile),
     `👥 ${followersLabel(u.followers)} ${ru ? 'подписчиков' : 'obunachi'}`,
     reachLine(u, lang),
+    reelsLine(u, lang),
     `🏷 ${esc(nicheLabel(u.niche, lang))}`,
     audienceLine(u.region, lang),
     stats,
@@ -118,6 +125,7 @@ const uz = {
       '',
       'Bizneslar shu rasm orqali auditoriyangizni ko‘radi.'
     ].join('\n'),
+  askReels: '🎬 Reels va postlaringiz o‘rtacha nechta ko‘rish to‘playdi?',
   statsSkip: 'O‘tkazib yuborish',
   errStats: 'Iltimos, skrinshotni rasm (foto) sifatida yuboring yoki “O‘tkazib yuborish” tugmasini bosing.',
   askFollowers: 'Obunachilaringiz soni qancha?',
@@ -153,6 +161,13 @@ const uz = {
   editProfile: '✏️ Ma’lumotlarni o‘zgartirish',
   openApp: '🚀 Ilovani ochish',
   updateProfile: '✏️ Ma’lumotlarni yangilash',
+  deleteBusiness: '🗑 Biznesni o‘chirish',
+  bizDeleteConfirm:
+    'Biznesingiz, barcha reklama e’lonlaringiz va ularga kelgan so‘rovlar butunlay o‘chiriladi. Keyin qaytadan ro‘yxatdan o‘tasiz va profilingiz yana moderatsiyadan o‘tadi.\n\nDavom etilsinmi?',
+  bizDeleteYes: '🗑 Ha, o‘chirish',
+  bizDeleted: '🗑 Biznesingiz va uning barcha ma’lumotlari o‘chirildi. Endi qaytadan ro‘yxatdan o‘ting.',
+  errFinishRegistration: 'Avval ro‘yxatdan o‘tishni yakunlang: savollarga javob bering yoki /start yuboring.',
+  errNotApproved: 'Profilingiz hali tasdiqlanmagan.',
   home: (name) => `Assalomu alaykum, ${esc(name)}! Reklama e’lonlari va so‘rovlar ilovada.`,
   help:
     '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
@@ -250,6 +265,7 @@ const uz = {
         profileLine(a.platform, a.profile),
         `👥 ${followersLabel(a.followers)} obunachi`,
         reachLine(a, 'uz'),
+        reelsLine(a, 'uz'),
         `🏷 ${esc(nicheLabel(a.niche, 'uz'))}`,
         audienceLine(a.region, 'uz'),
         a.stats_file_id ? '📊 Statistika skrinshoti — rasmda' : ''
@@ -295,6 +311,7 @@ const uz = {
       profileLine(u.platform, u.profile),
       `👥 ${followersLabel(u.followers)} obunachi`,
       reachLine(u, 'uz'),
+      reelsLine(u, 'uz'),
       `🏷 ${esc(nicheLabel(u.niche, 'uz'))}`,
       audienceLine(u.region, 'uz'),
       `📊 Statistika: ${u.stats_file_id ? 'yuborildi ✅' : 'yuborilmadi'}`,
@@ -347,6 +364,7 @@ const ru = {
       '',
       'По этому скриншоту бизнес увидит вашу аудиторию.'
     ].join('\n'),
+  askReels: '🎬 Сколько в среднем просмотров набирают ваши reels и посты?',
   statsSkip: 'Пропустить',
   errStats: 'Пожалуйста, отправьте скриншот как фото или нажмите «Пропустить».',
   askFollowers: 'Сколько у вас подписчиков?',
@@ -382,6 +400,13 @@ const ru = {
   editProfile: '✏️ Изменить данные',
   openApp: '🚀 Открыть приложение',
   updateProfile: '✏️ Обновить данные',
+  deleteBusiness: '🗑 Удалить бизнес',
+  bizDeleteConfirm:
+    'Ваш бизнес, все рекламные объявления и отклики на них будут удалены навсегда. Затем вы зарегистрируетесь заново, и профиль снова пройдёт модерацию.\n\nПродолжить?',
+  bizDeleteYes: '🗑 Да, удалить',
+  bizDeleted: '🗑 Бизнес и все его данные удалены. Теперь зарегистрируйтесь заново.',
+  errFinishRegistration: 'Сначала завершите регистрацию: ответьте на вопросы или отправьте /start.',
+  errNotApproved: 'Ваш профиль ещё не одобрен.',
   home: (name) => `Здравствуйте, ${esc(name)}! Рекламные объявления и отклики — в приложении.`,
   help:
     '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
@@ -476,6 +501,7 @@ const ru = {
         profileLine(a.platform, a.profile),
         `👥 ${followersLabel(a.followers)} подписчиков`,
         reachLine(a, 'ru'),
+        reelsLine(a, 'ru'),
         `🏷 ${esc(nicheLabel(a.niche, 'ru'))}`,
         audienceLine(a.region, 'ru'),
         a.stats_file_id ? '📊 Скриншот статистики — на фото' : ''
@@ -521,6 +547,7 @@ const ru = {
       profileLine(u.platform, u.profile),
       `👥 ${followersLabel(u.followers)} подписчиков`,
       reachLine(u, 'ru'),
+      reelsLine(u, 'ru'),
       `🏷 ${esc(nicheLabel(u.niche, 'ru'))}`,
       audienceLine(u.region, 'ru'),
       `📊 Статистика: ${u.stats_file_id ? 'отправлена ✅' : 'не отправлена'}`,

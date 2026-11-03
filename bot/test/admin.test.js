@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import {
-  api, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, tgUser
+  api, approve, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, shareContact,
+  tgUser
 } from './helpers.js';
 
 // createEnv() da ADMIN_IDS = '999'
@@ -45,21 +46,28 @@ test('admin yangi foydalanuvchini moderatsiya kartasi bilan bir marta oladi', as
   assert.match(notes[0].body.text, /Tabiiy kosmetika/);
   assert.match(notes[0].body.text, /\+998 90 111 22 33/);
 
-  // Tasdiqlangan profilni yangilash yangi foydalanuvchi deb hisoblanmaydi: "#Profil_yangilandi" keladi
-  await press(env, business, 'reg:restart');
-  await press(env, business, 'role:business');
-  await say(env, business, 'Aziz');
-  await say(env, business, 'Yangi nom');
-  await press(env, business, 'cat:beauty');
-  await say(env, business, undefined, { contact: { phone_number: '998901112233', user_id: 310 } });
-  assert.equal(tg.sent(ADMIN).filter((c) => /#Yangi_biznes/.test(c.body.text)).length, 1);
-  assert.match(lastText(ADMIN), /#Profil_yangilandi/);
-  assert.match(lastText(ADMIN), /Yangi nom/);
-  assert.equal((await api(env, business, '/api/me')).data.user.moderation, 'approved');
-
   const blogger = tgUser(311);
   await registerBlogger(env, blogger, { approve: false });
   assert.match(lastText(ADMIN), /#Yangi_bloger/);
+  await approve(env, blogger);
+
+  // Tasdiqlangan bloger ma'lumotlarini yangilasa — yangi foydalanuvchi emas, "#Profil_yangilandi" keladi
+  await press(env, blogger, 'reg:restart');
+  await press(env, blogger, 'role:blogger');
+  await say(env, blogger, 'Dilnoza Yangi');
+  await press(env, blogger, 'plat:TikTok');
+  await say(env, blogger, '@dilnoza_tt');
+  await press(env, blogger, 'fol:10000-50000');
+  await press(env, blogger, 'rch:3000-10000'); // TikTok: reels savoli yo'q
+  await press(env, blogger, 'stats:skip');
+  await press(env, blogger, 'niche:beauty');
+  await press(env, blogger, 'rgn:tashkent_city');
+  await shareContact(env, blogger, '+998935556677');
+  assert.equal(tg.sent(ADMIN).filter((c) => /#Yangi_bloger/.test(c.body.text)).length, 1);
+  assert.match(lastText(ADMIN), /#Profil_yangilandi/);
+  assert.match(lastText(ADMIN), /Dilnoza Yangi/);
+  assert.doesNotMatch(lastText(ADMIN), /Reels/); // Instagramdan TikTokka o'tdi — eski reels ma'lumoti o'chdi
+  assert.equal((await api(env, blogger, '/api/me')).data.user.moderation, 'approved');
 });
 
 test('admin yangi kampaniyani ko‘radi va yopa oladi', async () => {

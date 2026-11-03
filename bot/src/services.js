@@ -20,11 +20,14 @@ export class AppError extends Error {
 
 export const appUrl = (ctx, tab) => `${ctx.origin}/${tab ? `?tab=${tab}` : ''}`;
 
-// Tasdiqlangan foydalanuvchining bosh menyusi
-export const homeKeyboard = (T, ctx) => ({
+// Tasdiqlangan foydalanuvchining bosh menyusi. Bloger ma'lumotlarini yangilaydi,
+// biznes esa o'chirib, qaytadan ro'yxatdan o'tadi (eski e'lonlar qolmasin).
+export const homeKeyboard = (T, ctx, role) => ({
   inline_keyboard: [
     [{ text: T.openApp, web_app: { url: appUrl(ctx) } }],
-    [{ text: T.updateProfile, callback_data: 'reg:restart' }]
+    role === 'business'
+      ? [{ text: T.deleteBusiness, callback_data: 'biz:delete' }]
+      : [{ text: T.updateProfile, callback_data: 'reg:restart' }]
   ]
 });
 export const pendingKeyboard = (T) => ({ inline_keyboard: [[{ text: T.editProfile, callback_data: 'reg:restart' }]] });
@@ -255,7 +258,7 @@ export async function moderate(ctx, moderatorId, targetId, action) {
   try {
     if (status === 'approved') {
       const text = target.role === 'business' ? T.approvedBusiness : T.approvedBlogger;
-      await ctx.tg.send(targetId, text, { reply_markup: homeKeyboard(T, ctx) });
+      await ctx.tg.send(targetId, text, { reply_markup: homeKeyboard(T, ctx, target.role) });
     } else {
       await ctx.tg.send(targetId, T.rejectedNotice, { reply_markup: resubmitKeyboard(T) });
     }
