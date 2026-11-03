@@ -125,6 +125,14 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
   - Instagram blogeridan to‘rtta alohida savol: reels → postlar → istoriya → qamrov (30 kun), oraliq tugmalar bilan;
   - hamma joyda aniq nom: "Reels (o‘rtacha)", "Postlar (o‘rtacha)", "Istoriya (o‘rtacha)", "Qamrov (30 kun)"; Telegramda "Postlar (o‘rtacha)", TikTok va YouTube'da "Videolar (o‘rtacha)";
   - eski blogerlarda yangi maydonlar "kiritilmagan", avvalgi "Reels va postlar" esa "(eski)" deb ko‘rinadi; ularga xabar yuborilmadi.
+- **Kompyuterdagi chat** — foydalanuvchi kompyuteriga Git, Node, GitHub CLI va GitHub Desktop o‘rnatildi, repo `Desktop\Loyiha\Sarvarbek-` papkasiga olindi. Endi ish shu papkada qilinadi, bulut sessiya kerak emas.
+- "Bot tayyormi, unga blogerlarni va brendlarni taklif qilsam bo‘ladimi" → bot ishlayapti, lekin saytda begona domendagi email (ovoza.uz boshqa odamniki) va pullik tariflar turgani aytildi. Foydalanuvchi botni o‘zi sinab ko‘rgan.
+- "Email hozircha bo‘sh tursin. Saytda bitta tarif qolsin, hozircha bepul bo‘lib, xizmat professional tarzda tushuntirilgan bo‘lishi kerak: biz brendlarga qanday xizmat ko‘rsatamiz va ularga nima qilib bera olamiz"
+
+  → PR #19:
+  - email saytdan olib tashlandi;
+  - "Tariflar" o‘rniga "Xizmatlar" bo‘limi: brendlar uchun 6 ta xizmat va bitta tarif, "Bepul" (ishga tushirish davri);
+  - saytdagi botda yo‘q va’dalar to‘g‘rilandi: post havolasini yuklash va tasdiqlash, reyting, portfolio, e’londagi qo‘shimcha haq.
 
 ## PR'lar ro‘yxati
 
@@ -148,6 +156,7 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 | #16 | `CLAUDE.md` |
 | #17 | Shu hujjat (chat tarixi) |
 | #18 | Instagram: reels, postlar, istoriya va qamrov alohida |
+| #19 | Saytda brendlar uchun xizmatlar va bitta bepul tarif, email olib tashlandi |
 
 ## Bloger yo‘nalishlari (21 ta)
 
@@ -223,7 +232,7 @@ Manbalar: [goesti: Toshkent](https://goesti.ru/cities/tashkent), [goesti: mediak
 
 ## Qo‘lda tekshirib qo‘yish kerak bo‘lgan narsalar
 
-- Saytdagi email (`info@ovoza.uz`) va tarif narxlari namuna. Haqiqiylarini yuborsangiz, almashtiriladi.
+- Saytda email yo‘q (ovoza.uz domeni boshqa odamniki). ovozagroup.uz da pochta ochilsa, email qo‘shiladi.
 - Saytdagi katalogdagi e’lonlar "Namuna" deb belgilangan.
 - GitHub'da asosiy branch `main` bo‘lishi kerak (Settings → General → Default branch). Qilinmagan bo‘lsa, o‘zgartiring.
 - Maxfiylik siyosati matnini yurist ko‘rib chiqsin.
