@@ -43,7 +43,7 @@ python3 -m http.server 8000
 
 - **Matnlar**: o‘zbekcha matnlar `index.html` ichida. Matnni o‘zgartirsangiz, ruschasini `assets/js/i18n.js` dagi xuddi shu kalit (`data-i18n` qiymati) bo‘yicha yangilang.
 - **Reklama e’lonlari (namunalar)**: `assets/js/campaigns.js`. Hozirgilari namuna, saytda ham "Namuna" deb belgilangan.
-- **Aloqa ma’lumotlari**: telefon raqami `+998 95 555 45 49` va bot @Ovozauz_bot. Email hozircha yo‘q (ovoza.uz domeni bizniki emas). Ular `index.html` da ro‘yxatdan o‘tish bo‘limi, savollar bo‘limi va footerda turadi.
+- **Aloqa ma’lumotlari**: telefon raqami `+998 95 555 57 91` va bot @Ovozauz_bot. Email hozircha yo‘q (ovoza.uz domeni bizniki emas). Ular `index.html` da ro‘yxatdan o‘tish bo‘limi, savollar bo‘limi va footerda turadi.
 - **Xizmatlar va tarif**: `index.html` dagi "Xizmatlar" bo‘limi va `i18n.js` dagi `svc…` va `offer…` kalitlari. Bu yerda faqat botda haqiqatan bor imkoniyatlarni yozing. Raqamlar (20 ta faol e’lon, e’longa 100 tagacha bloger) `bot/src/constants.js` dagi `LIMITS` bilan bir xil bo‘lsin.
 - **Ranglar**: `assets/css/style.css` boshidagi `:root` bloki (kunduzgi) va undan keyingi tungi rejim bloklari.
 
