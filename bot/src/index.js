@@ -4,8 +4,10 @@
 //   POST /setup             — webhook, menyu tugmasi va buyruqlarni sozlash (deploydan keyin)
 //   /api/*                  — mini ilova API'si
 //   GET /img/c/...          — reklama e'lonlarining rasmlari (Telegramdan olib beriladi)
+//   /admin/login, /api/admin/* — admin panel (sahifasi public/admin/ da)
 //   qolganlari              — mini ilova fayllari (public/)
 
+import { handleAdmin } from './admin.js';
 import { handleApi } from './api.js';
 import { handleUpdate } from './bot.js';
 import { tr } from './i18n.js';
@@ -22,12 +24,14 @@ export default {
 
     const image = path.match(IMAGE_PATH);
     const stats = path.match(STATS_PATH);
-    if (image || stats || path === '/telegram/webhook' || path === '/setup' || path.startsWith('/api/')) {
+    const admin = path === '/admin/login' || path.startsWith('/api/admin/');
+    if (admin || image || stats || path === '/telegram/webhook' || path === '/setup' || path.startsWith('/api/')) {
       if (!env.BOT_TOKEN || !env.DB) return json({ error: 'not_configured' }, 503);
       const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin: url.origin };
       try {
         if (image) return await serveImage(request, ctx, image, exec);
         if (stats) return await serveStatsImage(request, ctx, stats, exec);
+        if (admin) return await handleAdmin(request, ctx);
         if (path === '/telegram/webhook') return await webhook(request, ctx);
         if (path === '/setup') return await setup(request, ctx);
         return await handleApi(request, ctx);
