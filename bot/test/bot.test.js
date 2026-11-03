@@ -203,7 +203,16 @@ test('ro‘yxatdan o‘tgan foydalanuvchi /start bosganda bosh menyu chiqadi', a
   assert.match(home.body.text, /Assalomu alaykum, Aziz/);
   const buttons = home.body.reply_markup.inline_keyboard.flat();
   assert.ok(buttons.some((b) => b.web_app?.url === `${ORIGIN}/`));
-  assert.ok(buttons.some((b) => b.callback_data === 'reg:restart'));
+  // Biznes ma'lumotlarini yangilamaydi, o'chirib qayta ro'yxatdan o'tadi
+  assert.ok(buttons.some((b) => b.callback_data === 'biz:delete'));
+  assert.ok(!buttons.some((b) => b.callback_data === 'reg:restart'));
+
+  // Blogerda esa "Ma'lumotlarni yangilash"
+  const blogger = tgUser(41);
+  await registerBlogger(env, blogger);
+  await say(env, blogger, '/start');
+  const bloggerButtons = tg.sent(41).at(-1).body.reply_markup.inline_keyboard.flat();
+  assert.ok(bloggerButtons.some((b) => b.callback_data === 'reg:restart'));
 });
 
 test('/lang tilni o‘zgartiradi', async () => {
@@ -228,11 +237,12 @@ test('/stats faqat admin uchun', async () => {
   assert.match(lastText(999), /Bizneslar: 1/);
 });
 
-test('biznes blogerga o‘tsa, faol kampaniyalari yopiladi', async () => {
+test('biznes o‘chirib, bloger bo‘lib qayta ro‘yxatdan o‘tsa, e’lonlari qolmaydi', async () => {
   const user = tgUser(70);
   await registerBusiness(env, user);
   assert.equal((await createCampaign(env, user)).status, 201);
-  await press(env, user, 'reg:restart');
+  await press(env, user, 'biz:delete');
+  await press(env, user, 'biz:yes');
   await press(env, user, 'role:blogger');
   // Qayta ro'yxatdan o'tish tugamaguncha ilova "ro'yxatdan o'ting" deydi
   const me = await api(env, user, '/api/me');

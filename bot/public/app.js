@@ -143,6 +143,7 @@
       adRejectedNote: 'E’lon tasdiqlanmadi. Shartlar va rasmni tekshirib, yangi e’lon joylashingiz mumkin.',
       publishedPending: 'E’lon moderatsiyaga yuborildi. Tasdiqlangach blogerlar ko‘radi.',
       reach: (what) => `O‘rtacha ko‘rishlar (${what})`,
+      reels: 'Reels va postlar',
       reachWhat: { Instagram: 'storis', Telegram: 'post' },
       reachVideo: 'video',
       upTo: (n) => `${n} gacha`,
@@ -334,6 +335,7 @@
       adRejectedNote: 'Объявление не одобрено. Проверьте условия и фото и разместите новое.',
       publishedPending: 'Объявление отправлено на модерацию. После одобрения его увидят блогеры.',
       reach: (what) => `Средние просмотры (${what})`,
+      reels: 'Reels и посты',
       reachWhat: { Instagram: 'сторис', Telegram: 'пост' },
       reachVideo: 'видео',
       upTo: (n) => `до ${n}`,
@@ -906,7 +908,9 @@
           ? `<p class="muted small">🔒 ${esc(t('contactHidden'))}</p>`
           : '';
     const reachWhat = t('reachWhat')[b.platform] || t('reachVideo');
-    const reach = b.reach ? `<span>${esc(t('reach', reachWhat))}: ${esc(reachText(b.reach))}</span>` : '';
+    const reach =
+      (b.reach ? `<span>${esc(t('reach', reachWhat))}: ${esc(reachText(b.reach))}</span>` : '') +
+      (b.reelsReach ? `<span>${esc(t('reels'))}: ${esc(reachText(b.reelsReach))}</span>` : '');
     const stats = b.statsImage
       ? `<button type="button" class="stats-thumb" data-act="lightbox" data-src="${esc(b.statsImage)}" aria-label="${esc(t('stats'))}">
           <img src="${esc(b.statsImage)}" alt="" loading="lazy" decoding="async"><span>${icon('image')}${esc(t('stats'))}</span>

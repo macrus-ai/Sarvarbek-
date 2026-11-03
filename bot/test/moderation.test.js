@@ -133,18 +133,12 @@ test('tasdiqlangan biznes bloklansa, e’lonlari yopiladi', async () => {
   await createCampaign(env, business);
   assert.equal((await api(env, blogger, '/api/campaigns')).data.campaigns.length, 1);
 
-  // Profilni yangilasa, jamoaga "bloklash" tugmasi bilan karta keladi
+  // Biznes "Ma'lumotlarni yangilash" (eski tugma) bosa — o'chirishni taklif qilamiz, ma'lumotlar o'zgarmaydi
   await press(env, business, 'reg:restart');
-  await press(env, business, 'role:business');
-  await say(env, business, 'Aziz');
-  await say(env, business, 'Shubhali nom');
-  await press(env, business, 'cat:beauty');
-  await shareContact(env, business, '998901112233');
-  const card = tg.sent(ADMIN).at(-1);
-  assert.match(card.body.text, /#Profil_yangilandi/);
-  assert.equal(card.body.reply_markup.inline_keyboard[0][0].callback_data, 'mod:b:720');
-  assert.equal((await api(env, business, '/api/me')).data.user.moderation, 'approved');
+  assert.match(lastText(720), /butunlay o‘chiriladi/);
+  assert.equal((await api(env, business, '/api/me')).data.registered, true);
 
+  // Moderator bloklaydi (masalan, eski "#Profil_yangilandi" kartasidan)
   await press(env, tgUser(ADMIN), 'mod:b:720');
   assert.match(tg.last('editMessageText').body.text, /Bloklandi/);
   assert.equal((await api(env, business, '/api/me')).data.user.moderation, 'rejected');

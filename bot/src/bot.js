@@ -1,14 +1,14 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
 import {
-  CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REACH, REGIONS, findFollowers, findReach, isCategory, isNiche, isPlatform,
-  isRegion
+  CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REACH, REELS_REACH, REGIONS, findFollowers, findReach, findReelsReach,
+  isCategory, isNiche, isPlatform, isRegion
 } from './constants.js';
 import {
   closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, listPendingCampaigns,
   listPendingUsers, setSetting, touchUser, updateUser
 } from './db.js';
-import { catLabel, followersLabel, nicheLabel, reachLabel, regionLabel, tr } from './i18n.js';
+import { catLabel, followersLabel, nicheLabel, reachLabel, reelsLabel, regionLabel, tr } from './i18n.js';
 import { newImageKey } from './images.js';
 import {
   AppError, MOD_CHAT_KEYS, adKeyboard, canModerate, decide, editMessage, homeKeyboard, isModerationChat, moderate,
@@ -19,9 +19,12 @@ import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, normali
 // Ro'yxatdan o'tish qadamlari
 const FLOW = {
   business: ['name', 'company', 'category', 'phone'],
-  blogger: ['name', 'platform', 'profile', 'followers', 'reach', 'stats', 'niche', 'region', 'phone']
+  blogger: ['name', 'platform', 'profile', 'followers', 'reach', 'reels', 'stats', 'niche', 'region', 'phone']
 };
-const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'reach', 'niche', 'region']);
+const BUTTON_STEPS = new Set(['lang', 'role', 'category', 'platform', 'followers', 'reach', 'reels', 'niche', 'region']);
+
+// Reels va postlar savoli faqat Instagram blogerlari uchun
+const stepApplies = (step, user) => step !== 'reels' || user.platform === 'Instagram';
 
 const statsKeyboard = (T) => ({ inline_keyboard: [[{ text: T.statsSkip, callback_data: 'stats:skip' }]] });
 
@@ -106,6 +109,12 @@ function ask(ctx, user, step) {
       return ctx.tg.send(id, T.askReach(user.platform), {
         reply_markup: { inline_keyboard: rows(REACH.map((r) => ({ text: reachLabel(r.id, lang), callback_data: `rch:${r.id}` })), 2) }
       });
+    case 'reels':
+      return ctx.tg.send(id, T.askReels, {
+        reply_markup: {
+          inline_keyboard: rows(REELS_REACH.map((r) => ({ text: reelsLabel(r.id, lang), callback_data: `rls:${r.id}` })), 2)
+        }
+      });
     case 'stats':
       return ctx.tg.send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
     case 'followers':
@@ -124,7 +133,14 @@ function ask(ctx, user, step) {
 // Javobni saqlaydi va keyingi qadamni belgilaydi (Telegramga hech narsa yubormaydi)
 async function save(ctx, user, fields) {
   const flow = FLOW[user.role];
-  const next = flow[flow.indexOf(user.reg_step) + 1] || 'done';
+  const merged = { ...user, ...fields };
+  let next = 'done';
+  for (let i = flow.indexOf(user.reg_step) + 1; i < flow.length; i += 1) {
+    if (stepApplies(flow[i], merged)) {
+      next = flow[i];
+      break;
+    }
+  }
   const changes = { ...fields, reg_step: next };
   if (next === 'done') changes.registered_at = user.registered_at || now();
   await updateUser(ctx.db, user.tg_id, changes);
@@ -149,7 +165,7 @@ async function finish(ctx, user) {
   // Tasdiqlangan foydalanuvchi ma'lumotlarini yangiladi: kirish saqlanadi, jamoa o'zgarishni ko'radi
   if (user.moderation === 'approved') {
     try {
-      await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx) });
+      await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx, user.role) });
     } finally {
       await sendModerationCard(ctx, user, 'updated');
     }
@@ -159,7 +175,7 @@ async function finish(ctx, user) {
   // Moderatorlar sozlanmagan bo'lsa, profil darhol faollashadi
   if (!(await moderationEnabled(ctx))) {
     await updateUser(ctx.db, user.tg_id, { moderation: 'approved' });
-    await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx) });
+    await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx, user.role) });
     return;
   }
 
@@ -178,7 +194,20 @@ function sendHome(ctx, user) {
   const id = user.tg_id;
   if (user.moderation === 'rejected') return ctx.tg.send(id, T.rejectedNotice, { reply_markup: resubmitKeyboard(T) });
   if (user.moderation !== 'approved') return ctx.tg.send(id, T.pendingHome, { reply_markup: pendingKeyboard(T) });
-  return ctx.tg.send(id, T.home(user.name || user.first_name || ''), { reply_markup: homeKeyboard(T, ctx) });
+  return ctx.tg.send(id, T.home(user.name || user.first_name || ''), { reply_markup: homeKeyboard(T, ctx, user.role) });
+}
+
+// Biznes ma'lumotlarini yangilamaydi: hammasini o'chirib, qaytadan ro'yxatdan o'tadi (eski e'lonlar qolmaydi)
+function askDeleteBusiness(ctx, user) {
+  const T = tr(user.lang);
+  return ctx.tg.send(user.tg_id, T.bizDeleteConfirm, {
+    reply_markup: {
+      inline_keyboard: [[
+        { text: T.bizDeleteYes, callback_data: 'biz:yes' },
+        { text: T.deleteNo, callback_data: 'biz:no' }
+      ]]
+    }
+  });
 }
 
 /* ---------- Moderatsiya guruhi ---------- */
@@ -438,6 +467,10 @@ async function onCallback(cq, ctx) {
     case 'reg': {
       if (value !== 'restart') return stale();
       await ack();
+      // Tasdiqlangan biznes (eski "Ma'lumotlarni yangilash" tugmasi ham) — o'chirib, qayta ro'yxatdan o'tish
+      if (user.role === 'business' && isRegistered(user) && user.moderation === 'approved') {
+        return askDeleteBusiness(ctx, user);
+      }
       await updateUser(ctx.db, user.tg_id, { reg_step: 'role' });
       return ask(ctx, { ...user, reg_step: 'role' }, 'role');
     }
@@ -466,6 +499,40 @@ async function onCallback(cq, ctx) {
       await markChosen(regionLabel(value, user.lang));
       return advance(ctx, user, { region: value });
     }
+    case 'rls': {
+      if (user.reg_step !== 'reels' || !findReelsReach(value)) return stale();
+      await ack();
+      await markChosen(reelsLabel(value, user.lang));
+      return advance(ctx, user, { reels_reach: value });
+    }
+    case 'biz': {
+      if (user.role !== 'business' || !isRegistered(user)) return stale();
+      if (value === 'delete') {
+        await ack();
+        return askDeleteBusiness(ctx, user);
+      }
+      if (value === 'no') {
+        await ack();
+        try {
+          await ctx.tg.edit(chatId, messageId, T.deleteCancelled);
+        } catch {
+          /* e'tiborsiz */
+        }
+        return undefined;
+      }
+      if (value !== 'yes') return stale();
+      await ack();
+      // Profil, e'lonlar va ularga kelgan so'rovlar o'chadi; til saqlanib, rol savolidan boshlanadi
+      await deleteUserData(ctx.db, user.tg_id);
+      try {
+        await ctx.tg.edit(chatId, messageId, T.bizDeleted);
+      } catch {
+        /* e'tiborsiz */
+      }
+      const fresh = await touchUser(ctx.db, cq.from, user.lang);
+      await updateUser(ctx.db, fresh.tg_id, { lang: user.lang, reg_step: 'role' });
+      return ask(ctx, { ...fresh, lang: user.lang, reg_step: 'role' }, 'role');
+    }
     case 'rch': {
       if (user.reg_step !== 'reach' || !findReach(value)) return stale();
       await ack();
@@ -483,7 +550,7 @@ async function onCallback(cq, ctx) {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();
       await ack();
       await markChosen(value);
-      return advance(ctx, user, { platform: value });
+      return advance(ctx, user, { platform: value, ...(value === 'Instagram' ? {} : { reels_reach: null }) });
     }
     case 'fol': {
       if (user.reg_step !== 'followers' || !findFollowers(value)) return stale();
@@ -495,6 +562,9 @@ async function onCallback(cq, ctx) {
       const appId = Number(extra);
       const decision = value === 'a' ? 'accepted' : value === 'r' ? 'rejected' : null;
       if (!decision || !Number.isSafeInteger(appId)) return stale();
+      // Ro'yxatdan o'tish yarim qolgan yoki profil tasdiqlanmagan bo'lsa — sababini aytamiz
+      if (!isRegistered(user)) return ack(T.errFinishRegistration, true);
+      if (user.moderation !== 'approved') return ack(T.errNotApproved, true);
       try {
         await decide(ctx, user, appId, decision);
       } catch (e) {

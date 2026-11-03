@@ -5,7 +5,7 @@ import { now } from './util.js';
 const USER_FIELDS = [
   'first_name', 'username', 'lang', 'role', 'reg_step', 'name', 'phone', 'company',
   'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at',
-  'moderation', 'moderated_by', 'moderated_at', 'reach', 'stats_file_id', 'stats_key'
+  'moderation', 'moderated_by', 'moderated_at', 'reach', 'reels_reach', 'stats_file_id', 'stats_key'
 ];
 
 /* ---------- Foydalanuvchilar ---------- */
@@ -218,7 +218,7 @@ export function getApplicationFull(db, id) {
       `SELECT a.*, c.title, c.business_id, c.slots, c.format, c.status AS campaign_status,
          b.name AS business_contact, b.company, b.phone AS business_phone, b.username AS business_username, b.lang AS business_lang,
          g.name AS blogger_name, g.phone AS blogger_phone, g.username AS blogger_username, g.lang AS blogger_lang,
-         g.platform, g.profile, g.followers, g.niche, g.region, g.reach, g.stats_file_id
+         g.platform, g.profile, g.followers, g.niche, g.region, g.reach, g.reels_reach, g.stats_file_id
        FROM applications a
        JOIN campaigns c ON c.id = a.campaign_id
        JOIN users b ON b.tg_id = c.business_id
@@ -291,7 +291,7 @@ export async function listBusinessRequests(db, businessId) {
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at,
          c.id AS campaign_id, c.title,
-         g.tg_id AS blogger_id, g.name, g.platform, g.profile, g.followers, g.niche, g.region, g.reach,
+         g.tg_id AS blogger_id, g.name, g.platform, g.profile, g.followers, g.niche, g.region, g.reach, g.reels_reach,
          CASE WHEN g.stats_file_id IS NOT NULL THEN g.stats_key END AS stats_key,
          CASE WHEN a.status = 'accepted' THEN g.username END AS username,
          CASE WHEN a.status = 'accepted' THEN g.phone END AS phone

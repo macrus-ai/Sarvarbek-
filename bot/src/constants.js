@@ -70,6 +70,16 @@ export const REACH = [
   { id: '50000+', min: 50000, max: null }
 ];
 
+// Instagram: reels va postlarning o'rtacha ko'rishlari (odatda storisdan ko'p)
+export const REELS_REACH = [
+  { id: '0-1000', min: 0, max: 1000 },
+  { id: '1000-5000', min: 1000, max: 5000 },
+  { id: '5000-20000', min: 5000, max: 20000 },
+  { id: '20000-100000', min: 20000, max: 100000 },
+  { id: '100000-500000', min: 100000, max: 500000 },
+  { id: '500000+', min: 500000, max: null }
+];
+
 // Profil havolasi qaysi saytda bo'lishi kerak
 export const PLATFORM_HOSTS = {
   Instagram: ['instagram.com', 'instagr.am'],
@@ -115,3 +125,4 @@ export const isCampaignRegion = (id) => id === ALL_REGIONS || isRegion(id);
 export const isPlatform = (p) => PLATFORMS.includes(p);
 export const findFollowers = (id) => FOLLOWERS.find((f) => f.id === id) || null;
 export const findReach = (id) => REACH.find((r) => r.id === id) || null;
+export const findReelsReach = (id) => REELS_REACH.find((r) => r.id === id) || null;

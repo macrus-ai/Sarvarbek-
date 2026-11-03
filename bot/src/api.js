@@ -114,6 +114,7 @@ function requestOut(r) {
       profileUrl: profileUrl(r.platform, r.profile),
       followers: r.followers,
       reach: r.reach || null,
+      reelsReach: r.reels_reach || null,
       statsImage: statsImageUrl(r.blogger_id, r.stats_key),
       niche: r.niche,
       region: r.region || null,
