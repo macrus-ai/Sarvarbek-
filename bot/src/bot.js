@@ -8,6 +8,7 @@ import {
   closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, listPendingCampaigns,
   listPendingUsers, setSetting, touchUser, updateUser
 } from './db.js';
+import { createLoginLink } from './admin.js';
 import { catLabel, followersLabel, nicheLabel, reachLabel, reelsLabel, regionLabel, tr } from './i18n.js';
 import { newImageKey } from './images.js';
 import {
@@ -357,6 +358,12 @@ async function onMessage(msg, ctx) {
     if (cmd === 'app') return isRegistered(user) ? sendHome(ctx, user) : ctx.tg.send(id, T.notRegistered);
     if (cmd === 'stats' && isAdmin(id, ctx.env)) return ctx.tg.send(id, T.stats(await getStats(ctx.db)));
     if (cmd === 'moderatsiya' && isAdmin(id, ctx.env)) return sendPendingList(ctx, id, user.lang);
+    // Admin panelga kirish: havola faqat tugmada (matnda bo'lsa, Telegram uni ko'rib chiqib "ishlatib" qo'yishi mumkin)
+    if (cmd === 'admin' && isAdmin(id, ctx.env)) {
+      return ctx.tg.send(id, T.adminPanel, {
+        reply_markup: { inline_keyboard: [[{ text: T.adminPanelButton, url: await createLoginLink(ctx, id) }]] }
+      });
+    }
     if (cmd === 'id') return ctx.tg.send(id, T.myId(id));
     if (cmd === 'privacy') return ctx.tg.send(id, T.privacy(privacyUrl(ctx.env, user.lang)));
     if (cmd === 'delete') {

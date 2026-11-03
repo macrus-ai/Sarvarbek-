@@ -45,6 +45,22 @@ Guruh ulanmagan bo‘lsa, kartalar `ADMIN_IDS` dagi adminlarga shaxsan keladi. M
 
 O‘z ID'ingizni bilish uchun botga `/id` yuboring.
 
+### Admin panel (sayt)
+
+Hamma jarayonni brauzerdan boshqarish uchun: `https://ovoza-bot.axborotmarkazi-uz.workers.dev/admin/`
+
+**Kirish:** botga `/admin` yuboring (faqat `ADMIN_IDS` dagilar uchun), bot "🔐 Admin panelni ochish" tugmasini beradi. Havola 10 daqiqa ichida bir marta ishlaydi, brauzer 30 kun eslab qoladi. Parol yo‘q. Admin `ADMIN_IDS` dan olib tashlansa, panelga darhol kira olmaydi.
+
+Bo‘limlar:
+- **Bosh sahifa:** blogerlar, bizneslar, moderatsiyadagilar, faol e’lonlar, so‘rovlar, so‘nggi 7 kun.
+- **Moderatsiya:** tasdiq kutayotgan profillar (statistika skrinshoti bilan) va e’lonlar. Tasdiqlash yoki rad etish botdagi tugmalar bilan bir xil ishlaydi: foydalanuvchiga xabar boradi.
+- **Foydalanuvchilar:** qidiruv (ism, kompaniya, @username, telefon, Telegram ID), rol va holat filtri. Batafsil oynada: tasdiqlash, rad etish, bloklash, o‘chirish; biznesning e’lonlari, blogerning so‘rovlari.
+- **Reklama e’lonlari:** qidiruv, moderatsiya va holat filtri; e’lonni tasdiqlash, rad etish yoki yopish, unga kelgan so‘rovlar.
+- **So‘rovlar:** blogerlarning barcha so‘rovlari holati bilan.
+- **Sozlamalar:** ulangan moderatsiya guruhlari (uzish mumkin), chiqish.
+
+Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlanadi, panel boshqa saytdan so‘rov yuborishga va ramkaga qo‘yishga yo‘l qo‘ymaydi.
+
 ### E’lon rasmlari
 
 - Biznes rasmni e’lon joylashda yoki keyin e’lon sahifasida qo‘shadi, almashtiradi yoki olib tashlaydi.

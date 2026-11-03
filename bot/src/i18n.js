@@ -227,6 +227,9 @@ const uz = {
   groupHelp:
     'Guruhni ulash uchun:\n/ulash — hammasi shu guruhga\n/ulash bloger — yangi blogerlar\n/ulash biznes — yangi bizneslar\n/ulash elon — yangi reklama e’lonlari\n\n/moderatsiya — tasdiq kutayotgan profillar',
   groupNotAdmin: 'Guruhni faqat Ovoza adminlari ulay oladi.',
+  adminPanel:
+    '🔐 Admin panelga kirish havolasi tayyor. U 10 daqiqa ichida bir marta ishlaydi va brauzerni 30 kun eslab qoladi.\n\nHavolani hech kimga bermang.',
+  adminPanelButton: '🔐 Admin panelni ochish',
   adminNewCampaign: (c) =>
     [
       '#Yangi_elon',
@@ -464,6 +467,9 @@ const ru = {
   groupHelp:
     'Чтобы подключить группу:\n/ulash — всё в эту группу\n/ulash bloger — новые блогеры\n/ulash biznes — новые бизнесы\n/ulash elon — новые рекламные объявления\n\n/moderatsiya — профили, ожидающие проверки',
   groupNotAdmin: 'Подключить группу могут только администраторы Ovoza.',
+  adminPanel:
+    '🔐 Ссылка для входа в админ-панель готова. Она работает один раз в течение 10 минут, браузер запомнит вход на 30 дней.\n\nНикому не передавайте ссылку.',
+  adminPanelButton: '🔐 Открыть админ-панель',
   adminNewCampaign: (c) =>
     [
       '#Yangi_elon',
