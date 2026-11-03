@@ -2,6 +2,8 @@
 
 Ovoza — O‘zbekistondagi bizneslar va blogerlarni barter asosida bog‘laydigan platforma.
 
+Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili, keyingi g‘oyalar): `docs/chat-tarixi.md`.
+
 ## Foydalanuvchi bilan ishlash
 
 - Javoblar **o‘zbekcha**, qisqa, telefonda o‘qishga qulay: natija birinchi, keyin tafsilot. Foydalanuvchi dasturchi emas, texnik so‘zlarni kam ishlating.
