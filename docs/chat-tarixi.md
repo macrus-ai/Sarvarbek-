@@ -55,7 +55,7 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 - **19:05** — "Ha, kuzatib tur" → PR #1 merge qilindi.
 - **23:23** — "O‘zing qil shu ishni" → sayt GitHub Pages'ga chiqdi.
 - **23:28** — "Ha, avtomatik yangilashni qo‘sh" → PR #2: `main` o‘zgarsa, sayt o‘zi yangilanadi.
-- **23:55** — rasm bilan: "Nomerga +998955554549 ni kirit" → PR #3: raqam saytning ikki joyiga qo‘yildi.
+- **23:55** — rasm bilan: "Nomerga +998955554549 ni kirit" → PR #3: raqam saytning ikki joyiga qo‘yildi. (04.11 da +998 95 555 57 91 ga almashtirildi, PR #21.)
 - **23:58** — "Shuni doim merge qilishim shartmi, o‘zi avtomatik bo‘lsin" → shundan beri merge'ni Claude o‘zi qiladi.
 
 ### 1-noyabr — Telegram bot
@@ -135,6 +135,7 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
   - saytdagi botda yo‘q va’dalar to‘g‘rilandi: post havolasini yuklash va tasdiqlash, reyting, portfolio, e’londagi qo‘shimcha haq.
 - "Cloudflare'da turmasdan boshqa qayerda saqlayman botnikini" → qonun 2026-yil martida o‘zgargani aniqlandi: faqat biometrik va genetik ma’lumotlarni O‘zbekistonda saqlash majburiy. Ovoza Cloudflare'da qolishi mumkin. Toshkentdagi variantlar ham aytildi (Serverspace, Falconcloud, Pro-Data, TCloud, Beeline Cloud), lekin tavsiya: Cloudflare'da qolish. Manbalar: [kun.uz](https://kun.uz/ru/news/2026/03/28/xraneniye-nekotoryx-personalnyx-dannyx-za-predelami-uzbekistana-razresheno), [spot.uz](https://www.spot.uz/ru/2026/08/04/personal-data-abroad/).
 - "Ha, yoz" (maxfiylik siyosatiga) → PR #20: maxfiylik siyosatida baza qayerda turishi yozildi (Cloudflare, AQSh, Shimoliy Amerikaning sharqi), ro‘yxatdagi davlatlar va "biometrik ma’lumot yig‘ilmaydi" qo‘shildi. Ko‘rishlar va qamrov yig‘iladigan ma’lumotlar ro‘yxatiga kiritildi.
+- "Saytda nomer xato yozilgan, shu ma’lumotlarni kirit: 955555791" → PR #21: sayt, savollar bo‘limi va maxfiylik siyosatida (uz va ru) raqam +998 95 555 57 91 ga almashtirildi.
 
 ## PR'lar ro‘yxati
 
@@ -160,6 +161,7 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 | #18 | Instagram: reels, postlar, istoriya va qamrov alohida |
 | #19 | Saytda brendlar uchun xizmatlar va bitta bepul tarif, email olib tashlandi |
 | #20 | Maxfiylik siyosati: ma’lumotlar qayerda saqlanishi, ko‘rishlar va qamrov |
+| #21 | Saytdagi telefon raqami: +998 95 555 57 91 |
 
 ## Bloger yo‘nalishlari (21 ta)
 
