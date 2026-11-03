@@ -142,10 +142,13 @@
       adPendingNote: 'E’lon moderatsiyada. Jamoamiz tasdiqlagach blogerlar uni ko‘radi va botga xabar keladi.',
       adRejectedNote: 'E’lon tasdiqlanmadi. Shartlar va rasmni tekshirib, yangi e’lon joylashingiz mumkin.',
       publishedPending: 'E’lon moderatsiyaga yuborildi. Tasdiqlangach blogerlar ko‘radi.',
-      reach: (what) => `O‘rtacha ko‘rishlar (${what})`,
-      reels: 'Reels va postlar',
-      reachWhat: { Instagram: 'storis', Telegram: 'post' },
-      reachVideo: 'video',
+      viewsReels: 'Reels (o‘rtacha)',
+      viewsPosts: 'Postlar (o‘rtacha)',
+      viewsStories: 'Istoriya (o‘rtacha)',
+      viewsAccounts: 'Qamrov (30 kun)',
+      viewsLegacy: 'Reels va postlar (eski)',
+      viewsTelegram: 'Postlar (o‘rtacha)',
+      viewsVideo: 'Videolar (o‘rtacha)',
       upTo: (n) => `${n} gacha`,
       stats: 'Statistika',
       contactHidden: 'Telegram va telefon raqami so‘rovni qabul qilgach ko‘rinadi.',
@@ -334,10 +337,13 @@
       adPendingNote: 'Объявление на модерации. После одобрения блогеры увидят его, а бот пришлёт сообщение.',
       adRejectedNote: 'Объявление не одобрено. Проверьте условия и фото и разместите новое.',
       publishedPending: 'Объявление отправлено на модерацию. После одобрения его увидят блогеры.',
-      reach: (what) => `Средние просмотры (${what})`,
-      reels: 'Reels и посты',
-      reachWhat: { Instagram: 'сторис', Telegram: 'пост' },
-      reachVideo: 'видео',
+      viewsReels: 'Reels (в среднем)',
+      viewsPosts: 'Посты (в среднем)',
+      viewsStories: 'Сторис (в среднем)',
+      viewsAccounts: 'Охват за 30 дней',
+      viewsLegacy: 'Reels и посты (старое)',
+      viewsTelegram: 'Посты (в среднем)',
+      viewsVideo: 'Видео (в среднем)',
       upTo: (n) => `до ${n}`,
       stats: 'Статистика',
       contactHidden: 'Telegram и телефон будут видны после того, как вы примете отклик.',
@@ -453,6 +459,20 @@
     const max = m[2] ? Number(m[2]) : null;
     if (!min && max) return t('upTo', fmt(max));
     return max ? `${fmt(min)} – ${fmt(max)}` : `${fmt(min)}+`;
+  }
+
+  // Blogerning ko'rishlari va qamrovi: Instagram — reels, postlar, istoriya, qamrov (30 kun);
+  // boshqa platformalar — bitta o'rtacha ko'rishlar. Eski "Reels va postlar" yangilari bo'lmasa ko'rinadi.
+  function viewsHTML(b) {
+    const item = (key, id) => (id ? `<span>${esc(t(key))}: ${esc(reachText(id))}</span>` : '');
+    if (b.platform !== 'Instagram') return item(b.platform === 'Telegram' ? 'viewsTelegram' : 'viewsVideo', b.reach);
+    return [
+      item('viewsReels', b.reelsViews),
+      item('viewsPosts', b.postsViews),
+      item('viewsStories', b.reach),
+      item('viewsAccounts', b.accountsReached),
+      b.reelsViews || b.postsViews ? '' : item('viewsLegacy', b.reelsReach)
+    ].join('');
   }
 
   function followersLabel(id) {
@@ -907,10 +927,7 @@
         : r.status === 'pending'
           ? `<p class="muted small">🔒 ${esc(t('contactHidden'))}</p>`
           : '';
-    const reachWhat = t('reachWhat')[b.platform] || t('reachVideo');
-    const reach =
-      (b.reach ? `<span>${esc(t('reach', reachWhat))}: ${esc(reachText(b.reach))}</span>` : '') +
-      (b.reelsReach ? `<span>${esc(t('reels'))}: ${esc(reachText(b.reelsReach))}</span>` : '');
+    const reach = viewsHTML(b);
     const stats = b.statsImage
       ? `<button type="button" class="stats-thumb" data-act="lightbox" data-src="${esc(b.statsImage)}" aria-label="${esc(t('stats'))}">
           <img src="${esc(b.statsImage)}" alt="" loading="lazy" decoding="async"><span>${icon('image')}${esc(t('stats'))}</span>

@@ -119,6 +119,12 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 
 - **01:01** — "Shu chatdagi birinchi xabar qachon yozilgan va nima deb yozilgan", "Keyingi xabarlar" → xabarlar ro‘yxati berildi.
 - **01:01** — "Shu chatdagi barcha ma’lumotlarni loyiha papkasiga joylashingni xohlayman" → shu hujjat.
+- **Yangi chat (bulutda)** — admin paneldagi Moderatsiya sahifasi rasmi bilan (u yerda faqat "Ko‘rishlar: 500 gacha" chiqqan edi): "Shu yerda Reels lar o‘rtacha ko‘rilishi soni, Postlar o‘rtacha ko‘rilishi soni, Istoriya o‘rtacha ko‘rilishi soni, Qamrov darajasi (охват) shular bo‘lishi kerak". Qamrov uchun "oxirgi 30 kunda qamrab olingan akkauntlar" varianti tanlandi (foiz emas).
+
+  → PR #18:
+  - Instagram blogeridan to‘rtta alohida savol: reels → postlar → istoriya → qamrov (30 kun), oraliq tugmalar bilan;
+  - hamma joyda aniq nom: "Reels (o‘rtacha)", "Postlar (o‘rtacha)", "Istoriya (o‘rtacha)", "Qamrov (30 kun)"; Telegramda "Postlar (o‘rtacha)", TikTok va YouTube'da "Videolar (o‘rtacha)";
+  - eski blogerlarda yangi maydonlar "kiritilmagan", avvalgi "Reels va postlar" esa "(eski)" deb ko‘rinadi; ularga xabar yuborilmadi.
 
 ## PR'lar ro‘yxati
 
@@ -140,6 +146,8 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 | #14 | Reels ko‘rishlari, biznesni o‘chirish |
 | #15 | Admin panel |
 | #16 | `CLAUDE.md` |
+| #17 | Shu hujjat (chat tarixi) |
+| #18 | Instagram: reels, postlar, istoriya va qamrov alohida |
 
 ## Bloger yo‘nalishlari (21 ta)
 

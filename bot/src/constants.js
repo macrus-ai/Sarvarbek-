@@ -60,7 +60,8 @@ export const ALL_REGIONS = 'all';
 
 export const PLATFORMS = ['Instagram', 'Telegram', 'TikTok', 'YouTube'];
 
-// Blogerning o'rtacha ko'rishlari (Instagram — storis, Telegram — post, TikTok/YouTube — video)
+// Blogerning o'rtacha ko'rishlari: Telegram — post, TikTok/YouTube — video.
+// Instagramda shu oraliqlar istoriya (users.reach) va postlar (users.posts_views) uchun.
 export const REACH = [
   { id: '0-500', min: 0, max: 500 },
   { id: '500-1000', min: 500, max: 1000 },
@@ -70,7 +71,8 @@ export const REACH = [
   { id: '50000+', min: 50000, max: null }
 ];
 
-// Instagram: reels va postlarning o'rtacha ko'rishlari (odatda storisdan ko'p)
+// Instagram: reels o'rtacha ko'rishlari (odatda istoriyadan ko'p), users.reels_views.
+// Eski users.reels_reach ("Reels va postlar") ham shu oraliqlarda saqlangan.
 export const REELS_REACH = [
   { id: '0-1000', min: 0, max: 1000 },
   { id: '1000-5000', min: 1000, max: 5000 },
@@ -78,6 +80,16 @@ export const REELS_REACH = [
   { id: '20000-100000', min: 20000, max: 100000 },
   { id: '100000-500000', min: 100000, max: 500000 },
   { id: '500000+', min: 500000, max: null }
+];
+
+// Instagram qamrovi: oxirgi 30 kunda qamrab olingan akkauntlar ("Accounts reached"), users.accounts_reached
+export const ACCOUNTS_REACHED = [
+  { id: '0-5000', min: 0, max: 5000 },
+  { id: '5000-20000', min: 5000, max: 20000 },
+  { id: '20000-100000', min: 20000, max: 100000 },
+  { id: '100000-500000', min: 100000, max: 500000 },
+  { id: '500000-1000000', min: 500000, max: 1000000 },
+  { id: '1000000+', min: 1000000, max: null }
 ];
 
 // Profil havolasi qaysi saytda bo'lishi kerak
@@ -126,3 +138,4 @@ export const isPlatform = (p) => PLATFORMS.includes(p);
 export const findFollowers = (id) => FOLLOWERS.find((f) => f.id === id) || null;
 export const findReach = (id) => REACH.find((r) => r.id === id) || null;
 export const findReelsReach = (id) => REELS_REACH.find((r) => r.id === id) || null;
+export const findAccountsReached = (id) => ACCOUNTS_REACHED.find((r) => r.id === id) || null;

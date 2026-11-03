@@ -113,7 +113,11 @@ function requestOut(r) {
       profile: r.profile,
       profileUrl: profileUrl(r.platform, r.profile),
       followers: r.followers,
+      // Instagram: reels, postlar, istoriya (reach), qamrov 30 kun; boshqalar — faqat reach. Eski: reelsReach.
       reach: r.reach || null,
+      reelsViews: r.reels_views || null,
+      postsViews: r.posts_views || null,
+      accountsReached: r.accounts_reached || null,
       reelsReach: r.reels_reach || null,
       statsImage: statsImageUrl(r.blogger_id, r.stats_key),
       niche: r.niche,

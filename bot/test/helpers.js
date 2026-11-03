@@ -256,8 +256,10 @@ export async function registerBlogger(
     lang = 'uz',
     niche = 'beauty',
     region = 'tashkent_city',
-    reach = '1000-3000',
-    reels = '5000-20000', // Instagram: reels va postlar
+    reels = '5000-20000', // Instagram: reels o'rtacha ko'rishlari
+    posts = '3000-10000', // Instagram: postlar
+    reach = '1000-3000', // Instagram: istoriya (storis)
+    accounts = '20000-100000', // Instagram: qamrov (30 kun)
     stats = false, // true — statistika skrinshotini yuboradi
     approve: approved = true
   } = {}
@@ -269,8 +271,10 @@ export async function registerBlogger(
   await press(env, user, 'plat:Instagram');
   await say(env, user, '@dilnoza.blog');
   await press(env, user, `fol:${followers}`);
-  await press(env, user, `rch:${reach}`);
   await press(env, user, `rls:${reels}`);
+  await press(env, user, `pst:${posts}`);
+  await press(env, user, `rch:${reach}`);
+  await press(env, user, `acc:${accounts}`);
   if (stats) await sendPhoto(env, user, `stats-${user.id}`);
   else await press(env, user, 'stats:skip');
   await press(env, user, `niche:${niche}`);
