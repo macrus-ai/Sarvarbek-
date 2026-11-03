@@ -133,6 +133,8 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
   - email saytdan olib tashlandi;
   - "Tariflar" o‘rniga "Xizmatlar" bo‘limi: brendlar uchun 6 ta xizmat va bitta tarif, "Bepul" (ishga tushirish davri);
   - saytdagi botda yo‘q va’dalar to‘g‘rilandi: post havolasini yuklash va tasdiqlash, reyting, portfolio, e’londagi qo‘shimcha haq.
+- "Cloudflare'da turmasdan boshqa qayerda saqlayman botnikini" → qonun 2026-yil martida o‘zgargani aniqlandi: faqat biometrik va genetik ma’lumotlarni O‘zbekistonda saqlash majburiy. Ovoza Cloudflare'da qolishi mumkin. Toshkentdagi variantlar ham aytildi (Serverspace, Falconcloud, Pro-Data, TCloud, Beeline Cloud), lekin tavsiya: Cloudflare'da qolish. Manbalar: [kun.uz](https://kun.uz/ru/news/2026/03/28/xraneniye-nekotoryx-personalnyx-dannyx-za-predelami-uzbekistana-razresheno), [spot.uz](https://www.spot.uz/ru/2026/08/04/personal-data-abroad/).
+- "Ha, yoz" (maxfiylik siyosatiga) → PR #20: maxfiylik siyosatida baza qayerda turishi yozildi (Cloudflare, AQSh, Shimoliy Amerikaning sharqi), ro‘yxatdagi davlatlar va "biometrik ma’lumot yig‘ilmaydi" qo‘shildi. Ko‘rishlar va qamrov yig‘iladigan ma’lumotlar ro‘yxatiga kiritildi.
 
 ## PR'lar ro‘yxati
 
@@ -157,6 +159,7 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 | #17 | Shu hujjat (chat tarixi) |
 | #18 | Instagram: reels, postlar, istoriya va qamrov alohida |
 | #19 | Saytda brendlar uchun xizmatlar va bitta bepul tarif, email olib tashlandi |
+| #20 | Maxfiylik siyosati: ma’lumotlar qayerda saqlanishi, ko‘rishlar va qamrov |
 
 ## Bloger yo‘nalishlari (21 ta)
 
@@ -190,7 +193,7 @@ Ro‘yxat `bot/src/constants.js` faylida (`NICHES`). Biznes toifalari alohida, u
 2. **Avval bizneslarni, keyin blogerlarni olib keling.** Bloger bo‘sh ro‘yxatni ko‘rsa qaytib kelmaydi. Avval kamida 3–5 ta haqiqiy e’lon bo‘lsin.
 3. **Shaxsiy ma’lumotlar:**
    - Maxfiylik siyosati namuna sifatida yozilgan, uni yurist ko‘rib chiqsin.
-   - O‘zbekiston qonunchiligi fuqarolarning shaxsiy ma’lumotlarini O‘zbekistondagi serverlarda saqlashni talab qiladi, hozir esa ular Cloudflare'da. Loyiha kattalashishidan oldin yurist bilan maslahatlashing.
+   - ~~O‘zbekiston qonunchiligi fuqarolarning shaxsiy ma’lumotlarini O‘zbekistondagi serverlarda saqlashni talab qiladi.~~ **Eskirgan (04.11 da to‘g‘rilandi).** 2026-yil 27-martdan beri 27-1-modda faqat biometrik va genetik ma’lumotlarni, hamda telekom operatorlari mijozlarining ma’lumotlarini O‘zbekistonda saqlashni talab qiladi. Boshqa ma’lumotlarni Vazirlar Mahkamasi ro‘yxatidagi davlatlarda saqlash mumkin. Ro‘yxat 2026-yil 29-iyulda tasdiqlangan, unda 49 ta davlat, jumladan AQSh, Kanada va Yevropa Ittifoqi davlatlari bor. Ovoza bazasi Cloudflare'da, ENAM mintaqasida (Shimoliy Amerikaning sharqi) turadi, shuning uchun ko‘chirish shart emas. Yurist bilan ikki narsani aniqlashtirish kerak: bazani Davlat reyestrida ro‘yxatdan o‘tkazish kerakmi va maxfiylik siyosati matni to‘g‘rimi.
 
 Blogerlarga yuborish uchun tayyor matn:
 
@@ -235,4 +238,4 @@ Manbalar: [goesti: Toshkent](https://goesti.ru/cities/tashkent), [goesti: mediak
 - Saytda email yo‘q (ovoza.uz domeni boshqa odamniki). ovozagroup.uz da pochta ochilsa, email qo‘shiladi.
 - Saytdagi katalogdagi e’lonlar "Namuna" deb belgilangan.
 - GitHub'da asosiy branch `main` bo‘lishi kerak (Settings → General → Default branch). Qilinmagan bo‘lsa, o‘zgartiring.
-- Maxfiylik siyosati matnini yurist ko‘rib chiqsin.
+- Maxfiylik siyosati matnini yurist ko‘rib chiqsin. Bazani Davlat reyestrida ro‘yxatdan o‘tkazish kerakmi, shuni ham so‘rang.
