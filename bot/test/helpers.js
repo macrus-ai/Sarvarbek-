@@ -45,6 +45,8 @@ export function createDb() {
 export function fakeTelegram() {
   const calls = [];
   const failing = new Set();
+  // chat_id -> { code, description }: shu chatga yuborilgan xabar xato qaytaradi (masalan, botni bloklagan)
+  const failingChats = new Map();
   let nextMessageId = 1000;
   const original = globalThis.fetch;
   let nextFile = 1;
@@ -87,6 +89,12 @@ export function fakeTelegram() {
     if (failing.has(method)) {
       return new Response(JSON.stringify({ ok: false, error_code: 400, description: 'Bad Request: query is too old' }), { status: 400 });
     }
+    const chatFailure = failingChats.get(Number(body.chat_id));
+    if (chatFailure && (method === 'sendMessage' || method === 'sendPhoto')) {
+      return new Response(JSON.stringify({ ok: false, error_code: chatFailure.code, description: chatFailure.description }), {
+        status: chatFailure.code
+      });
+    }
     let result = true;
     if (method === 'sendMessage') result = { message_id: nextMessageId++, chat: { id: body.chat_id }, text: body.text };
     if (method === 'sendPhoto') {
@@ -118,6 +126,10 @@ export function fakeTelegram() {
     },
     // Berilgan Telegram metodi xato qaytarsin
     fail: (method) => failing.add(method),
+    // Shu chatga xabar yuborilmasin: 403 — botni bloklagan, 429 — Telegram "kuting" deydi
+    failChat: (chatId, code = 403, description = 'Forbidden: bot was blocked by the user') =>
+      failingChats.set(Number(chatId), { code, description }),
+    unfailChat: (chatId) => failingChats.delete(Number(chatId)),
     sent: (chatId) => calls.filter((c) => c.method === 'sendMessage' && c.body.chat_id === chatId),
     last: (method) => [...calls].reverse().find((c) => c.method === method)
   };
@@ -224,6 +236,17 @@ export const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 0x4a, 0x46, 0
 
 // Rasmni xuddi brauzer kabi oladi (initData'siz)
 export const getImage = (env, path) => worker.fetch(new Request(`${ORIGIN}${path}`), env);
+
+// Cloudflare cron'ni bir marta ishga tushiradi (yangi e'lonlar haqida xabarlar).
+// Mini ilova manzili odatda /setup da saqlanadi; testda to'g'ridan-to'g'ri yozamiz.
+export async function runCron(env) {
+  await env.DB.prepare(
+    "INSERT INTO settings (key, value, updated_at) VALUES ('app_origin', ?1, 0) ON CONFLICT (key) DO NOTHING"
+  )
+    .bind(ORIGIN)
+    .run();
+  await worker.scheduled({ cron: '* * * * *', scheduledTime: Date.now() }, env, { waitUntil() {} });
+}
 
 // Admin (ADMIN_IDS dagi birinchisi) profilni tasdiqlaydi
 export async function approve(env, user) {

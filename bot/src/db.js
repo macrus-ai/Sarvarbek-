@@ -1,12 +1,13 @@
 // D1 (SQLite) bazasi bilan ishlash
 
+import { FOLLOWERS } from './constants.js';
 import { now } from './util.js';
 
 const USER_FIELDS = [
   'first_name', 'username', 'lang', 'role', 'reg_step', 'name', 'phone', 'company',
   'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at',
   'moderation', 'moderated_by', 'moderated_at', 'reach', 'reels_reach', 'reels_views', 'posts_views',
-  'accounts_reached', 'stats_file_id', 'stats_key'
+  'accounts_reached', 'stats_file_id', 'stats_key', 'notify_ads'
 ];
 
 /* ---------- Foydalanuvchilar ---------- */
@@ -333,8 +334,71 @@ export async function deleteUserData(db, id) {
     .prepare('DELETE FROM applications WHERE blogger_id = ?1 OR campaign_id IN (SELECT id FROM campaigns WHERE business_id = ?1)')
     .bind(id)
     .run();
+  await db.prepare('DELETE FROM ad_broadcasts WHERE campaign_id IN (SELECT id FROM campaigns WHERE business_id = ?1)').bind(id).run();
   await db.prepare('DELETE FROM campaigns WHERE business_id = ?1').bind(id).run();
   await db.prepare('DELETE FROM users WHERE tg_id = ?1').bind(id).run();
+}
+
+/* ---------- Yangi e'lon haqida blogerlarga xabar (src/broadcast.js) ---------- */
+
+// E'lon tasdiqlanganda navbatga qo'yiladi. Bir e'lon faqat bir marta (qayta ochilsa ham takrorlanmaydi).
+export function enqueueAdBroadcast(db, campaignId) {
+  return db
+    .prepare('INSERT OR IGNORE INTO ad_broadcasts (campaign_id, created_at) VALUES (?1, ?2)')
+    .bind(campaignId, now())
+    .run();
+}
+
+export async function openAdBroadcasts(db, limit) {
+  const { results } = await db
+    .prepare('SELECT * FROM ad_broadcasts WHERE done_at IS NULL ORDER BY created_at, campaign_id LIMIT ?1')
+    .bind(limit)
+    .all();
+  return results;
+}
+
+// Obunachilar oralig'ining yuqori chegarasi (services.js dagi followersOk bilan bir xil qoida):
+// oraliq noma'lum yoki chegarasiz ('100000+') bo'lsa — talabga mos deb hisoblanadi.
+const FOLLOWERS_MAX_SQL = `(CASE u.followers ${FOLLOWERS.map((f) => `WHEN '${f.id}' THEN ${f.max ?? 'NULL'}`).join(' ')} ELSE NULL END)`;
+
+// E'longa mos keyingi blogerlar (tg_id bo'yicha, afterId dan keyin):
+// tasdiqlangan, xabarlarni o'chirmagan, platformasi e'londa bor, auditoriya hududi mos
+// (yoki e'lon butun O'zbekiston uchun), obunachilari yetadi va hali so'rov yubormagan.
+export async function adBroadcastTargets(db, c, afterId, limit) {
+  const { results } = await db
+    .prepare(
+      `SELECT u.tg_id, u.lang FROM users u
+       WHERE u.role = 'blogger' AND u.reg_step = 'done' AND u.moderation = 'approved' AND u.notify_ads = 1
+         AND u.tg_id > ?1
+         AND instr(',' || ?2 || ',', ',' || u.platform || ',') > 0
+         AND (?3 = 'all' OR u.region = ?3)
+         AND (?4 <= 0 OR ${FOLLOWERS_MAX_SQL} IS NULL OR ${FOLLOWERS_MAX_SQL} >= ?4)
+         AND NOT EXISTS (SELECT 1 FROM applications a WHERE a.campaign_id = ?5 AND a.blogger_id = u.tg_id)
+       ORDER BY u.tg_id
+       LIMIT ?6`
+    )
+    .bind(afterId, String(c.platforms || ''), c.region || 'all', Number(c.min_followers) || 0, c.id, limit)
+    .all();
+  return results;
+}
+
+// Navbatni oldinga suradi. done: true — bu e'lon bo'yicha xabarlar tugadi.
+export function advanceAdBroadcast(db, campaignId, lastId, sent, done) {
+  return db
+    .prepare(
+      `UPDATE ad_broadcasts SET last_tg_id = MAX(last_tg_id, ?1), sent = sent + ?2,
+         done_at = CASE WHEN ?3 THEN ?4 ELSE done_at END
+       WHERE campaign_id = ?5`
+    )
+    .bind(lastId, sent, done ? 1 : 0, now(), campaignId)
+    .run();
+}
+
+// Botni bloklagan blogerlarga boshqa yuborilmaydi
+export function disableAdNotifications(db, ids) {
+  if (!ids.length) return null;
+  const marks = ids.map((_, i) => `?${i + 1}`).join(', ');
+  return db.prepare(`UPDATE users SET notify_ads = 0 WHERE tg_id IN (${marks})`).bind(...ids).run();
 }
 
 // Admin kampaniyani yopadi (egasidan qat'i nazar). Yopilgan kampaniyani qaytaradi.

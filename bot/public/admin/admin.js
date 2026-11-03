@@ -95,6 +95,7 @@
     users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/>',
     megaphone: '<path d="M3 11v2a2 2 0 0 0 2 2h1l5 4V5L6 9H5a2 2 0 0 0-2 2z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
     inbox: '<path d="M3 13h5l2 3h4l2-3h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/>',
+    download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
   };
   const icon = (name) =>
@@ -176,7 +177,7 @@
       return `<${tag} class="kpi ${alert ? 'alert' : ''}" ${href ? `href="${href}"` : ''}><span>${esc(label)}</span><strong>${fmt(value)}</strong>${extra ? `<small>${esc(extra)}</small>` : ''}</${tag}>`;
     };
     const pending = s.pendingUsers + s.pendingAds;
-    return `<div class="head"><div><h1>Bosh sahifa</h1><p>Platformaning hozirgi holati</p></div></div>
+    return `<div class="head"><div><h1>Bosh sahifa</h1><p>Platformaning hozirgi holati</p></div>${exportButton}</div>
       ${pending ? `<p class="notice" style="margin-bottom:14px">⏳ Tasdiqlashni kutmoqda: ${s.pendingUsers} ta profil va ${s.pendingAds} ta reklama e’loni. <a href="#/moderation">Moderatsiyaga o‘tish</a></p>` : ''}
       <div class="kpis">
         ${kpi('Moderatsiyada: profillar', s.pendingUsers, '', '#/moderation', s.pendingUsers > 0)}
@@ -330,7 +331,7 @@
         </tr>`
       )
       .join('');
-    return `<div class="head"><div><h1>Foydalanuvchilar</h1><p>Bloger va bizneslar</p></div></div>
+    return `<div class="head"><div><h1>Foydalanuvchilar</h1><p>Bloger va bizneslar</p></div>${exportButton}</div>
       <form class="filters" data-form="users">
         <label class="sr-only" for="u-q">Qidiruv</label>
         <input id="u-q" class="control" name="q" type="search" placeholder="Ism, kompaniya, @username, telefon yoki ID" value="${esc(f.q)}">
@@ -502,6 +503,174 @@
     }
   }
 
+  /* ---------- Excel'ga yuklab olish ---------- */
+  // Hamma ma'lumot: blogerlar, bizneslar, reklama e'lonlari va so'rovlar — to'rt varaqli bitta fayl.
+  // Server 500 tadan beradi, fayl brauzerda yasaladi (xlsx.js).
+  const exportButton = `<button type="button" class="btn" data-act="export">${icon('download')}<span>Excel’ga yuklab olish</span></button>`;
+
+  const dateCell = (ts) => (ts ? date(ts) : '');
+  const yesNo = (v, yes, no) => (v ? yes : no);
+  const LANG = { uz: 'O‘zbekcha', ru: 'Ruscha' };
+
+  // [sarlavha, qiymat, ustun kengligi]
+  const EXPORT_SHEETS = [
+    {
+      name: 'Blogerlar',
+      kind: 'users',
+      filter: (r) => r.role === 'blogger',
+      columns: [
+        ['Telegram ID', (r) => r.id, 13],
+        ['Ism', (r) => r.name, 20],
+        ['Telegram', (r) => (r.username ? `@${r.username}` : ''), 18],
+        ['Telefon', (r) => r.phone, 18],
+        ['Platforma', (r) => r.platform, 11],
+        ['Profil', (r) => r.profile, 38],
+        ['Obunachilar', (r) => r.followers, 18],
+        ['Reels (o‘rtacha)', (r) => r.reels, 16],
+        ['Postlar (o‘rtacha)', (r) => r.posts, 16],
+        ['Istoriya (o‘rtacha)', (r) => r.stories, 16],
+        ['Qamrov (30 kun)', (r) => r.accounts, 18],
+        ['Ko‘rishlar (Telegram, TikTok, YouTube)', (r) => r.views, 18],
+        ['Reels va postlar (eski)', (r) => r.legacy, 16],
+        ['Yo‘nalish', (r) => r.niche, 22],
+        ['Auditoriya hududi', (r) => r.region, 20],
+        ['Statistika skrinshoti', (r) => yesNo(r.stats, 'bor', 'yo‘q'), 12],
+        ['Holat', (r) => MODERATION[r.moderation] || r.moderation, 14],
+        ['Yangi e’lonlar haqida xabar', (r) => yesNo(r.notifyAds, 'yoqilgan', 'o‘chirilgan'), 14],
+        ['Til', (r) => LANG[r.lang] || r.lang, 11],
+        ['Ro‘yxatdan o‘tgan', (r) => dateCell(r.registeredAt), 17],
+        ['So‘rovlar', (r) => r.applications, 10]
+      ]
+    },
+    {
+      name: 'Bizneslar',
+      kind: 'users',
+      filter: (r) => r.role === 'business',
+      columns: [
+        ['Telegram ID', (r) => r.id, 13],
+        ['Kompaniya', (r) => r.company, 26],
+        ['Toifa', (r) => r.category, 18],
+        ['Kontakt (ism)', (r) => r.name, 20],
+        ['Telegram', (r) => (r.username ? `@${r.username}` : ''), 18],
+        ['Telefon', (r) => r.phone, 18],
+        ['Holat', (r) => MODERATION[r.moderation] || r.moderation, 14],
+        ['Til', (r) => LANG[r.lang] || r.lang, 11],
+        ['Ro‘yxatdan o‘tgan', (r) => dateCell(r.registeredAt), 17],
+        ['E’lonlar', (r) => r.campaigns, 10]
+      ]
+    },
+    {
+      name: 'E’lonlar',
+      kind: 'campaigns',
+      columns: [
+        ['ID', (r) => r.id, 7],
+        ['Nomi', (r) => r.title, 28],
+        ['Biznes', (r) => r.company, 24],
+        ['Kontakt', (r) => r.contact, 18],
+        ['Toifa', (r) => r.category, 18],
+        ['Hudud', (r) => r.region, 20],
+        ['Shahar', (r) => r.city, 14],
+        ['Mahsulot qiymati (so‘m)', (r) => r.value, 14],
+        ['Platformalar', (r) => r.platforms, 18],
+        ['Format', (r) => r.format, 26],
+        ['Kerakli obunachilar', (r) => r.minFollowers, 12],
+        ['Muddat (kun)', (r) => r.days, 9],
+        ['O‘rinlar', (r) => r.slots, 9],
+        ['Holat', (r) => AD_STATUS[r.status] || r.status, 10],
+        ['Moderatsiya', (r) => MODERATION[r.moderation] || r.moderation, 14],
+        ['So‘rovlar', (r) => r.applications, 10],
+        ['Qabul qilingan', (r) => r.accepted, 10],
+        ['Kutilmoqda', (r) => r.pending, 10],
+        ['Yaratilgan', (r) => dateCell(r.createdAt), 17],
+        ['Tavsif', (r) => r.description, 40]
+      ]
+    },
+    {
+      name: 'So‘rovlar',
+      kind: 'applications',
+      columns: [
+        ['ID', (r) => r.id, 7],
+        ['Holat', (r) => APP_STATUS[r.status] || r.status, 14],
+        ['Sana', (r) => dateCell(r.createdAt), 17],
+        ['E’lon ID', (r) => r.campaignId, 9],
+        ['E’lon', (r) => r.title, 28],
+        ['Biznes', (r) => r.company, 24],
+        ['Bloger ID', (r) => r.bloggerId, 13],
+        ['Bloger', (r) => r.bloggerName, 20],
+        ['Telegram', (r) => (r.bloggerUsername ? `@${r.bloggerUsername}` : ''), 18],
+        ['Telefon', (r) => r.bloggerPhone, 18],
+        ['Platforma', (r) => r.platform, 11],
+        ['Obunachilar', (r) => r.followers, 18],
+        ['Profil', (r) => r.profile, 38],
+        ['Xabar', (r) => r.message, 40]
+      ]
+    }
+  ];
+
+  async function fetchAllRows(kind, onProgress) {
+    const rows = [];
+    for (let page = 1; page <= 1000; page += 1) {
+      const data = await api(`/api/admin/export/${kind}?page=${page}`);
+      rows.push(...data.rows);
+      onProgress(rows.length);
+      if (!data.rows.length || rows.length >= data.total) break;
+    }
+    return rows;
+  }
+
+  function saveFile(bytes, filename) {
+    const url = URL.createObjectURL(
+      new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    );
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  async function exportExcel(button) {
+    if (state.busy) return;
+    if (!window.OvozaXlsx) {
+      toast('Sahifani yangilab, qaytadan urinib ko‘ring.');
+      return;
+    }
+    state.busy = true;
+    button.disabled = true;
+    const label = button.innerHTML;
+    const progress = (text) => {
+      button.innerHTML = `${icon('download')}<span>${esc(text)}</span>`;
+    };
+    try {
+      const data = {};
+      for (const [kind, title] of [['users', 'Foydalanuvchilar'], ['campaigns', 'E’lonlar'], ['applications', 'So‘rovlar']]) {
+        data[kind] = await fetchAllRows(kind, (n) => progress(`${title}: ${fmt(n)}`));
+      }
+      progress('Fayl tayyorlanmoqda…');
+      const sheets = EXPORT_SHEETS.map((s) => {
+        const rows = s.filter ? data[s.kind].filter(s.filter) : data[s.kind];
+        return {
+          name: s.name,
+          header: s.columns.map(([h]) => h),
+          widths: s.columns.map(([, , w]) => w),
+          rows: rows.map((r) => s.columns.map(([, get]) => get(r)))
+        };
+      });
+      const d = new Date();
+      saveFile(window.OvozaXlsx.build(sheets), `ovoza-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.xlsx`);
+      const count = (name) => sheets.find((s) => s.name === name).rows.length;
+      toast(`Yuklab olindi: ${fmt(count('Blogerlar'))} bloger, ${fmt(count('Bizneslar'))} biznes, ${fmt(count('E’lonlar'))} e’lon`);
+    } catch (e) {
+      if (!e.silent) toast(errorText(e));
+    } finally {
+      button.innerHTML = label;
+      button.disabled = false;
+      state.busy = false;
+    }
+  }
+
   /* ---------- Amallar ---------- */
   async function act(button, fn, done) {
     if (state.busy) return;
@@ -586,6 +755,9 @@
         render();
         break;
       }
+      case 'export':
+        exportExcel(el);
+        break;
       case 'logout':
         api('/api/admin/logout', { method: 'POST' })
           // Chiqqandan keyin /me 401 qaytaradi va kirish sahifasi bot nomi bilan ochiladi

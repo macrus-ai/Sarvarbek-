@@ -23,6 +23,16 @@ Qo‘shimcha:
 - Bloger ma’lumotlarini botdagi "✏️ Ma’lumotlarni yangilash" tugmasi bilan yangilaydi. Biznesda bu tugma yo‘q: o‘rniga "🗑 Biznesni o‘chirish" bor. U tasdiqdan keyin biznesning profili, barcha e’lonlari va ularga kelgan so‘rovlarni o‘chiradi, so‘ng biznes qaytadan ro‘yxatdan o‘tadi va yana moderatsiyadan o‘tadi (eski e’lonlar qolmaydi).
 - `/delete` foydalanuvchining profili, e’lonlari va so‘rovlarini tasdiqdan keyin butunlay o‘chiradi. `/privacy` siyosat havolasini yuboradi.
 
+### Yangi e’lon haqida blogerlarga xabar
+
+- E’lon tasdiqlanganda (botdagi tugma yoki admin panel; moderatorlar bo‘lmasa — joylanganda) u navbatga tushadi (`ad_broadcasts` jadvali). Cloudflare cron har daqiqada (`wrangler.toml` dagi `[triggers]`) navbatdagi blogerlarga xabar yuboradi: `src/broadcast.js`.
+- **Kimga boradi:** tasdiqlangan, xabarlarni o‘chirmagan bloger; platformasi e’londa bor; auditoriya hududi e’lon hududi bilan bir xil (yoki e’lon butun O‘zbekiston uchun); obunachilari talabga yetadi (`followersOk` bilan bir xil qoida); hali so‘rov yubormagan. Biznesga va moderatsiyadagi blogerga bormaydi.
+- **Xabar:** e’lon nomi, toifa, biznes, qiymati, format, muddat, hudud, kerakli obunachilar (rasm bo‘lsa — rasm bilan). Tugmalar: "👀 E’lonni ko‘rish" (mini ilovada e’lonni darhol ochadi: `/?c=ID`) va "🔕 Bunday xabarlarni o‘chirish".
+- **Tezlik:** bitta ishga tushishda 15 ta bloger (`LIMITS.adNotifyBatch`): bepul tarifda bitta ishga tushishda 50 tagacha tashqi so‘rov (Telegram + D1) mumkin. Ya’ni soatiga ~900 bloger. Pullik tarifga o‘tilsa, `wrangler.toml` dagi `[vars]` ga `AD_NOTIFY_BATCH = "100"` qo‘shib tezlashtirish mumkin.
+- Botni bloklagan blogerga (Telegram 403) boshqa yuborilmaydi (`notify_ads = 0`). Telegram "kuting" desa (429) yoki tarmoq xatosi bo‘lsa, navbat to‘xtaydi va keyingi daqiqada o‘sha blogerdan davom etadi.
+- E’lon yopilsa, o‘rinlari to‘lsa yoki o‘chirilsa, xabarlar to‘xtaydi. Bir e’lon haqida bir marta yuboriladi (qayta ochilsa ham takrorlanmaydi).
+- `/xabarlar` — bloger xabarlarni yoqadi yoki o‘chiradi. Mini ilova manzili cron uchun `/setup` da `settings.app_origin` ga yoziladi (har deployda).
+
 ### Moderatsiya
 
 Yangi bloger va biznes ro‘yxatdan o‘tgach **moderatsiyada** turadi: ilova ochilmaydi, botda "Profilingiz moderatsiyada" xabari chiqadi. Jamoa tasdiqlagandan keyingina platformadan foydalanadi.
@@ -60,6 +70,8 @@ Bo‘limlar:
 - **Reklama e’lonlari:** qidiruv, moderatsiya va holat filtri; e’lonni tasdiqlash, rad etish yoki yopish, unga kelgan so‘rovlar.
 - **So‘rovlar:** blogerlarning barcha so‘rovlari holati bilan.
 - **Sozlamalar:** ulangan moderatsiya guruhlari (uzish mumkin), chiqish.
+
+**Excel’ga yuklab olish** (bosh sahifa va "Foydalanuvchilar" bo‘limidagi tugma): `ovoza-YYYY-MM-DD.xlsx` fayl, to‘rt varaq — Blogerlar (barcha ko‘rsatkichlari bilan), Bizneslar, E’lonlar, So‘rovlar. Faqat ro‘yxatdan o‘tishni tugatganlar kiradi. Panel ma’lumotni `/api/admin/export/{users|campaigns|applications}?page=N` dan 500 tadan oladi, faylni esa brauzerning o‘zi yasaydi (`public/admin/xlsx.js`, tashqi kutubxonasiz): bepul tarifda serverning bitta so‘rovga protsessor vaqti qisqa. Fayl zaxira nusxa sifatida ham saqlab qo‘yish uchun qulay.
 
 Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlanadi, panel boshqa saytdan so‘rov yuborishga va ramkaga qo‘yishga yo‘l qo‘ymaydi.
 
