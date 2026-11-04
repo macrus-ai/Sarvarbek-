@@ -1,23 +1,23 @@
 /* Ovoza admin panel. Brend: kobalt va za'faron (mini ilova bilan bir xil). */
 
 :root {
-  --page: #EEF1F8;
+  --page: #F1F0FA;
   --card: #FFFFFF;
-  --text: #0C1430;
-  --hint: #687190;
-  --line: rgba(12, 20, 48, 0.1);
-  --field: #F3F5FA;
-  --brand: #1E3CCB;
+  --text: #14112E;
+  --hint: #6B6990;
+  --line: rgba(20, 17, 46, 0.1);
+  --field: #F4F3FB;
+  --brand: #4F46E5;
   --on-brand: #FFFFFF;
-  --brand-soft: rgba(30, 60, 203, 0.1);
-  --saffron: #FFC233;
+  --brand-soft: rgba(79, 70, 229, 0.1);
+  --saffron: #FF6B57;
   --ok: #0B805D;
   --ok-soft: rgba(11, 128, 93, 0.12);
   --warn: #9A5B00;
   --warn-soft: rgba(255, 170, 0, 0.18);
   --danger: #C93434;
   --danger-soft: rgba(201, 52, 52, 0.11);
-  --shadow: 0 10px 30px rgba(8, 16, 60, 0.12);
+  --shadow: 0 10px 30px rgba(30, 20, 80, 0.12);
   --font: "Onest", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
   --font-display: "Unbounded", "Onest", -apple-system, system-ui, sans-serif;
   color-scheme: light;
@@ -25,15 +25,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #0B0F1E;
-    --card: #161C34;
-    --text: #E9ECF8;
-    --hint: #8E98BB;
+    --page: #0D0B1F;
+    --card: #1B1838;
+    --text: #ECEBFA;
+    --hint: #A4A2CC;
     --line: rgba(255, 255, 255, 0.1);
-    --field: #1E2541;
-    --brand: #7C93FF;
-    --on-brand: #071040;
-    --brand-soft: rgba(124, 147, 255, 0.16);
+    --field: #25214A;
+    --brand: #8F8AFF;
+    --on-brand: #14112E;
+    --brand-soft: rgba(143, 138, 255, 0.16);
     --ok: #45D2A0;
     --ok-soft: rgba(69, 210, 160, 0.14);
     --warn: #FFC24D;
@@ -240,7 +240,7 @@ tbody tr[data-open]:hover td { background: var(--field); }
 .quote { margin: 0; padding: 8px 12px; border-left: 3px solid var(--brand); border-radius: 8px; background: var(--field); font-size: 14px; }
 
 /* ---------- Batafsil (o'ngdan chiqadigan panel) ---------- */
-.drawer-bg { position: fixed; inset: 0; z-index: 20; background: rgba(5, 9, 25, 0.45); }
+.drawer-bg { position: fixed; inset: 0; z-index: 20; background: rgba(9, 7, 24, 0.45); }
 .drawer {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 21;
   width: min(520px, 100%); overflow-y: auto;
