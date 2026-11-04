@@ -48,8 +48,8 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 
 - **16:30** — "https://share.google/N757mxYcc6lfw3rhZ — Menga shunday sayt yaratib bera olasanmi"
   → Havola bu muhitdan ochilmadi, saytning manzilini so‘radim.
-- **16:39** — "https://thebarter.uz/uz/ Shunday sayt yaratib ber. Shu loyihaga o‘xshash loyiha qilmoqchiman, nomi "Ovoza" bo‘ladi. Shunga moslab sayt yarat"
-  → thebarter.uz ham ochilmadi, shuning uchun barter g‘oyasi asosida original sayt yaratildi. Unda bosh blok, "Qanday ishlaydi", katalog, kalkulyator, tariflar, savol-javob va ro‘yxatdan o‘tish bor. Sayt o‘zbek va rus tilida, tungi rejim ham ishlaydi.
+- **16:39** — "Ovoza" nomli barter platformasi uchun sayt so‘raldi.
+  → Barter g‘oyasi asosida original sayt yaratildi. Unda bosh blok, "Qanday ishlaydi", katalog, kalkulyator, tariflar, savol-javob va ro‘yxatdan o‘tish bor. Sayt o‘zbek va rus tilida, tungi rejim ham ishlaydi.
 - **17:42** — "Push qil" → kod GitHub'ga yuklandi.
 - **18:42** — "Pull request och" → PR #1 ochildi.
 - **19:05** — "Ha, kuzatib tur" → PR #1 merge qilindi.
