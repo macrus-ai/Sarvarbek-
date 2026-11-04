@@ -60,12 +60,13 @@ Bot va mini ilova kodi `bot/` papkasida: [bot/README.md](bot/README.md).
 
 ## Internetga joylash
 
-Sayt GitHub Pages orqali ishlaydi: https://macrus-ai.github.io/Sarvarbek-/
+Sayt GitHub Pages orqali ishlaydi: https://ovozagroup.uz/ (eski manzil https://macrus-ai.github.io/Sarvarbek-/ unga yo‘naltiradi).
 
 - Pages sayti `gh-pages` branchidan chiqariladi.
 - `main` ga har bir o‘zgarish kirganda `.github/workflows/sayt-yangilash.yml` `gh-pages` ni `main` nusxasi bilan almashtiradi, keyin GitHub saytni bir-ikki daqiqada yangilaydi.
 - `gh-pages` ni qo‘lda o‘zgartirmang: undagi o‘zgarishlar keyingi yangilanishda o‘chib ketadi. Hamma o‘zgarish `main` orqali kiritilsin.
 - Yangilashni qo‘lda ham ishga tushirish mumkin: **Actions → Saytni yangilash → Run workflow**.
+- Domen: ildizdagi `CNAME` faylida `ovozagroup.uz` yozilgan. GitHub domenni shu fayldan oladi, uni o‘chirmang. Domen Arsenal-D (webname.uz) da ro‘yxatdan o‘tgan, DNS yozuvlari: `@` uchun to‘rtta A yozuv (185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153) va `www` uchun `macrus-ai.github.io` ga CNAME.
 
 Netlify, Vercel yoki istalgan boshqa hosting ham mos keladi: fayllarni shundayligicha yuklash kifoya.
 

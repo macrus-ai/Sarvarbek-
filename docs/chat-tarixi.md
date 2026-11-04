@@ -8,8 +8,8 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 
 | Nima | Manzil |
 | --- | --- |
-| Sayt | https://macrus-ai.github.io/Sarvarbek-/ |
-| Maxfiylik siyosati | https://macrus-ai.github.io/Sarvarbek-/privacy.html |
+| Sayt | https://ovozagroup.uz/ (eski: https://macrus-ai.github.io/Sarvarbek-/) |
+| Maxfiylik siyosati | https://ovozagroup.uz/privacy.html |
 | Telegram bot | https://t.me/Ovozauz_bot |
 | Mini ilova (server) | https://ovoza-bot.axborotmarkazi-uz.workers.dev |
 | Admin panel | https://ovoza-bot.axborotmarkazi-uz.workers.dev/admin/ (kirish: botga `/admin`) |
