@@ -19,6 +19,10 @@ migrations_dir = "migrations"
 [observability]
 enabled = true
 
+# Har daqiqada: yangi reklama e'lonlari haqida mos blogerlarga xabar (src/broadcast.js)
+[triggers]
+crons = ["* * * * *"]
+
 [vars]
 # Maxfiylik siyosati sahifasi (saytda)
 PRIVACY_URL = "https://macrus-ai.github.io/Sarvarbek-/privacy.html"

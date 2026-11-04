@@ -4,7 +4,7 @@ import {
   ALL_REGIONS, CATEGORIES, FOLLOWERS, LIMITS, NICHES, PLATFORMS, REGIONS, isCampaignRegion, isCategory, isPlatform, isRegion
 } from './constants.js';
 import {
-  countActiveCampaigns, createCampaign, getCampaign, listActiveCampaigns, listBloggerApplications,
+  countActiveCampaigns, createCampaign, enqueueAdBroadcast, getCampaign, listActiveCampaigns, listBloggerApplications,
   listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser, updateUser
 } from './db.js';
 import { tr } from './i18n.js';
@@ -297,6 +297,8 @@ async function route(ctx, user, method, path, url, request) {
     // Jamoa bor bo'lsa, e'lon tasdiqlanguncha blogerlarga ko'rinmaydi
     const moderation = (await moderationEnabled(ctx)) ? 'pending' : 'approved';
     const campaignId = await createCampaign(db, id, { ...data, moderation });
+    // Moderatorlar yo'q: e'lon darhol tasdiqlangan, mos blogerlarga xabar navbatga qo'yiladi
+    if (moderation === 'approved') await enqueueAdBroadcast(db, campaignId);
     const created = await getCampaign(db, campaignId, id);
     // E'lonlar guruhiga karta: moderatsiyada — tasdiqlash/rad etish, aks holda — yopish tugmasi
     await sendAdCard(ctx, created, user.name);

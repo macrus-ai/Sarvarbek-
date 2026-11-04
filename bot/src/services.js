@@ -2,8 +2,8 @@
 
 import { findFollowers } from './constants.js';
 import {
-  closeBusinessCampaigns, closeCampaignByAdmin, decideApplication, getApplicationFull, getCampaign, getSetting, getUser,
-  insertApplication, setApplicationNotify, setCampaignModeration, setModeration
+  closeBusinessCampaigns, closeCampaignByAdmin, decideApplication, enqueueAdBroadcast, getApplicationFull, getCampaign,
+  getSetting, getUser, insertApplication, setApplicationNotify, setCampaignModeration, setModeration
 } from './db.js';
 import { tr } from './i18n.js';
 import { TelegramError } from './telegram.js';
@@ -302,6 +302,8 @@ export async function moderateCampaign(ctx, moderatorId, campaignId, action) {
   if (!(await setCampaignModeration(ctx.db, campaignId, status, moderatorId))) throw new AppError('already', 409);
   // Rad etilgan e'lon yopiladi: faol e'lonlar limitidan joy egallamasin
   if (status === 'rejected') await closeCampaignByAdmin(ctx.db, campaignId);
+  // Tasdiqlangan e'lon haqida mos blogerlarga xabar boradi (cron orqali, src/broadcast.js)
+  if (status === 'approved') await enqueueAdBroadcast(ctx.db, campaignId);
 
   const owner = await getUser(ctx.db, c.business_id);
   const T = tr(owner?.lang);

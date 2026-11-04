@@ -6,10 +6,14 @@
 //   GET /img/c/...          — reklama e'lonlarining rasmlari (Telegramdan olib beriladi)
 //   /admin/login, /api/admin/* — admin panel (sahifasi public/admin/ da)
 //   qolganlari              — mini ilova fayllari (public/)
+//
+//   scheduled (cron, har daqiqada, wrangler.toml) — yangi e'lonlar haqida blogerlarga xabar (broadcast.js)
 
 import { handleAdmin } from './admin.js';
 import { handleApi } from './api.js';
 import { handleUpdate } from './bot.js';
+import { sendAdBroadcasts } from './broadcast.js';
+import { getSetting, setSetting } from './db.js';
 import { tr } from './i18n.js';
 import { IMAGE_PATH, STATS_PATH, serveImage, serveStatsImage } from './images.js';
 import { createTelegram, webhookSecret } from './telegram.js';
@@ -43,8 +47,28 @@ export default {
 
     if (env.ASSETS) return env.ASSETS.fetch(request);
     return new Response('Not found', { status: 404 });
+  },
+
+  // Cron: navbatdagi blogerlarga yangi e'lon haqida xabar. Manzil (mini ilova havolasi uchun) /setup da saqlanadi.
+  async scheduled(event, env) {
+    if (!env.BOT_TOKEN || !env.DB) return;
+    const origin = await getSetting(env.DB, APP_ORIGIN);
+    if (!origin) {
+      console.warn('scheduled: app origin is not saved yet (run /setup)');
+      return;
+    }
+    const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin };
+    try {
+      const r = await sendAdBroadcasts(ctx);
+      if (r.sent || r.blocked.length || r.skipped) console.log('ad notify:', JSON.stringify({ ...r, blocked: r.blocked.length }));
+    } catch (e) {
+      console.error('ad notify failed:', e);
+    }
   }
 };
+
+// Sozlamalardagi kalit: mini ilova manzili (https://...workers.dev)
+const APP_ORIGIN = 'app_origin';
 
 async function webhook(request, ctx) {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
@@ -74,6 +98,8 @@ async function setup(request, ctx) {
   if (request.headers.get('x-setup-key') !== secret) return json({ error: 'forbidden' }, 403);
 
   const { tg, origin } = ctx;
+  // Cron'da so'rov manzili bo'lmaydi: xabardagi ilova havolasi uchun saqlab qo'yamiz
+  await setSetting(ctx.db, APP_ORIGIN, origin);
   const me = await tg.call('getMe');
   await tg.call('setWebhook', {
     url: `${origin}/telegram/webhook`,

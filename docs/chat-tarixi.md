@@ -136,6 +136,11 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 - "Cloudflare'da turmasdan boshqa qayerda saqlayman botnikini" → qonun 2026-yil martida o‘zgargani aniqlandi: faqat biometrik va genetik ma’lumotlarni O‘zbekistonda saqlash majburiy. Ovoza Cloudflare'da qolishi mumkin. Toshkentdagi variantlar ham aytildi (Serverspace, Falconcloud, Pro-Data, TCloud, Beeline Cloud), lekin tavsiya: Cloudflare'da qolish. Manbalar: [kun.uz](https://kun.uz/ru/news/2026/03/28/xraneniye-nekotoryx-personalnyx-dannyx-za-predelami-uzbekistana-razresheno), [spot.uz](https://www.spot.uz/ru/2026/08/04/personal-data-abroad/).
 - "Ha, yoz" (maxfiylik siyosatiga) → PR #20: maxfiylik siyosatida baza qayerda turishi yozildi (Cloudflare, AQSh, Shimoliy Amerikaning sharqi), ro‘yxatdagi davlatlar va "biometrik ma’lumot yig‘ilmaydi" qo‘shildi. Ko‘rishlar va qamrov yig‘iladigan ma’lumotlar ro‘yxatiga kiritildi.
 - "Saytda nomer xato yozilgan, shu ma’lumotlarni kirit: 955555791" → PR #21: sayt, savollar bo‘limi va maxfiylik siyosatida (uz va ru) raqam +998 95 555 57 91 ga almashtirildi.
+- "Ertadan blogerlarni botga chaqirib to‘plashni boshlasam bo‘ladimi, ma’lumotlari Cloudflare’da turadi va istalgan vaqtda olishim mumkinmi" (foydalanuvchi bloger va brend bo‘lib sinab ko‘rgan) → bot tayyor, lekin ikki narsa yetishmasligi aytildi. "Ikkalasini qil"
+
+  → PR #22:
+  - e’lon tasdiqlanganda mos blogerlarga botda xabar boradi: platforma, auditoriya hududi (yoki butun O‘zbekiston), obunachilar talabi; cron har daqiqada 15 tadan yuboradi; "🔕 Bunday xabarlarni o‘chirish" tugmasi va `/xabarlar` buyrug‘i; xabardagi tugma e’lonni mini ilovada darhol ochadi;
+  - admin panelda "Excel’ga yuklab olish": blogerlar, bizneslar, e’lonlar va so‘rovlar — to‘rt varaqli .xlsx fayl.
 
 ## PR'lar ro‘yxati
 
@@ -162,6 +167,7 @@ Tokenlar, kalitlar va shaxsiy ID'lar bu yerga ataylab yozilmagan. Ular faqat Git
 | #19 | Saytda brendlar uchun xizmatlar va bitta bepul tarif, email olib tashlandi |
 | #20 | Maxfiylik siyosati: ma’lumotlar qayerda saqlanishi, ko‘rishlar va qamrov |
 | #21 | Saytdagi telefon raqami: +998 95 555 57 91 |
+| #22 | Yangi e’lon haqida blogerlarga xabar, admin paneldan Excel’ga yuklab olish |
 
 ## Bloger yo‘nalishlari (21 ta)
 
@@ -213,7 +219,7 @@ Raqobatchilarning saytlarini bu muhitdan ochib bo‘lmadi, ma’lumot qidiruv na
 
 Tavsiyalar, foydasi bo‘yicha tartiblangan:
 
-1. **Mos e’lon chiqsa, blogerga botda xabar yuborish.** Hudud, yo‘nalish va obunachilar soniga qarab.
+1. **Mos e’lon chiqsa, blogerga botda xabar yuborish.** ✅ PR #22 da qilindi (platforma, hudud va obunachilar bo‘yicha).
 2. **Natijani tasdiqlash.** Bloger post havolasini, keyin qamrov skrinshotini yuklaydi, biznes "Bajarildi" deb tasdiqlaydi.
 3. **Reyting va kelmaganlar uchun jarima.**
 4. **Tashrif sanasini belgilash va eslatma** (kafe va salonlar uchun).
@@ -227,13 +233,11 @@ Manbalar: [goesti: Toshkent](https://goesti.ru/cities/tashkent), [goesti: mediak
 
 ## Keyinroq qilinishi mumkin bo‘lgan ishlar
 
-- Mos e’lon chiqsa, blogerga xabar yuborish.
 - Natijani tasdiqlash: post havolasi, qamrov skrinshoti va "Bajarildi".
 - Blogerlar reytingi.
 - Kafe va salonlar uchun tashrif sanasi va eslatma.
 - Biznes uchun blogerlar katalogi.
 - Click yoki Payme orqali to‘lov va bizneslar uchun obuna.
-- Admin paneldan ma’lumotlarni Excel'ga yuklab olish.
 
 ## Qo‘lda tekshirib qo‘yish kerak bo‘lgan narsalar
 

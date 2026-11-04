@@ -122,7 +122,11 @@ export const LIMITS = {
   followersMax: 10000000,
   daysMax: 90,
   slotsMax: 100,
-  imageMaxBytes: 5 * 1024 * 1024 // yuklanadigan rasm hajmi (mini ilova uni oldindan kichraytiradi)
+  imageMaxBytes: 5 * 1024 * 1024, // yuklanadigan rasm hajmi (mini ilova uni oldindan kichraytiradi)
+  // Yangi e'lon haqida bitta cron ishga tushishida nechta blogerga xabar yuboriladi (har daqiqada).
+  // Cloudflare bepul tarifida bitta ishga tushishda 50 ta tashqi so'rov (Telegram + D1) mumkin:
+  // rasmli xabar ikki urinish olishi mumkin, shuning uchun 15 ta. Pullik tarifda wrangler.toml dagi AD_NOTIFY_BATCH bilan oshiring.
+  adNotifyBatch: 15
 };
 
 export const LANGS = ['uz', 'ru'];

@@ -324,6 +324,131 @@ async function listApplications(db, url, { bloggerId = null, campaignId = null }
   return { applications: results.map(applicationOut), total, page: pageNo, pageSize: PAGE_SIZE };
 }
 
+/* ---------- Excel eksporti ---------- */
+// Panel hamma ma'lumotni sahifalab oladi va Excel faylni brauzerning o'zida yasaydi (public/admin/xlsx.js).
+// Sahifa 500 qator: bitta so'rovga ajratilgan protsessor vaqti (bepul tarifda) qisqa.
+const EXPORT_PAGE = 500;
+
+function userExportOut(u) {
+  const business = u.role === 'business';
+  // Ko'rishlar: Instagram — reels, posts, stories, accounts (va eski legacy); boshqalar — reach
+  const views = business ? {} : Object.fromEntries(viewsFacts(u, UZ).map((f) => [f.key, f.value || '']));
+  return {
+    id: u.tg_id,
+    role: u.role,
+    name: u.name || u.first_name || '',
+    username: u.username || '',
+    phone: u.phone ? formatPhone(u.phone) : '',
+    lang: u.lang,
+    moderation: u.moderation || '',
+    registeredAt: u.registered_at || u.created_at,
+    company: business ? u.company || '' : '',
+    category: business ? catLabel(u.category, UZ) : '',
+    platform: business ? '' : u.platform || '',
+    profile: business ? '' : profileUrl(u.platform, u.profile) || u.profile || '',
+    followers: business ? '' : followersLabel(u.followers),
+    reels: views.reels || '',
+    posts: views.posts || '',
+    stories: views.stories || '',
+    accounts: views.accounts || '',
+    views: views.reach || '',
+    legacy: views.legacy || '',
+    niche: business ? '' : nicheLabel(u.niche, UZ) || '',
+    region: u.region ? regionLabel(u.region, UZ) : '',
+    stats: Boolean(u.stats_file_id),
+    notifyAds: Number(u.notify_ads) !== 0,
+    campaigns: Number(u.campaigns_count) || 0,
+    applications: Number(u.applications_count) || 0
+  };
+}
+
+function campaignExportOut(c) {
+  const o = campaignOut(c);
+  return {
+    id: o.id,
+    title: o.title,
+    businessId: o.business.id,
+    company: o.business.company,
+    contact: o.business.contact,
+    category: o.category,
+    region: o.region || '',
+    city: o.city,
+    value: o.value,
+    platforms: o.platforms.join(', '),
+    format: o.format,
+    minFollowers: o.minFollowers,
+    days: o.days,
+    slots: o.slots,
+    status: o.status,
+    moderation: o.moderation,
+    applications: o.applications,
+    accepted: o.accepted,
+    pending: o.pending,
+    createdAt: o.createdAt,
+    description: o.description
+  };
+}
+
+function applicationExportOut(a) {
+  return {
+    id: a.id,
+    status: a.status,
+    createdAt: a.created_at,
+    campaignId: a.campaign_id,
+    title: a.title,
+    businessId: a.business_id,
+    company: a.company || '',
+    bloggerId: a.blogger_id,
+    bloggerName: a.blogger_name || '',
+    bloggerUsername: a.blogger_username || '',
+    bloggerPhone: a.blogger_phone ? formatPhone(a.blogger_phone) : '',
+    platform: a.platform || '',
+    followers: followersLabel(a.followers),
+    profile: profileUrl(a.platform, a.profile) || a.profile || '',
+    message: a.message || ''
+  };
+}
+
+// Eng eskisidan boshlab: eksport paytida yangi qator qo'shilsa ham sahifalar siljimaydi
+const EXPORTS = {
+  users: {
+    count: "SELECT COUNT(*) AS n FROM users WHERE reg_step = 'done'",
+    rows: `SELECT u.*,
+             (SELECT COUNT(*) FROM campaigns c WHERE c.business_id = u.tg_id) AS campaigns_count,
+             (SELECT COUNT(*) FROM applications a WHERE a.blogger_id = u.tg_id) AS applications_count
+           FROM users u WHERE u.reg_step = 'done'
+           ORDER BY COALESCE(u.registered_at, u.created_at), u.tg_id`,
+    out: userExportOut
+  },
+  campaigns: {
+    count: 'SELECT COUNT(*) AS n FROM campaigns',
+    rows: `${CAMPAIGN_ADMIN_SELECT} ORDER BY c.created_at, c.id`,
+    out: campaignExportOut
+  },
+  applications: {
+    count: 'SELECT COUNT(*) AS n FROM applications',
+    rows: `SELECT a.id, a.status, a.message, a.created_at, a.campaign_id, a.blogger_id,
+             c.title, c.business_id, b.company,
+             g.name AS blogger_name, g.username AS blogger_username, g.phone AS blogger_phone,
+             g.platform, g.profile, g.followers
+           FROM applications a
+           JOIN campaigns c ON c.id = a.campaign_id
+           JOIN users b ON b.tg_id = c.business_id
+           JOIN users g ON g.tg_id = a.blogger_id
+           ORDER BY a.created_at, a.id`,
+    out: applicationExportOut
+  }
+};
+
+async function exportPage(db, kind, pageNo) {
+  const spec = EXPORTS[kind];
+  const total = (await db.prepare(spec.count).first()).n;
+  const { results } = await db
+    .prepare(`${spec.rows} LIMIT ${EXPORT_PAGE} OFFSET ${(pageNo - 1) * EXPORT_PAGE}`)
+    .all();
+  return { rows: results.map(spec.out), total, page: pageNo, pageSize: EXPORT_PAGE };
+}
+
 async function dashboardStats(db) {
   const base = await getStats(db);
   const week = now() - 7 * 24 * 3600;
@@ -423,6 +548,10 @@ async function route(ctx, admin, method, path, url, request) {
   if (method === 'GET' && path === '/api/admin/campaigns') return json(await listCampaigns(db, url));
   if (method === 'GET' && path === '/api/admin/applications') return json(await listApplications(db, url));
   if (method === 'GET' && path === '/api/admin/settings') return json(await settings(ctx));
+  // Excel uchun: /api/admin/export/users?page=2
+  if (method === 'GET' && (m = path.match(/^\/api\/admin\/export\/(users|campaigns|applications)$/))) {
+    return json(await exportPage(db, m[1], pageOf(url)));
+  }
 
   // Foydalanuvchi: batafsil, moderatsiya qarori, o'chirish
   if ((m = path.match(/^\/api\/admin\/users\/(\d+)(\/moderation)?$/))) {

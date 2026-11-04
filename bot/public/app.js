@@ -1705,11 +1705,15 @@
       state.role = me.user.role;
       if (state.role === 'blogger') restoreFilters();
       const tabs = state.role === 'business' ? ['campaigns', 'requests'] : ['browse', 'mine'];
-      const wanted = new URLSearchParams(window.location.search).get('tab');
+      const params = new URLSearchParams(window.location.search);
+      const wanted = params.get('tab');
       state.tab = tabs.includes(wanted) ? wanted : tabs[0];
       render();
       await loadTab();
       if (state.role === 'business' && state.tab !== 'requests') loadRequestsBadge();
+      // Botdagi "yangi e'lon" xabaridan kelgan bloger: ?c=ID — e'lon darhol ochiladi
+      const campaignId = Number(params.get('c'));
+      if (state.role === 'blogger' && Number.isSafeInteger(campaignId) && campaignId > 0) openDetail(campaignId);
     } catch (e) {
       screen(e.code === 'unauthorized' ? 'authError' : 'loadError');
     }

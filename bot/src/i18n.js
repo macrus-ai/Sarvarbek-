@@ -194,14 +194,14 @@ const uz = {
   doneBusiness: (summary) =>
     `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nEndi ilovada reklama e’loni joylang. Blogerlar uni ko‘rib, so‘rov yuboradi, so‘rovlar shu botga keladi.`,
   doneBlogger: (summary) =>
-    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi.`,
+    `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi. Sizga mos yangi e’lon chiqsa, shu yerga xabar beramiz.`,
   donePending: (summary) =>
     `✅ <b>Ro‘yxatdan o‘tdingiz!</b>\n\n${summary}\n\n⏳ <b>Profilingiz moderatsiyada.</b> Jamoamiz uni tez orada ko‘rib chiqadi va natijani shu yerga yozadi.`,
   pendingHome: '⏳ Profilingiz moderatsiyada. Tasdiqlangach shu yerga xabar keladi.',
   approvedBusiness:
     '🎉 <b>Profilingiz tasdiqlandi!</b>\n\nEndi ilovada reklama e’loni joylang. Blogerlar uni ko‘rib, so‘rov yuboradi, so‘rovlar shu botga keladi.',
   approvedBlogger:
-    '🎉 <b>Profilingiz tasdiqlandi!</b>\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi.',
+    '🎉 <b>Profilingiz tasdiqlandi!</b>\n\nIlovada reklama e’lonlarini ko‘ring va yoqqaniga so‘rov yuboring. Javoblar shu botga keladi. Sizga mos yangi e’lon chiqsa, shu yerga xabar beramiz.',
   rejectedNotice:
     'Afsuski, profilingiz tasdiqlanmadi.\n\nMa’lumotlaringizni tekshirib (masalan, profil havolasi to‘g‘ri va ochiq ekanini), qayta yuborishingiz mumkin.',
   resubmit: '🔄 Qayta yuborish',
@@ -217,7 +217,7 @@ const uz = {
   errNotApproved: 'Profilingiz hali tasdiqlanmagan.',
   home: (name) => `Assalomu alaykum, ${esc(name)}! Reklama e’lonlari va so‘rovlar ilovada.`,
   help:
-    '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
+    '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/xabarlar — yangi e’lonlar haqida xabarlar (blogerlar uchun)\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
   notRegistered: 'Avval ro‘yxatdan o‘ting: /start',
   langSaved: 'Til saqlandi: O‘zbekcha 🇺🇿',
   privacy: (url) => `Qaysi ma’lumotlar yig‘iladi va qanday ishlatiladi: <a href="${esc(url)}">maxfiylik siyosati</a>.\n\nMa’lumotlaringizni o‘chirish uchun /delete yuboring.`,
@@ -298,6 +298,30 @@ const uz = {
   toBusinessAdApproved: (title) => `✅ «${esc(title)}» reklama e’loningiz tasdiqlandi. Endi blogerlar uni ilovada ko‘radi.`,
   toBusinessAdRejected: (title) =>
     `«${esc(title)}» reklama e’loningiz tasdiqlanmadi. Shartlar va rasmni tekshirib, yangi e’lon joylashingiz mumkin.`,
+  // Yangi e'lon haqida blogerga xabar (src/broadcast.js)
+  newAdForBlogger: (c) =>
+    [
+      '🆕 <b>Sizga mos yangi reklama e’loni</b>',
+      '',
+      [
+        `«${esc(c.title)}» · ${esc(catLabel(c.category, 'uz'))}`,
+        `🏪 ${esc(c.business_name)}`,
+        `💰 Mahsulot qiymati: ${fmtNum(c.value)} so‘m`,
+        `📝 ${esc(c.format)} · ${c.days} kun`,
+        regionLine(c.region, 'uz'),
+        c.min_followers > 0 ? `👥 ${fmtNum(c.min_followers)}+ obunachi` : ''
+      ].filter(Boolean).join('\n'),
+      '',
+      'Batafsil ko‘rish va so‘rov yuborish uchun pastdagi tugmani bosing.'
+    ].join('\n'),
+  viewAd: '👀 E’lonni ko‘rish',
+  notifyOffButton: '🔕 Bunday xabarlarni o‘chirish',
+  notifyOnButton: '🔔 Xabarlarni yoqish',
+  notifyOff: '🔕 Yangi e’lonlar haqidagi xabarlar o‘chirildi. Qayta yoqish uchun /xabarlar yuboring.',
+  notifyOn: '🔔 Xabarlar yoqildi: sizga mos yangi reklama e’loni chiqsa, shu yerga xabar keladi.',
+  notifyStatus: (on) =>
+    `${on ? '🔔 Sizga mos yangi reklama e’lonlari haqida xabarlar <b>yoqilgan</b>.' : '🔕 Yangi reklama e’lonlari haqida xabarlar <b>o‘chirilgan</b>.'}\n\nMos e’lon: platformangiz, auditoriyangiz hududi (yoki butun O‘zbekiston) va obunachilar talabi to‘g‘ri keladi.`,
+  notifyBloggersOnly: 'Bu sozlama blogerlar uchun.',
   imageSaved: (title) => `🖼 «${esc(title)}» reklama e’loniga rasm qo‘shildi. Blogerlar uni ilovada ko‘radi.`,
   adminClose: '🚫 E’lonni yopish',
   adminClosed: '🚫 <b>Siz yopdingiz.</b>',
@@ -368,6 +392,7 @@ const uz = {
   commands: [
     { command: 'start', description: 'Ro‘yxatdan o‘tish yoki bosh menyu' },
     { command: 'app', description: 'Ilovani ochish' },
+    { command: 'xabarlar', description: 'Yangi e’lonlar haqida xabarlar' },
     { command: 'lang', description: 'Tilni o‘zgartirish' },
     { command: 'privacy', description: 'Maxfiylik siyosati' },
     { command: 'help', description: 'Yordam' }
@@ -439,14 +464,14 @@ const ru = {
   doneBusiness: (summary) =>
     `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nТеперь разместите рекламное объявление в приложении. Блогеры увидят его и отправят отклики, а они придут в этот бот.`,
   doneBlogger: (summary) =>
-    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот.`,
+    `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот. Когда появится подходящее вам объявление, мы напишем сюда.`,
   donePending: (summary) =>
     `✅ <b>Регистрация завершена!</b>\n\n${summary}\n\n⏳ <b>Ваш профиль на модерации.</b> Команда скоро его проверит и напишет результат сюда.`,
   pendingHome: '⏳ Ваш профиль на модерации. Когда его одобрят, мы напишем сюда.',
   approvedBusiness:
     '🎉 <b>Ваш профиль одобрен!</b>\n\nТеперь разместите рекламное объявление в приложении. Блогеры увидят его и отправят отклики, а они придут в этот бот.',
   approvedBlogger:
-    '🎉 <b>Ваш профиль одобрен!</b>\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот.',
+    '🎉 <b>Ваш профиль одобрен!</b>\n\nСмотрите рекламные объявления в приложении и откликайтесь на понравившиеся. Ответы придут в этот бот. Когда появится подходящее вам объявление, мы напишем сюда.',
   rejectedNotice:
     'К сожалению, ваш профиль не одобрен.\n\nПроверьте данные (например, что ссылка на профиль верная и профиль открыт) и отправьте их повторно.',
   resubmit: '🔄 Отправить повторно',
@@ -462,7 +487,7 @@ const ru = {
   errNotApproved: 'Ваш профиль ещё не одобрен.',
   home: (name) => `Здравствуйте, ${esc(name)}! Рекламные объявления и отклики — в приложении.`,
   help:
-    '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
+    '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/xabarlar — уведомления о новых объявлениях (для блогеров)\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
   notRegistered: 'Сначала пройдите регистрацию: /start',
   langSaved: 'Язык сохранён: Русский 🇷🇺',
   privacy: (url) => `Какие данные собираются и как используются: <a href="${esc(url)}">политика конфиденциальности</a>.\n\nЧтобы удалить свои данные, отправьте /delete.`,
@@ -541,6 +566,29 @@ const ru = {
   toBusinessAdApproved: (title) => `✅ Ваше рекламное объявление «${esc(title)}» одобрено. Теперь блогеры видят его в приложении.`,
   toBusinessAdRejected: (title) =>
     `Ваше рекламное объявление «${esc(title)}» не одобрено. Проверьте условия и фото и разместите новое объявление.`,
+  newAdForBlogger: (c) =>
+    [
+      '🆕 <b>Новое подходящее вам объявление</b>',
+      '',
+      [
+        `«${esc(c.title)}» · ${esc(catLabel(c.category, 'ru'))}`,
+        `🏪 ${esc(c.business_name)}`,
+        `💰 Стоимость продукта: ${fmtNum(c.value)} сум`,
+        `📝 ${esc(c.format)} · дней: ${c.days}`,
+        regionLine(c.region, 'ru'),
+        c.min_followers > 0 ? `👥 от ${fmtNum(c.min_followers)} подписчиков` : ''
+      ].filter(Boolean).join('\n'),
+      '',
+      'Нажмите кнопку ниже, чтобы посмотреть подробности и откликнуться.'
+    ].join('\n'),
+  viewAd: '👀 Открыть объявление',
+  notifyOffButton: '🔕 Отключить такие уведомления',
+  notifyOnButton: '🔔 Включить уведомления',
+  notifyOff: '🔕 Уведомления о новых объявлениях отключены. Чтобы включить снова, отправьте /xabarlar.',
+  notifyOn: '🔔 Уведомления включены: когда появится подходящее объявление, мы напишем сюда.',
+  notifyStatus: (on) =>
+    `${on ? '🔔 Уведомления о подходящих новых объявлениях <b>включены</b>.' : '🔕 Уведомления о новых объявлениях <b>отключены</b>.'}\n\nПодходящее объявление: совпадают ваша платформа, регион аудитории (или весь Узбекистан) и требование по подписчикам.`,
+  notifyBloggersOnly: 'Эта настройка для блогеров.',
   imageSaved: (title) => `🖼 Фото добавлено к рекламному объявлению «${esc(title)}». Блогеры увидят его в приложении.`,
   adminClose: '🚫 Закрыть объявление',
   adminClosed: '🚫 <b>Вы закрыли объявление.</b>',
@@ -610,6 +658,7 @@ const ru = {
   commands: [
     { command: 'start', description: 'Регистрация или главное меню' },
     { command: 'app', description: 'Открыть приложение' },
+    { command: 'xabarlar', description: 'Уведомления о новых объявлениях' },
     { command: 'lang', description: 'Сменить язык' },
     { command: 'privacy', description: 'Политика конфиденциальности' },
     { command: 'help', description: 'Помощь' }

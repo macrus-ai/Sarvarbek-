@@ -210,6 +210,20 @@ function sendHome(ctx, user) {
   return ctx.tg.send(id, T.home(user.name || user.first_name || ''), { reply_markup: homeKeyboard(T, ctx, user.role) });
 }
 
+// Yangi e'lonlar haqidagi xabarlar: tugma qarama-qarshi amalni ko'rsatadi
+const notifyKeyboard = (T, on) => ({
+  inline_keyboard: [[on ? { text: T.notifyOffButton, callback_data: 'ntf:off' } : { text: T.notifyOnButton, callback_data: 'ntf:on' }]]
+});
+
+// /xabarlar: yangi e'lonlar haqidagi xabarlarni yoqish yoki o'chirish (faqat blogerlar)
+function notifySettings(ctx, user) {
+  const T = tr(user.lang);
+  if (!isRegistered(user)) return ctx.tg.send(user.tg_id, T.notRegistered);
+  if (user.role !== 'blogger') return ctx.tg.send(user.tg_id, T.notifyBloggersOnly);
+  const on = Number(user.notify_ads) !== 0;
+  return ctx.tg.send(user.tg_id, T.notifyStatus(on), { reply_markup: notifyKeyboard(T, on) });
+}
+
 // Biznes ma'lumotlarini yangilamaydi: hammasini o'chirib, qaytadan ro'yxatdan o'tadi (eski e'lonlar qolmaydi)
 function askDeleteBusiness(ctx, user) {
   const T = tr(user.lang);
@@ -368,6 +382,7 @@ async function onMessage(msg, ctx) {
     if (cmd === 'lang') return ctx.tg.send(id, T.chooseLang, { reply_markup: langKeyboard('setlang') });
     if (cmd === 'help') return ctx.tg.send(id, T.help);
     if (cmd === 'app') return isRegistered(user) ? sendHome(ctx, user) : ctx.tg.send(id, T.notRegistered);
+    if (cmd === 'xabarlar' || cmd === 'notify') return notifySettings(ctx, user);
     if (cmd === 'stats' && isAdmin(id, ctx.env)) return ctx.tg.send(id, T.stats(await getStats(ctx.db)));
     if (cmd === 'moderatsiya' && isAdmin(id, ctx.env)) return sendPendingList(ctx, id, user.lang);
     // Admin panelga kirish: havola faqat tugmada (matnda bo'lsa, Telegram uni ko'rib chiqib "ishlatib" qo'yishi mumkin)
@@ -460,6 +475,14 @@ async function onCallback(cq, ctx) {
   };
 
   switch (kind) {
+    // Yangi e'lon xabaridagi yoki /xabarlar dagi tugma
+    case 'ntf': {
+      if ((value !== 'on' && value !== 'off') || user.role !== 'blogger') return stale();
+      const on = value === 'on';
+      await updateUser(ctx.db, user.tg_id, { notify_ads: on ? 1 : 0 });
+      await ack();
+      return ctx.tg.send(user.tg_id, on ? T.notifyOn : T.notifyOff, { reply_markup: notifyKeyboard(T, on) });
+    }
     case 'lang': {
       if (user.reg_step !== 'lang' || (value !== 'uz' && value !== 'ru')) return stale();
       await ack();

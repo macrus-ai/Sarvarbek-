@@ -25,8 +25,9 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
 
 - **Sayt** (repo ildizi): `index.html`, `privacy.html`, `assets/`. GitHub Pages: https://macrus-ai.github.io/Sarvarbek-/. `sayt-yangilash.yml` `main` ni `gh-pages` ga ko‘chiradi.
 - **Bot** (`bot/`): Cloudflare Workers + D1. Manzil: https://ovoza-bot.axborotmarkazi-uz.workers.dev, Telegram bot: @Ovozauz_bot.
-  - `src/index.js` — marshrutlar. `bot.js` — Telegram xabarlari va ro‘yxatdan o‘tish. `api.js` — mini ilova API (Telegram initData HMAC). `admin.js` — admin panel API va kirish. `services.js` — moderatsiya, bildirishnomalar, umumiy logika. `db.js` — SQL. `i18n.js` — barcha matnlar (uz/ru). `images.js` — rasmlar (Telegram `file_id`, proksi). `constants.js` — hududlar, yo‘nalishlar va boshqalar.
-  - `public/` — mini ilova (`index.html`, `app.js`, `app.css`). `public/admin/` — admin panel (`/admin/`). `public/_headers` — admin uchun xavfsizlik sarlavhalari.
+  - `src/index.js` — marshrutlar. `bot.js` — Telegram xabarlari va ro‘yxatdan o‘tish. `api.js` — mini ilova API (Telegram initData HMAC). `admin.js` — admin panel API va kirish. `services.js` — moderatsiya, bildirishnomalar, umumiy logika. `db.js` — SQL. `i18n.js` — barcha matnlar (uz/ru). `images.js` — rasmlar (Telegram `file_id`, proksi). `constants.js` — hududlar, yo‘nalishlar va boshqalar. `broadcast.js` — yangi e’lon haqida blogerlarga xabar (cron har daqiqada, `index.js` dagi `scheduled`).
+  - `public/` — mini ilova (`index.html`, `app.js`, `app.css`). `public/admin/` — admin panel (`/admin/`), `xlsx.js` — Excel fayl yasash (brauzerda). `public/_headers` — admin uchun xavfsizlik sarlavhalari.
+  - Cloudflare bepul tarifi: bitta so‘rov yoki cron ishga tushishida 50 tagacha tashqi so‘rov (Telegram fetch + D1 so‘rovlari) va qisqa protsessor vaqti. Ko‘p foydalanuvchiga tegadigan ishni bo‘lib-bo‘lib qiling (masalan, `broadcast.js` dagi navbat).
   - `migrations/000N_*.sql` — sxema o‘zgarsa, yangi fayl qo‘shiladi. Deploy uni o‘zi qo‘llaydi.
   - `bot/README.md` — mahsulotning to‘liq tavsifi. Funksiya o‘zgarsa, README ham yangilanadi.
 - `.github/workflows/bot.yml` — testlar, `wrangler deploy --dry-run`, `main` da esa migratsiya, deploy va `/setup`.
@@ -43,6 +44,8 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
 
 - `cd bot && npm install && npm test`. Node 22 yoki yangisi kerak. Testlar `node:test` da, D1 o‘rniga `node:sqlite`, Telegram esa `test/helpers.js` dagi soxta Telegram.
 - `registerBlogger`, `registerBusiness` va `createCampaign` yordamchilari avtomatik tasdiqlaydi. Moderatsiyada qoldirish uchun `{ approve: false }` bering.
+- `runCron(env)` cron'ni bir marta ishga tushiradi. `tg.failChat(id, 403 | 429)` — shu chatga xabar xato qaytaradi.
+- Kompyuter: Windows, `Desktop\Loyiha\Sarvarbek-` papkasi (Git, Node, `gh` o‘rnatilgan). PowerShell'da PATH eskirgan bo‘lsa, uni registrdan qayta o‘qing. Admin panelni brauzerda ko‘rish uchun Worker'ni Node'da test yordamchilari bilan `http.createServer` orqali ishga tushirish mumkin.
 - Soxta Telegram haqiqiysi kabi rasmli xabarda `editMessageText` ni rad etadi.
 - `fmtNum` oddiy bo‘shliq o‘rniga NBSP qo‘yadi, shuning uchun test regexlarida `\s` ishlating.
 - UI o‘zgarsa, brauzerda tekshiring. Playwright o‘rnatilgan, `require('playwright')` orqali chaqiriladi. Worker'ni Node'da test yordamchilari bilan dev server qilib ishga tushiring. 390px va 1280px kenglikda, yorug‘ va qorong‘i rejimda ko‘ring.
