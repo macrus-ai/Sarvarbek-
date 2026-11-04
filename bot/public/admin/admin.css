@@ -96,9 +96,6 @@ a { color: var(--brand); }
 .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; font-family: var(--font-display); font-weight: 700; font-size: 18px; }
 .brand small { display: block; font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--hint); }
 .logo { width: 34px; height: 34px; flex: none; }
-.lm-bg { fill: var(--brand); }
-.lm-dot { fill: #FFFFFF; }
-.lm-wave { stroke: var(--saffron); }
 
 .nav { display: grid; gap: 2px; }
 
