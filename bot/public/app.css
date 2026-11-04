@@ -119,9 +119,6 @@ h1, h2, h3, p { margin: 0; }
 }
 
 .brand svg { width: 28px; height: 28px; }
-.lm-bg { fill: var(--brand); }
-.lm-dot { fill: var(--on-brand); }
-.lm-wave { stroke: var(--saffron); }
 
 .role-chip {
   margin-left: auto;

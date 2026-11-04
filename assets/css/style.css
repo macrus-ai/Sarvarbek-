@@ -354,9 +354,6 @@ textarea { font: inherit; color: inherit; }
   flex: none;
 }
 
-.lm-bg { fill: var(--cobalt); }
-.lm-dot { fill: var(--on-cobalt); }
-.lm-wave { stroke: var(--saffron); }
 
 .nav {
   display: flex;
