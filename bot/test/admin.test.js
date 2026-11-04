@@ -22,7 +22,7 @@ test('ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi', async
   const user = tgUser(300);
   await say(env, user, '/start');
   await press(env, user, 'lang:uz');
-  assert.match(lastText(300), /<a href="https:\/\/macrus-ai\.github\.io\/Sarvarbek-\/privacy\.html">maxfiylik siyosati<\/a>/);
+  assert.match(lastText(300), /<a href="https:\/\/ovozagroup\.uz\/privacy\.html">maxfiylik siyosati<\/a>/);
 
   const ru = tgUser(301);
   await say(env, ru, '/start blogger-ru');

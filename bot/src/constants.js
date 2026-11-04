@@ -132,7 +132,7 @@ export const LIMITS = {
 export const LANGS = ['uz', 'ru'];
 
 // Maxfiylik siyosati (saytda). wrangler.toml dagi PRIVACY_URL bilan almashtirish mumkin.
-export const DEFAULT_PRIVACY_URL = 'https://macrus-ai.github.io/Sarvarbek-/privacy.html';
+export const DEFAULT_PRIVACY_URL = 'https://ovozagroup.uz/privacy.html';
 
 export const isCategory = (id) => CATEGORIES.some((c) => c.id === id);
 export const isNiche = (id) => NICHES.some((n) => n.id === id);

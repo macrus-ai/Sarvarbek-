@@ -25,7 +25,7 @@ crons = ["* * * * *"]
 
 [vars]
 # Maxfiylik siyosati sahifasi (saytda)
-PRIVACY_URL = "https://macrus-ai.github.io/Sarvarbek-/privacy.html"
+PRIVACY_URL = "https://ovozagroup.uz/privacy.html"
 
 # Maxfiy qiymatlar (wrangler.toml ga yozilmaydi):
 #   BOT_TOKEN  — @BotFather bergan token
