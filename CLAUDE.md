@@ -23,7 +23,7 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
 
 ## Loyiha tuzilishi
 
-- **Sayt** (repo ildizi): `index.html`, `privacy.html`, `assets/`. GitHub Pages: https://macrus-ai.github.io/Sarvarbek-/. `sayt-yangilash.yml` `main` ni `gh-pages` ga ko‘chiradi.
+- **Sayt** (repo ildizi): `index.html`, `privacy.html`, `assets/`. Manzil: https://ovozagroup.uz/ (GitHub Pages, ildizdagi `CNAME` fayli). `sayt-yangilash.yml` `main` ni `gh-pages` ga ko‘chiradi, shuning uchun `CNAME` `main` da turishi shart.
 - **Bot** (`bot/`): Cloudflare Workers + D1. Manzil: https://ovoza-bot.axborotmarkazi-uz.workers.dev, Telegram bot: @Ovozauz_bot.
   - `src/index.js` — marshrutlar. `bot.js` — Telegram xabarlari va ro‘yxatdan o‘tish. `api.js` — mini ilova API (Telegram initData HMAC). `admin.js` — admin panel API va kirish. `services.js` — moderatsiya, bildirishnomalar, umumiy logika. `db.js` — SQL. `i18n.js` — barcha matnlar (uz/ru). `images.js` — rasmlar (Telegram `file_id`, proksi). `constants.js` — hududlar, yo‘nalishlar va boshqalar. `broadcast.js` — yangi e’lon haqida blogerlarga xabar (cron har daqiqada, `index.js` dagi `scheduled`).
   - `public/` — mini ilova (`index.html`, `app.js`, `app.css`). `public/admin/` — admin panel (`/admin/`), `xlsx.js` — Excel fayl yasash (brauzerda). `public/_headers` — admin uchun xavfsizlik sarlavhalari.
