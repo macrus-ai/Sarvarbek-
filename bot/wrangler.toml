@@ -16,6 +16,10 @@ binding = "DB"
 database_name = "ovoza-db"
 migrations_dir = "migrations"
 
+# Worker ma'lumotlar bazasiga yaqinroq joyda ishlasin: har so'rovdagi bir nechta baza chaqiruvi tezlashadi
+[placement]
+mode = "smart"
+
 [observability]
 enabled = true
 
