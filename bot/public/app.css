@@ -3,16 +3,16 @@
    Telegramdan tashqarida esa quyidagi zaxira ranglar ishlaydi. Brend: kobalt va za'faron. */
 
 :root {
-  --fb-page: #EEF1F8;
+  --fb-page: #F1F0FA;
   --fb-card: #FFFFFF;
-  --fb-text: #0C1430;
-  --fb-hint: #687190;
-  --fb-line: rgba(12, 20, 48, 0.1);
-  --brand: #1E3CCB;
+  --fb-text: #14112E;
+  --fb-hint: #6B6990;
+  --fb-line: rgba(20, 17, 46, 0.1);
+  --brand: #4F46E5;
   --on-brand: #FFFFFF;
-  --brand-soft: rgba(30, 60, 203, 0.1);
-  --saffron: #FFC233;
-  --on-saffron: #221700;
+  --brand-soft: rgba(79, 70, 229, 0.1);
+  --saffron: #FF6B57;
+  --on-saffron: #2B0D08;
   --ok: #0B805D;
   --ok-soft: rgba(11, 128, 93, 0.12);
   --warn: #9A5B00;
@@ -20,21 +20,21 @@
   --danger: #C93434;
   --on-danger: #FFFFFF;
   --danger-soft: rgba(201, 52, 52, 0.11);
-  --shadow: 0 10px 30px rgba(8, 16, 60, 0.18);
+  --shadow: 0 10px 30px rgba(30, 20, 80, 0.18);
   --font: "Onest", -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
   --font-display: "Unbounded", "Onest", -apple-system, system-ui, sans-serif;
   color-scheme: light;
 }
 
 :root[data-scheme="dark"] {
-  --fb-page: #0B0F1E;
-  --fb-card: #161C34;
-  --fb-text: #E9ECF8;
-  --fb-hint: #8E98BB;
+  --fb-page: #0D0B1F;
+  --fb-card: #1B1838;
+  --fb-text: #ECEBFA;
+  --fb-hint: #A4A2CC;
   --fb-line: rgba(255, 255, 255, 0.1);
-  --brand: #7C93FF;
-  --on-brand: #071040;
-  --brand-soft: rgba(124, 147, 255, 0.16);
+  --brand: #8F8AFF;
+  --on-brand: #14112E;
+  --brand-soft: rgba(143, 138, 255, 0.16);
   --ok: #45D2A0;
   --ok-soft: rgba(69, 210, 160, 0.14);
   --warn: #FFC24D;
