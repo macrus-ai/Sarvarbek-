@@ -16,8 +16,15 @@ export function getUser(db, id) {
   return db.prepare('SELECT * FROM users WHERE tg_id = ?1').bind(id).first();
 }
 
-// Foydalanuvchi qatorini yaratadi (yo'q bo'lsa) va Telegram ismi/username ni yangilaydi
+// Foydalanuvchi qatorini yaratadi (yo'q bo'lsa) va Telegram ismi/username ni yangilaydi.
+// Har so'rovda yozmaslik uchun: avval o'qiladi, yozuv faqat yangi foydalanuvchi yoki ism/username
+// o'zgargan bo'lsa bajariladi (D1 da yozuv sekin: u asosiy bazaga boradi).
 export async function touchUser(db, from, lang) {
+  const firstName = from.first_name ?? null;
+  const username = from.username ?? null;
+  const existing = await getUser(db, from.id);
+  if (existing && (existing.first_name ?? null) === firstName && (existing.username ?? null) === username) return existing;
+
   const ts = now();
   await db
     .prepare(
@@ -28,7 +35,7 @@ export async function touchUser(db, from, lang) {
          username = excluded.username,
          updated_at = excluded.updated_at`
     )
-    .bind(from.id, from.first_name ?? null, from.username ?? null, lang, ts)
+    .bind(from.id, firstName, username, lang, ts)
     .run();
   return getUser(db, from.id);
 }
