@@ -31,7 +31,8 @@ export default {
     const admin = path === '/admin/login' || path.startsWith('/api/admin/');
     if (admin || image || stats || path === '/telegram/webhook' || path === '/setup' || path.startsWith('/api/')) {
       if (!env.BOT_TOKEN || !env.DB) return json({ error: 'not_configured' }, 503);
-      const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin: url.origin };
+      // exec: javobdan keyin fonda davom etadigan ishlar uchun (waitUntil)
+      const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin: url.origin, exec };
       try {
         if (image) return await serveImage(request, ctx, image, exec);
         if (stats) return await serveStatsImage(request, ctx, stats, exec);

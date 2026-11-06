@@ -15,6 +15,7 @@ import {
   AppError, MOD_CHAT_KEYS, adKeyboard, canModerate, decide, editMessage, homeKeyboard, isModerationChat, moderate,
   moderateCampaign, moderationEnabled, pendingKeyboard, resubmitKeyboard, sendAdCard, sendModerationCard
 } from './services.js';
+import { addToSheet } from './sheets.js';
 import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, normalizeProfile, now, privacyUrl } from './util.js';
 
 // Ro'yxatdan o'tish qadamlari.
@@ -174,6 +175,9 @@ async function finish(ctx, user) {
   const T = tr(user.lang);
   const summary = user.role === 'business' ? T.summaryBusiness(user) : T.summaryBlogger(user);
   const doneText = user.role === 'business' ? T.doneBusiness(summary) : T.doneBlogger(summary);
+
+  // Birinchi marta ro'yxatdan o'tgan bo'lsa — agentlar jadvaliga (Google Sheets) "Yangi" qator
+  if (user.firstRegistration) await addToSheet(ctx, user);
 
   // Tasdiqlangan foydalanuvchi ma'lumotlarini yangiladi: kirish saqlanadi, jamoa o'zgarishni ko'radi
   if (user.moderation === 'approved') {
