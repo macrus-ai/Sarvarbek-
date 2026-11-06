@@ -75,6 +75,16 @@ Bo‘limlar:
 
 Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlanadi, panel boshqa saytdan so‘rov yuborishga va ramkaga qo‘yishga yo‘l qo‘ymaydi.
 
+### Agentlar jadvali (Google Sheets)
+
+Botda birinchi marta ro‘yxatdan o‘tgan bloger "Ovoza kunlik agent jadvali" ning **Blogerlar** varag‘iga, biznes esa **Brendlar** varag‘iga "Yangi" holatida yoziladi (`src/sheets.js`). Manba ustunida "Telegram bot", izohda Telegram ID turadi. Profilni qayta tahrirlash yangi qator qo‘shmaydi.
+
+- Jadval tomonida Apps Script web app ishlaydi, uning manzili `wrangler.toml` dagi `SHEETS_URL`. U qatorni qo‘shadi va egasiga Telegramda xabar beradi. `SHEETS_URL` bo‘sh bo‘lsa, hech narsa yuborilmaydi. Skript kodining nusxasi: `apps-script/Code.gs` (o‘zgartirilsa, Apps Script'ga qo‘yilib, yangi versiya deploy qilinadi, manzil o‘zgarmaydi).
+- Kalit bot tokenidan hosil qilinadi (`sha256("ovoza-sheets:" + token)` ning boshidagi 48 belgi). Apps Script ham tokenni biladi, shuning uchun alohida maxfiy kalit kerak emas.
+- Jadval ishlamasa ham ro‘yxatdan o‘tish to‘xtamaydi: xato faqat logga yoziladi. Cloudflare'da so‘rov javobdan keyin fonda (`waitUntil`) yuboriladi.
+- Agentlar jadvalga qo‘lda qo‘shgan qatorlar haqida egasiga xabarni Apps Script o‘zi har 5 daqiqada yuboradi.
+- ⚠️ Apps Script botning webhook'ini o‘zgartirmasligi kerak: Telegram'da botga faqat bitta webhook bo‘ladi va u shu Worker'ga qarashi shart.
+
 ### E’lon rasmlari
 
 - Biznes rasmni e’lon joylashda yoki keyin e’lon sahifasida qo‘shadi, almashtiradi yoki olib tashlaydi.
@@ -90,6 +100,7 @@ Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlan
 | Ma’lumotlar bazasi | Cloudflare D1 (SQLite), jadvallar `migrations/` da |
 | Mini ilova | `public/` (oddiy HTML, CSS, JS) |
 | Joylash | GitHub Actions: `.github/workflows/bot.yml` |
+| Agentlar jadvali | Google Sheets + Apps Script web app (`src/sheets.js`, `SHEETS_URL`) |
 
 Cloudflare'ning bepul tarifi boshlash uchun yetadi: kuniga 100 000 so‘rov, 5 GB baza.
 
