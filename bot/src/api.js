@@ -191,7 +191,7 @@ async function readImage(request) {
   if (bytes.length > LIMITS.imageMaxBytes) throw tooLarge();
   const kind = sniffImage(bytes);
   if (!kind) throw new AppError('image_invalid', 400);
-  return { bytes, type: kind.type, name: `ovoza.${kind.ext}` };
+  return { bytes, type: kind.type, name: `miqyos.${kind.ext}` };
 }
 
 // Rasmni Telegramga yuklaydi: u biznesning bot bilan chatiga tasdiq sifatida boradi

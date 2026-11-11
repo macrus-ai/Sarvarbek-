@@ -1,4 +1,4 @@
-/* Ovoza admin panel: moderatsiya, foydalanuvchilar, reklama e'lonlari, so'rovlar va sozlamalar.
+/* Miqyos admin panel: moderatsiya, foydalanuvchilar, reklama e'lonlari, so'rovlar va sozlamalar.
    Kirish: botga /admin yuboriladi, bot bir martalik havola beradi (sessiya cookie'da). */
 (() => {
   'use strict';
@@ -125,7 +125,7 @@
     ).join('');
     return `<div class="layout">
       <aside class="side">
-        <div class="brand">${logo}<div>Ovoza<small>Admin panel</small></div></div>
+        <div class="brand">${logo}<div>Miqyos<small>Admin panel</small></div></div>
         <nav class="nav" aria-label="Bo‘limlar">${nav}</nav>
         <div class="side-foot"><span>${esc(state.me?.name || 'Admin')} · ID ${esc(state.me?.id)}</span>
           <button type="button" class="btn btn-ghost" data-act="logout">Chiqish</button></div>
@@ -137,11 +137,11 @@
   const loading = '<div class="empty"><div class="spinner" style="margin:0 auto"></div></div>';
 
   function showLogin() {
-    const bot = state.bot ? `@${esc(state.bot)}` : 'Ovoza botiga';
+    const bot = state.bot ? `@${esc(state.bot)}` : 'Miqyos botiga';
     const link = state.bot ? `<a class="btn btn-primary" href="https://t.me/${esc(state.bot)}" target="_blank" rel="noopener">Botni ochish</a>` : '';
     root.innerHTML = `<div class="login"><div class="card">
       ${logo}
-      <h1>Ovoza admin panel</h1>
+      <h1>Miqyos admin panel</h1>
       <ol>
         <li>Telegramda ${bot} <code>/admin</code> buyrug‘ini yuboring.</li>
         <li>Bot yuborgan “Admin panelni ochish” tugmasini bosing.</li>
@@ -659,7 +659,7 @@
         };
       });
       const d = new Date();
-      saveFile(window.OvozaXlsx.build(sheets), `ovoza-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.xlsx`);
+      saveFile(window.OvozaXlsx.build(sheets), `miqyos-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.xlsx`);
       const count = (name) => sheets.find((s) => s.name === name).rows.length;
       toast(`Yuklab olindi: ${fmt(count('Blogerlar'))} bloger, ${fmt(count('Bizneslar'))} biznes, ${fmt(count('E’lonlar'))} e’lon`);
     } catch (e) {

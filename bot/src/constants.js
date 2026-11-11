@@ -1,4 +1,4 @@
-// Ovoza: toifalar, platformalar va obunachilar oraliqlari.
+// Miqyos: toifalar, platformalar va obunachilar oraliqlari.
 // Saytdagi (assets/js/campaigns.js) ro'yxatlar bilan bir xil saqlang.
 
 export const CATEGORIES = [
@@ -130,6 +130,9 @@ export const LIMITS = {
 };
 
 export const LANGS = ['uz', 'ru'];
+
+// Platforma nomi: botning Telegram'dagi ismi va menyu tugmasi (/setup sozlaydi)
+export const BRAND = 'Miqyos';
 
 // Maxfiylik siyosati (saytda). wrangler.toml dagi PRIVACY_URL bilan almashtirish mumkin.
 export const DEFAULT_PRIVACY_URL = 'https://ovozagroup.uz/privacy.html';

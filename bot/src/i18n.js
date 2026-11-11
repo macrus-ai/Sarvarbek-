@@ -141,11 +141,11 @@ function profileLines(u, lang) {
 const uz = {
   chooseLang: '🇺🇿 Tilni tanlang\n🇷🇺 Выберите язык',
   welcome: (url) =>
-    `<b>Ovoza</b> platformasiga xush kelibsiz!\n\nBu yerda bizneslar mahsulot yoki xizmat evaziga blogerlar bilan barter hamkorlik qiladi.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.\n\nSiz kimsiz?`,
+    `<b>Miqyos</b> platformasiga xush kelibsiz!\n\nBu yerda bizneslar mahsulot yoki xizmat evaziga blogerlar bilan barter hamkorlik qiladi.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.\n\nSiz kimsiz?`,
   roleBusiness: '🏪 Biznes egasiman',
   roleBlogger: '📸 Blogerman',
   welcomeAs: (role, url) =>
-    `<b>Ovoza</b> platformasiga xush kelibsiz! ${role === 'business' ? 'Biznes' : 'Bloger'} sifatida ro‘yxatdan o‘tamiz, bir nechta savolga javob bering.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.`,
+    `<b>Miqyos</b> platformasiga xush kelibsiz! ${role === 'business' ? 'Biznes' : 'Bloger'} sifatida ro‘yxatdan o‘tamiz, bir nechta savolga javob bering.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.`,
   askName: 'Ismingizni yozing:',
   askCompany: 'Do‘kon yoki kompaniyangiz nomini yozing:',
   askCategory: 'Mahsulot yoki xizmatingiz qaysi toifaga kiradi?',
@@ -217,7 +217,7 @@ const uz = {
   errNotApproved: 'Profilingiz hali tasdiqlanmagan.',
   home: (name) => `Assalomu alaykum, ${esc(name)}! Reklama e’lonlari va so‘rovlar ilovada.`,
   help:
-    '<b>Ovoza</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/xabarlar — yangi e’lonlar haqida xabarlar (blogerlar uchun)\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
+    '<b>Miqyos</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/xabarlar — yangi e’lonlar haqida xabarlar (blogerlar uchun)\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam',
   notRegistered: 'Avval ro‘yxatdan o‘ting: /start',
   langSaved: 'Til saqlandi: O‘zbekcha 🇺🇿',
   privacy: (url) => `Qaysi ma’lumotlar yig‘iladi va qanday ishlatiladi: <a href="${esc(url)}">maxfiylik siyosati</a>.\n\nMa’lumotlaringizni o‘chirish uchun /delete yuboring.`,
@@ -273,7 +273,7 @@ const uz = {
     ].join('\n'),
   groupHelp:
     'Guruhni ulash uchun:\n/ulash — hammasi shu guruhga\n/ulash bloger — yangi blogerlar\n/ulash biznes — yangi bizneslar\n/ulash elon — yangi reklama e’lonlari\n\n/moderatsiya — tasdiq kutayotgan profillar',
-  groupNotAdmin: 'Guruhni faqat Ovoza adminlari ulay oladi.',
+  groupNotAdmin: 'Guruhni faqat Miqyos adminlari ulay oladi.',
   adminPanel:
     '🔐 Admin panelga kirish havolasi tayyor. U 10 daqiqa ichida bir marta ishlaydi va brauzerni 30 kun eslab qoladi.\n\nHavolani hech kimga bermang.',
   adminPanelButton: '🔐 Admin panelni ochish',
@@ -404,18 +404,18 @@ const uz = {
     { command: 'stats', description: 'Statistika' }
   ],
   description:
-    'Ovoza — bizneslar va blogerlar uchun barter platformasi. Bizneslar reklama e’loni joylaydi, blogerlar so‘rov yuboradi, javoblar shu botga keladi.',
+    'Miqyos — bizneslar va blogerlar uchun barter platformasi. Bizneslar reklama e’loni joylaydi, blogerlar so‘rov yuboradi, javoblar shu botga keladi.',
   shortDescription: 'Mahsulot evaziga reklama: bizneslar va blogerlar uchun barter.'
 };
 
 const ru = {
   chooseLang: uz.chooseLang,
   welcome: (url) =>
-    `Добро пожаловать в <b>Ovoza</b>!\n\nЗдесь бизнес и блогеры сотрудничают по бартеру: товар или услуга в обмен на рекламу.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.\n\nКто вы?`,
+    `Добро пожаловать в <b>Miqyos</b>!\n\nЗдесь бизнес и блогеры сотрудничают по бартеру: товар или услуга в обмен на рекламу.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.\n\nКто вы?`,
   roleBusiness: '🏪 У меня бизнес',
   roleBlogger: '📸 Я блогер',
   welcomeAs: (role, url) =>
-    `Добро пожаловать в <b>Ovoza</b>! Регистрация для ${role === 'business' ? 'бизнеса' : 'блогера'}: ответьте на несколько вопросов.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.`,
+    `Добро пожаловать в <b>Miqyos</b>! Регистрация для ${role === 'business' ? 'бизнеса' : 'блогера'}: ответьте на несколько вопросов.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.`,
   askName: 'Напишите ваше имя:',
   askCompany: 'Напишите название магазина или компании:',
   askCategory: 'К какой категории относится ваш товар или услуга?',
@@ -487,7 +487,7 @@ const ru = {
   errNotApproved: 'Ваш профиль ещё не одобрен.',
   home: (name) => `Здравствуйте, ${esc(name)}! Рекламные объявления и отклики — в приложении.`,
   help:
-    '<b>Ovoza</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/xabarlar — уведомления о новых объявлениях (для блогеров)\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
+    '<b>Miqyos</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/xabarlar — уведомления о новых объявлениях (для блогеров)\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь',
   notRegistered: 'Сначала пройдите регистрацию: /start',
   langSaved: 'Язык сохранён: Русский 🇷🇺',
   privacy: (url) => `Какие данные собираются и как используются: <a href="${esc(url)}">политика конфиденциальности</a>.\n\nЧтобы удалить свои данные, отправьте /delete.`,
@@ -541,7 +541,7 @@ const ru = {
     ].join('\n'),
   groupHelp:
     'Чтобы подключить группу:\n/ulash — всё в эту группу\n/ulash bloger — новые блогеры\n/ulash biznes — новые бизнесы\n/ulash elon — новые рекламные объявления\n\n/moderatsiya — профили, ожидающие проверки',
-  groupNotAdmin: 'Подключить группу могут только администраторы Ovoza.',
+  groupNotAdmin: 'Подключить группу могут только администраторы Miqyos.',
   adminPanel:
     '🔐 Ссылка для входа в админ-панель готова. Она работает один раз в течение 10 минут, браузер запомнит вход на 30 дней.\n\nНикому не передавайте ссылку.',
   adminPanelButton: '🔐 Открыть админ-панель',
@@ -669,7 +669,7 @@ const ru = {
     { command: 'stats', description: 'Статистика' }
   ],
   description:
-    'Ovoza — бартерная платформа для бизнеса и блогеров. Бизнес размещает рекламные объявления, блогеры откликаются, ответы приходят в этот бот.',
+    'Miqyos — бартерная платформа для бизнеса и блогеров. Бизнес размещает рекламные объявления, блогеры откликаются, ответы приходят в этот бот.',
   shortDescription: 'Реклама за товар: бартер для бизнеса и блогеров.'
 };
 

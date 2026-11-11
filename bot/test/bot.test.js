@@ -278,6 +278,31 @@ test('/setup webhook, menyu tugmasi va buyruqlarni sozlaydi', async () => {
   assert.equal(commands.length, 4); // shaxsiy chat va guruhlar uchun, ikki tilda
   const group = commands.find((c) => c.body.scope?.type === 'all_group_chats' && !c.body.language_code);
   assert.deepEqual(group.body.commands.map((c) => c.command), ['ulash', 'moderatsiya', 'stats']);
+  assert.equal(tg.last('setChatMenuButton').body.menu_button.text, 'Miqyos');
+  assert.equal(tg.last('setMyName').body.name, 'Miqyos');
+});
+
+test('/setup bot ismini faqat farq qilsa o‘zgartiradi, xato bo‘lsa ham ishlaydi', async () => {
+  const { webhookSecret } = await import('../src/telegram.js');
+  const key = await webhookSecret(env.BOT_TOKEN);
+  const run = () => worker.fetch(new Request(`${ORIGIN}/setup`, { method: 'POST', headers: { 'x-setup-key': key } }), env);
+  const renames = () => tg.calls.filter((c) => c.method === 'setMyName').length;
+
+  // Birinchi marta: eski ism "Ovoza" -> "Miqyos"
+  assert.equal((await run()).status, 200);
+  assert.equal(renames(), 1);
+
+  // Ism allaqachon "Miqyos": qayta yozilmaydi (Telegram tez-tez o'zgartirishni cheklaydi)
+  tg.clear();
+  assert.equal((await run()).status, 200);
+  assert.equal(renames(), 0);
+
+  // Telegram ismni bermasa ham /setup muvaffaqiyatli tugaydi
+  tg.fail('getMyName');
+  tg.clear();
+  assert.equal((await run()).status, 200);
+  assert.ok(tg.last('setWebhook'));
+  assert.ok(tg.last('setMyDescription'));
 });
 
 test('Telegram tugma signaliga xato qaytarsa ham javob saqlanadi', async () => {

@@ -1,4 +1,4 @@
-/* Ovoza — namuna reklama e'lonlari va toifalar.
+/* Miqyos — namuna reklama e'lonlari va toifalar.
    Haqiqiy e'lonlar paydo bo'lganda shu ro'yxatni yangilang (yoki serverdan yuklang). */
 window.OVOZA_DATA = {
   categories: [

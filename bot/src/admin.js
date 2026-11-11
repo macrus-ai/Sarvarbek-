@@ -76,7 +76,7 @@ async function login(ctx, url) {
   // Panelga o'z sahifamizdan o'tamiz (SameSite=Strict cookie keyingi so'rovlarda yuboriladi)
   return new Response(
     page(
-      'Ovoza admin',
+      'Miqyos admin',
       '<h1>Kirildi</h1><p>Admin panel ochilmoqda… Ochilmasa, <a href="/admin/">shu yerni bosing</a>.</p>',
       '<meta http-equiv="refresh" content="0;url=/admin/">'
     ),

@@ -1,4 +1,4 @@
-/* Ovoza mini ilovasi: blogerlar reklama e'lonlarini ko'radi va so'rov yuboradi,
+/* Miqyos mini ilovasi: blogerlar reklama e'lonlarini ko'radi va so'rov yuboradi,
    bizneslar reklama e'loni joylaydi va so'rovlarga javob beradi. */
 (() => {
   'use strict';
@@ -167,7 +167,7 @@
       acceptedToast: 'Qabul qilindi. Blogerga aloqa ma’lumotlaringiz yuborildi.',
       rejectedToast: 'Rad etildi',
       notTelegramTitle: 'Ilovani Telegramda oching',
-      notTelegramText: 'Bu Ovoza botining mini ilovasi. Uni botdagi “Ilovani ochish” tugmasi orqali oching.',
+      notTelegramText: 'Bu Miqyos botining mini ilovasi. Uni botdagi “Ilovani ochish” tugmasi orqali oching.',
       unregisteredTitle: 'Avval ro‘yxatdan o‘ting',
       unregisteredText: 'Botga /start yozing va bir nechta savolga javob bering. Shundan keyin ilova to‘liq ishlaydi.',
       pendingTitle: 'Profilingiz tekshirilmoqda',
@@ -362,7 +362,7 @@
       acceptedToast: 'Принято. Блогеру отправлены ваши контакты.',
       rejectedToast: 'Отклонено',
       notTelegramTitle: 'Откройте приложение в Telegram',
-      notTelegramText: 'Это мини-приложение бота Ovoza. Откройте его кнопкой «Открыть приложение» в боте.',
+      notTelegramText: 'Это мини-приложение бота Miqyos. Откройте его кнопкой «Открыть приложение» в боте.',
       unregisteredTitle: 'Сначала пройдите регистрацию',
       unregisteredText: 'Напишите боту /start и ответьте на несколько вопросов. После этого приложение заработает полностью.',
       pendingTitle: 'Профиль на проверке',
@@ -706,7 +706,7 @@
     const showBack = state.view && !(supports('6.1') && tg.BackButton);
     const back = showBack ? `<button type="button" class="icon-btn" data-act="back" aria-label="${esc(t('back'))}">${icon('back')}</button>` : '';
     const role = state.role === 'business' ? t('roleBusiness') : t('roleBlogger');
-    return `<header class="top">${back}<div class="brand">${logo()}<span>Ovoza</span></div><span class="role-chip">${esc(role)}</span></header>`;
+    return `<header class="top">${back}<div class="brand">${logo()}<span>Miqyos</span></div><span class="role-chip">${esc(role)}</span></header>`;
   }
 
   function tabBar() {

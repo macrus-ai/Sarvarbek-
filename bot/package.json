@@ -2,7 +2,7 @@
   "name": "ovoza-bot",
   "private": true,
   "type": "module",
-  "description": "Ovoza Telegram boti va mini ilovasi (Cloudflare Workers + D1)",
+  "description": "Miqyos Telegram boti va mini ilovasi (Cloudflare Workers + D1)",
   "scripts": {
     "dev": "wrangler dev",
     "db:local": "wrangler d1 migrations apply ovoza-db --local",

@@ -1,4 +1,4 @@
-// Ovoza boti: Cloudflare Worker kirish nuqtasi
+// Miqyos boti: Cloudflare Worker kirish nuqtasi
 //
 //   POST /telegram/webhook  — Telegramdan keladigan xabarlar
 //   POST /setup             — webhook, menyu tugmasi va buyruqlarni sozlash (deploydan keyin)
@@ -13,6 +13,7 @@ import { handleAdmin } from './admin.js';
 import { handleApi } from './api.js';
 import { handleUpdate } from './bot.js';
 import { sendAdBroadcasts } from './broadcast.js';
+import { BRAND } from './constants.js';
 import { getSetting, setSetting } from './db.js';
 import { tr } from './i18n.js';
 import { IMAGE_PATH, STATS_PATH, serveImage, serveStatsImage } from './images.js';
@@ -108,8 +109,16 @@ async function setup(request, ctx) {
     allowed_updates: ['message', 'callback_query']
   });
   await tg.call('setChatMenuButton', {
-    menu_button: { type: 'web_app', text: 'Ovoza', web_app: { url: `${origin}/` } }
+    menu_button: { type: 'web_app', text: BRAND, web_app: { url: `${origin}/` } }
   });
+  // Botning Telegram'dagi ismi. Telegram ismni tez-tez o'zgartirishga ruxsat bermaydi,
+  // shuning uchun faqat farq qilsa yozamiz, xato bo'lsa ham deploy to'xtamaydi.
+  try {
+    const current = await tg.call('getMyName');
+    if (current?.name !== BRAND) await tg.call('setMyName', { name: BRAND });
+  } catch (e) {
+    console.error('setMyName failed:', e);
+  }
 
   for (const lang of ['uz', 'ru']) {
     const T = tr(lang);

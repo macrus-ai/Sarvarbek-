@@ -26,7 +26,7 @@ const cards = (chatId, tag) => tg.sent(chatId).filter((c) => c.body.text.include
 // Guruhdagi xabar (masalan, botni qo'shish yoki buyruq)
 const groupMessage = (from, extra, chat = GROUP) =>
   sendUpdate(env, {
-    message: { message_id: seq++, date: 0, chat: { id: chat, type: 'supergroup', title: 'Ovoza moderatsiya' }, from, ...extra }
+    message: { message_id: seq++, date: 0, chat: { id: chat, type: 'supergroup', title: 'Miqyos moderatsiya' }, from, ...extra }
   });
 
 // Guruhdagi moderatsiya kartasidagi tugmani bosish (karta profil havolasi tugmasi bilan)
@@ -52,7 +52,7 @@ const groupPress = (from, data, chat = GROUP) =>
   });
 
 const addBotToGroup = (from, chat = GROUP) =>
-  groupMessage(from, { new_chat_members: [{ id: BOT_ID, is_bot: true, first_name: 'Ovoza' }] }, chat);
+  groupMessage(from, { new_chat_members: [{ id: BOT_ID, is_bot: true, first_name: 'Miqyos' }] }, chat);
 
 test('yangi bloger moderatsiyada: ilova yopiq, admin tasdiqlagach ochiladi', async () => {
   const blogger = tgUser(700, { username: 'dilnoza' });
@@ -185,7 +185,7 @@ test('guruhni ulash: /ulash bloger va /ulash biznes, faqat adminlar', async () =
 
   // Admin bo'lmagan ula olmaydi
   await groupMessage(tgUser(5), { text: '/ulash' }, A);
-  assert.match(lastText(A), /faqat Ovoza adminlari/);
+  assert.match(lastText(A), /faqat Miqyos adminlari/);
   // Admin bo'lmagan botni qo'shsa — jim
   await addBotToGroup(tgUser(5), -1002009);
   assert.equal(tg.sent(-1002009).length, 0);

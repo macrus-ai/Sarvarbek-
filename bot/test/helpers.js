@@ -50,6 +50,8 @@ export function fakeTelegram() {
   let nextMessageId = 1000;
   const original = globalThis.fetch;
   let nextFile = 1;
+  // Botning Telegram'dagi ismi (getMyName / setMyName)
+  let botName = 'Ovoza';
   // Haqiqiy Telegram kabi: rasmli xabarning matnini editMessageText bilan o'zgartirib bo'lmaydi
   const photoMessages = new Set();
   const badRequest = (description) =>
@@ -114,6 +116,8 @@ export function fakeTelegram() {
     }
     if (method === 'getFile') result = { file_id: body.file_id, file_path: `photos/${body.file_id}.jpg` };
     if (method === 'getMe') result = { id: 1, is_bot: true, username: 'ovoza_test_bot' };
+    if (method === 'getMyName') result = { name: botName };
+    if (method === 'setMyName') botName = body.name;
     return new Response(JSON.stringify({ ok: true, result }), { headers: { 'content-type': 'application/json' } });
   };
   return {
