@@ -17,25 +17,34 @@ export function getUser(db, id) {
 }
 
 // Foydalanuvchi qatorini yaratadi (yo'q bo'lsa) va Telegram ismi/username ni yangilaydi.
-// Har so'rovda yozmaslik uchun: avval o'qiladi, yozuv faqat yangi foydalanuvchi yoki ism/username
+// botId — foydalanuvchi shu botga yozdi (bot orqali kelgan xabar yoki tugma; mini ilovada null).
+// Har so'rovda yozmaslik uchun: avval o'qiladi, yozuv faqat yangi foydalanuvchi yoki ism/username/bot
 // o'zgargan bo'lsa bajariladi (D1 da yozuv sekin: u asosiy bazaga boradi).
-export async function touchUser(db, from, lang) {
+export async function touchUser(db, from, lang, botId = null) {
   const firstName = from.first_name ?? null;
   const username = from.username ?? null;
   const existing = await getUser(db, from.id);
-  if (existing && (existing.first_name ?? null) === firstName && (existing.username ?? null) === username) return existing;
+  if (
+    existing &&
+    (existing.first_name ?? null) === firstName &&
+    (existing.username ?? null) === username &&
+    (botId == null || Number(existing.bot_id) === botId)
+  ) {
+    return existing;
+  }
 
   const ts = now();
   await db
     .prepare(
-      `INSERT INTO users (tg_id, first_name, username, lang, created_at, updated_at)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?5)
+      `INSERT INTO users (tg_id, first_name, username, lang, bot_id, created_at, updated_at)
+       VALUES (?1, ?2, ?3, ?4, ?6, ?5, ?5)
        ON CONFLICT (tg_id) DO UPDATE SET
          first_name = excluded.first_name,
          username = excluded.username,
+         bot_id = COALESCE(excluded.bot_id, users.bot_id),
          updated_at = excluded.updated_at`
     )
-    .bind(from.id, firstName, username, lang, ts)
+    .bind(from.id, firstName, username, lang, ts, botId)
     .run();
   return getUser(db, from.id);
 }
@@ -371,11 +380,13 @@ const FOLLOWERS_MAX_SQL = `(CASE u.followers ${FOLLOWERS.map((f) => `WHEN '${f.i
 // E'longa mos keyingi blogerlar (tg_id bo'yicha, afterId dan keyin):
 // tasdiqlangan, xabarlarni o'chirmagan, platformasi e'londa bor, auditoriya hududi mos
 // (yoki e'lon butun O'zbekiston uchun), obunachilari yetadi va hali so'rov yubormagan.
-export async function adBroadcastTargets(db, c, afterId, limit) {
+// botId — hozirgi bot: unga hali yozmagan (eski botdagi) blogerlarga bot xabar yubora olmaydi.
+export async function adBroadcastTargets(db, c, afterId, limit, botId) {
   const { results } = await db
     .prepare(
       `SELECT u.tg_id, u.lang FROM users u
        WHERE u.role = 'blogger' AND u.reg_step = 'done' AND u.moderation = 'approved' AND u.notify_ads = 1
+         AND u.bot_id = ?7
          AND u.tg_id > ?1
          AND instr(',' || ?2 || ',', ',' || u.platform || ',') > 0
          AND (?3 = 'all' OR u.region = ?3)
@@ -384,7 +395,7 @@ export async function adBroadcastTargets(db, c, afterId, limit) {
        ORDER BY u.tg_id
        LIMIT ?6`
     )
-    .bind(afterId, String(c.platforms || ''), c.region || 'all', Number(c.min_followers) || 0, c.id, limit)
+    .bind(afterId, String(c.platforms || ''), c.region || 'all', Number(c.min_followers) || 0, c.id, limit, botId)
     .all();
   return results;
 }

@@ -1,5 +1,5 @@
 /**
- * Ovoza kunlik agent jadvali <-> Telegram (@Ovozauz_bot)
+ * Ovoza kunlik agent jadvali <-> Telegram (@miqyosbot)
  *
  * Bu fayl jadvalga bog'langan Apps Script loyihasidagi Code.gs ning nusxasi (Extensions > Apps Script).
  * O'zgartirsangiz, Apps Script'ga ham qo'ying va Deploy > Manage deployments > New version qiling.
@@ -8,7 +8,7 @@
  * 2) Botda yangi bloger/biznes ro'yxatdan o'tsa -> Worker (bot/src/sheets.js) shu web app'ga yuboradi,
  *    qator "Yangi" holatida qo'shiladi va egasiga xabar boradi (doPost).
  *
- * Script properties: BOT_TOKEN, OWNER_CHAT_ID.
+ * Script properties: BOT_TOKEN (asosiy bot @miqyosbot tokeni, Worker'dagi bilan bir xil), OWNER_CHAT_ID.
  * DIQQAT: bu skript botning webhook'ini o'zgartirmasligi kerak (setWebhook). Webhook Worker'ga qaraydi.
  */
 

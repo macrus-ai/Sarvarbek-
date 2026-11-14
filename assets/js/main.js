@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  const CONFIG = Object.assign({ botUsername: 'Ovozauz_bot', defaultLang: 'uz' }, window.OVOZA_CONFIG || {});
+  const CONFIG = Object.assign({ botUsername: 'miqyosbot', defaultLang: 'uz' }, window.OVOZA_CONFIG || {});
   const I18N = window.OVOZA_I18N;
   const DATA = window.OVOZA_DATA;
   const LANG_KEY = 'ovoza-lang';

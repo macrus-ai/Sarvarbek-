@@ -1,13 +1,15 @@
 // Miqyos boti: Cloudflare Worker kirish nuqtasi
 //
 //   POST /telegram/webhook  — Telegramdan keladigan xabarlar
+//   POST /telegram/old-webhook — eski botga (@Ovozauz_bot) kelgan xabarlar: yangi botga yo'naltirish (oldbot.js)
 //   POST /setup             — webhook, menyu tugmasi va buyruqlarni sozlash (deploydan keyin)
 //   /api/*                  — mini ilova API'si
 //   GET /img/c/...          — reklama e'lonlarining rasmlari (Telegramdan olib beriladi)
 //   /admin/login, /api/admin/* — admin panel (sahifasi public/admin/ da)
 //   qolganlari              — mini ilova fayllari (public/)
 //
-//   scheduled (cron, har daqiqada, wrangler.toml) — yangi e'lonlar haqida blogerlarga xabar (broadcast.js)
+//   scheduled (cron, har daqiqada, wrangler.toml) — yangi e'lonlar haqida blogerlarga xabar (broadcast.js),
+//                 eski botdagi rasmlarni ko'chirish va eski foydalanuvchilarga xabar (oldbot.js)
 
 import { handleAdmin } from './admin.js';
 import { handleApi } from './api.js';
@@ -17,6 +19,7 @@ import { BRAND } from './constants.js';
 import { getSetting, setSetting } from './db.js';
 import { tr } from './i18n.js';
 import { IMAGE_PATH, STATS_PATH, serveImage, serveStatsImage } from './images.js';
+import { BOT_USERNAME, moveOldFiles, noticeOldUsers, oldTelegram, oldWebhook, setupOldBot } from './oldbot.js';
 import { createTelegram, webhookSecret } from './telegram.js';
 import { json } from './util.js';
 
@@ -30,15 +33,17 @@ export default {
     const image = path.match(IMAGE_PATH);
     const stats = path.match(STATS_PATH);
     const admin = path === '/admin/login' || path.startsWith('/api/admin/');
-    if (admin || image || stats || path === '/telegram/webhook' || path === '/setup' || path.startsWith('/api/')) {
+    const telegram = path === '/telegram/webhook' || path === '/telegram/old-webhook';
+    if (admin || image || stats || telegram || path === '/setup' || path.startsWith('/api/')) {
       if (!env.BOT_TOKEN || !env.DB) return json({ error: 'not_configured' }, 503);
       // exec: javobdan keyin fonda davom etadigan ishlar uchun (waitUntil)
-      const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin: url.origin, exec };
+      const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), oldTg: oldTelegram(env), origin: url.origin, exec };
       try {
         if (image) return await serveImage(request, ctx, image, exec);
         if (stats) return await serveStatsImage(request, ctx, stats, exec);
         if (admin) return await handleAdmin(request, ctx);
         if (path === '/telegram/webhook') return await webhook(request, ctx);
+        if (path === '/telegram/old-webhook') return await oldWebhook(request, ctx);
         if (path === '/setup') return await setup(request, ctx);
         return await handleApi(request, ctx);
       } catch (e) {
@@ -59,12 +64,25 @@ export default {
       console.warn('scheduled: app origin is not saved yet (run /setup)');
       return;
     }
-    const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), origin };
+    const ctx = { env, db: env.DB, tg: createTelegram(env.BOT_TOKEN), oldTg: oldTelegram(env), origin };
     try {
       const r = await sendAdBroadcasts(ctx);
       if (r.sent || r.blocked.length || r.skipped) console.log('ad notify:', JSON.stringify({ ...r, blocked: r.blocked.length }));
     } catch (e) {
       console.error('ad notify failed:', e);
+    }
+    // Eski botdan ko'chish (OLD_BOT_TOKEN bo'lsa). Har biri oz-ozdan: 50 ta so'rov chegarasi.
+    try {
+      const r = await moveOldFiles(ctx);
+      if (r?.moved) console.log('old files moved:', JSON.stringify(r));
+    } catch (e) {
+      console.error('moving old files failed:', e);
+    }
+    try {
+      const r = await noticeOldUsers(ctx);
+      if (r) console.log('old bot notice:', JSON.stringify(r));
+    } catch (e) {
+      console.error('old bot notice failed:', e);
     }
   }
 };
@@ -103,6 +121,8 @@ async function setup(request, ctx) {
   // Cron'da so'rov manzili bo'lmaydi: xabardagi ilova havolasi uchun saqlab qo'yamiz
   await setSetting(ctx.db, APP_ORIGIN, origin);
   const me = await tg.call('getMe');
+  // Eski bot yo'naltirish xabarida yangi botning username'i kerak
+  await setSetting(ctx.db, BOT_USERNAME, me.username);
   await tg.call('setWebhook', {
     url: `${origin}/telegram/webhook`,
     secret_token: secret,
@@ -129,5 +149,13 @@ async function setup(request, ctx) {
     await tg.call('setMyShortDescription', { short_description: T.shortDescription, ...scope });
   }
 
-  return json({ ok: true, bot: me.username, app: `${origin}/`, webhook: `${origin}/telegram/webhook` });
+  // Eski bot yangi botga yo'naltiradi. Xato bo'lsa ham yangi bot ishlayveradi.
+  let oldBot = null;
+  try {
+    oldBot = await setupOldBot(ctx, me.username);
+  } catch (e) {
+    console.error('old bot setup failed:', e);
+  }
+
+  return json({ ok: true, bot: me.username, oldBot, app: `${origin}/`, webhook: `${origin}/telegram/webhook` });
 }

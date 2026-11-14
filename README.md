@@ -15,7 +15,7 @@ Sayt oddiy HTML, CSS va JavaScript bilan yozilgan. Hech qanday o‘rnatish yoki 
 - **Xizmatlar** (`#xizmatlar`): brendlarga nima qilib berishimiz (6 ta karta) va yagona tarif, hozircha bepul.
 - **Savollar (FAQ)**, **Ro‘yxatdan o‘tish** (Telegram botga havolalar va QR-kod).
 - **Ikki til**: o‘zbekcha (asosiy) va ruscha. Tanlangan til brauzerda eslab qolinadi.
-- **Telegram bot**: ro‘yxatdan o‘tish va ariza berish [@Ovozauz_bot](https://t.me/Ovozauz_bot) orqali.
+- **Telegram bot**: ro‘yxatdan o‘tish va ariza berish [@miqyosbot](https://t.me/miqyosbot) orqali.
 - Telefon, planshet va kompyuterga moslashadi; tungi (dark) rejimni qo‘llab-quvvatlaydi.
 
 ## Fayllar
@@ -43,18 +43,18 @@ python3 -m http.server 8000
 
 - **Matnlar**: o‘zbekcha matnlar `index.html` ichida. Matnni o‘zgartirsangiz, ruschasini `assets/js/i18n.js` dagi xuddi shu kalit (`data-i18n` qiymati) bo‘yicha yangilang.
 - **Reklama e’lonlari (namunalar)**: `assets/js/campaigns.js`. Hozirgilari namuna, saytda ham "Namuna" deb belgilangan.
-- **Aloqa ma’lumotlari**: telefon raqami `+998 95 555 57 91` va bot @Ovozauz_bot. Email hozircha yo‘q. Ular `index.html` da ro‘yxatdan o‘tish bo‘limi, savollar bo‘limi va footerda turadi.
+- **Aloqa ma’lumotlari**: telefon raqami `+998 95 555 57 91` va bot @miqyosbot. Email hozircha yo‘q. Ular `index.html` da ro‘yxatdan o‘tish bo‘limi, savollar bo‘limi va footerda turadi.
 - **Xizmatlar va tarif**: `index.html` dagi "Xizmatlar" bo‘limi va `i18n.js` dagi `svc…` va `offer…` kalitlari. Bu yerda faqat botda haqiqatan bor imkoniyatlarni yozing. Raqamlar (20 ta faol e’lon, e’longa 100 tagacha bloger) `bot/src/constants.js` dagi `LIMITS` bilan bir xil bo‘lsin.
 - **Ranglar**: `assets/css/style.css` boshidagi `:root` bloki (kunduzgi) va undan keyingi tungi rejim bloklari.
 
 ## Ro‘yxatdan o‘tish: Telegram bot
 
-Saytdagi barcha "Ro‘yxatdan o‘tish", "Men biznes egasiman", "Men blogerman" va "Ariza berish" tugmalari Telegram botga ([@Ovozauz_bot](https://t.me/Ovozauz_bot)) olib boradi.
+Saytdagi barcha "Ro‘yxatdan o‘tish", "Men biznes egasiman", "Men blogerman" va "Ariza berish" tugmalari Telegram botga ([@miqyosbot](https://t.me/miqyosbot)) olib boradi.
 
-- Havolada rol va sayt tili uzatiladi (`t.me/Ovozauz_bot?start=business-uz`). Shuning uchun bot til va rolni qayta so‘ramay, darhol ismni so‘raydi.
+- Havolada rol va sayt tili uzatiladi (`t.me/miqyosbot?start=business-uz`). Shuning uchun bot til va rolni qayta so‘ramay, darhol ismni so‘raydi.
 - Kompyuterdan kirganlar uchun ro‘yxatdan o‘tish bo‘limida QR-kod bor.
 - Maxfiylik siyosati: `privacy.html` (o‘zbek va rus tilida). Bot ro‘yxatdan o‘tishda shu sahifaga havola beradi. Matn namuna sifatida yozilgan, uni yurist bilan ko‘rib chiqing.
-- Bot nomi o‘zgarsa, `assets/js/config.js` dagi `botUsername` ni va `index.html` dagi `t.me/Ovozauz_bot` havolalarini yangilang.
+- Bot nomi o‘zgarsa, `assets/js/config.js` dagi `botUsername` ni va `index.html` dagi `t.me/miqyosbot` havolalarini yangilang.
 
 Bot va mini ilova kodi `bot/` papkasida: [bot/README.md](bot/README.md).
 
