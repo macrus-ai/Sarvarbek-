@@ -1,4 +1,4 @@
-/* Ovoza admin: Excel (.xlsx) fayl yasash, tashqi kutubxonasiz.
+/* Miqyos admin: Excel (.xlsx) fayl yasash, tashqi kutubxonasiz.
    .xlsx — bu ichida bir nechta XML fayl bo'lgan zip arxiv. Bu yerda faqat kerakli qismi bor:
    bir nechta varaq, matn va son kataklar, qalin sarlavha qatori, ustun kengligi,
    muzlatilgan sarlavha va filtr. Zip siqilmagan holda yoziladi (Excel buni oddiy qabul qiladi).

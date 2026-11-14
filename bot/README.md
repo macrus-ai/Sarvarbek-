@@ -1,4 +1,4 @@
-# Ovoza Telegram boti va mini ilovasi
+# Miqyos Telegram boti va mini ilovasi
 
 Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilovaga reklama e’loni joylaydi, blogerlar ko‘rib so‘rov yuboradi, so‘rovlar esa bizneslarga shu bot orqali keladi.
 
@@ -47,7 +47,7 @@ Yangi bloger va biznes ro‘yxatdan o‘tgach **moderatsiyada** turadi: ilova oc
 
 #### Moderatsiya guruhini ulash
 
-1. Telegramda guruh oching (masalan, "Ovoza moderatsiya") va jamoangizni qo‘shing.
+1. Telegramda guruh oching (masalan, "Miqyos moderatsiya") va jamoangizni qo‘shing.
 2. Guruhga @Ovozauz_bot ni qo‘shing. Qo‘shgan odam `ADMIN_IDS` da bo‘lsa, guruh avtomatik ulanadi va bot "✅ Guruh ulandi" deb yozadi.
 3. Agar ulanmagan bo‘lsa, guruhda `/ulash` yozing (yoki ro‘yxatdan `/ulash@Ovozauz_bot` ni tanlang).
 
@@ -71,7 +71,7 @@ Bo‘limlar:
 - **So‘rovlar:** blogerlarning barcha so‘rovlari holati bilan.
 - **Sozlamalar:** ulangan moderatsiya guruhlari (uzish mumkin), chiqish.
 
-**Excel’ga yuklab olish** (bosh sahifa va "Foydalanuvchilar" bo‘limidagi tugma): `ovoza-YYYY-MM-DD.xlsx` fayl, to‘rt varaq — Blogerlar (barcha ko‘rsatkichlari bilan), Bizneslar, E’lonlar, So‘rovlar. Faqat ro‘yxatdan o‘tishni tugatganlar kiradi. Panel ma’lumotni `/api/admin/export/{users|campaigns|applications}?page=N` dan 500 tadan oladi, faylni esa brauzerning o‘zi yasaydi (`public/admin/xlsx.js`, tashqi kutubxonasiz): bepul tarifda serverning bitta so‘rovga protsessor vaqti qisqa. Fayl zaxira nusxa sifatida ham saqlab qo‘yish uchun qulay.
+**Excel’ga yuklab olish** (bosh sahifa va "Foydalanuvchilar" bo‘limidagi tugma): `miqyos-YYYY-MM-DD.xlsx` fayl, to‘rt varaq — Blogerlar (barcha ko‘rsatkichlari bilan), Bizneslar, E’lonlar, So‘rovlar. Faqat ro‘yxatdan o‘tishni tugatganlar kiradi. Panel ma’lumotni `/api/admin/export/{users|campaigns|applications}?page=N` dan 500 tadan oladi, faylni esa brauzerning o‘zi yasaydi (`public/admin/xlsx.js`, tashqi kutubxonasiz): bepul tarifda serverning bitta so‘rovga protsessor vaqti qisqa. Fayl zaxira nusxa sifatida ham saqlab qo‘yish uchun qulay.
 
 Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlanadi, panel boshqa saytdan so‘rov yuborishga va ramkaga qo‘yishga yo‘l qo‘ymaydi.
 
@@ -109,8 +109,8 @@ Cloudflare'ning bepul tarifi boshlash uchun yetadi: kuniga 100 000 so‘rov, 5 G
 ### 1. Telegramda bot yaratish
 
 1. Telegramda [@BotFather](https://t.me/BotFather) ni oching va `/newbot` yozing.
-2. Bot nomini yozing, masalan `Ovoza`.
-3. Username yozing. U `bot` bilan tugashi kerak, masalan `ovoza_uz_bot`.
+2. Bot nomini yozing, masalan `Miqyos`.
+3. Username yozing. U `bot` bilan tugashi kerak, masalan `miqyos_bot`.
 4. BotFather **token** beradi (`123456789:AA...` ko‘rinishida). Uni nusxalab oling.
 
 Tokenni hech kimga yubormang va chatlarga yozmang: u bilan botingizni boshqarish mumkin.
@@ -143,7 +143,7 @@ Workflow o‘zi bajaradigan ishlar:
 - `workers.dev` manzilini yaratadi (yangi akkauntda bo‘lmasa);
 - `ovoza-db` bazasini yaratadi va jadvallarni qo‘shadi;
 - botni joylaydi va tokenni xavfsiz saqlaydi;
-- webhookni, "Ovoza" menyu tugmasini, buyruqlarni va bot tavsifini sozlaydi.
+- webhookni, botning "Miqyos" ismini, menyu tugmasini, buyruqlarni va bot tavsifini sozlaydi.
 
 Tugagach, workflow sahifasidagi **Summary** da bot havolasi va mini ilova manzili chiqadi. Botga `/start` yozib tekshiring.
 

@@ -1,6 +1,8 @@
-# Ovoza — Claude uchun loyiha qo‘llanmasi
+# Miqyos — Claude uchun loyiha qo‘llanmasi
 
-Ovoza — O‘zbekistondagi bizneslar va blogerlarni barter asosida bog‘laydigan platforma.
+Miqyos — O‘zbekistondagi bizneslar va blogerlarni barter asosida bog‘laydigan platforma.
+
+Platforma avval **Ovoza** deb atalgan, 2026-11-11 da Miqyos'ga o‘zgartirildi (Ovoza nomli telekanal va boshqa loyihalar bor edi). Foydalanuvchiga ko‘rinadigan joylarda faqat "Miqyos" yozing. Texnik nomlar ataylab eskicha qoldirilgan, ularni o‘zgartirmang: `ovoza-db` (D1), `ovoza-bot` (Worker va uning manzili), `ovoza-webhook:` va `ovoza-sheets:` kalit tuzlari, `ovoza_admin` cookie, `x-ovoza-admin`, `ovoza-lang` / `ovoza-filters-v1` (brauzer xotirasi), `OVOZA_*` / `OvozaXlsx` JS nomlari. Ularni o‘zgartirsangiz bot, webhook, jadval yoki saqlangan sozlamalar buziladi. Domen (ovozagroup.uz) va bot username'i (@Ovozauz_bot) yangisi tayyor bo‘lganda alohida almashtiriladi.
 
 Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili, keyingi g‘oyalar): `docs/chat-tarixi.md`.
 

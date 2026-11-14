@@ -1,4 +1,4 @@
-/* Ovoza — sayt uslublari */
+/* Miqyos — sayt uslublari */
 
 /* Layout: cobalt hero band with a ripple diagram of reach, then left-aligned sections on blue-tinted paper; saffron is the single accent. */
 :root {
@@ -538,7 +538,7 @@ textarea { font: inherit; color: inherit; }
   color: var(--saffron);
 }
 
-/* Ovoza tarqalishi: markazdagi kampaniya va atrofdagi blogerlar */
+/* Reklama tarqalishi: markazdagi kampaniya va atrofdagi blogerlar */
 .ripple {
   position: relative;
   justify-self: center;

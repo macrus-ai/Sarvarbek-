@@ -1,4 +1,4 @@
-# Ovoza boti: testlar va Cloudflare'ga avtomatik joylash.
+# Miqyos boti: testlar va Cloudflare'ga avtomatik joylash.
 #
 # - PR'da va main'da bot/ o'zgarsa: testlar ishlaydi.
 # - main'ga kirganda: bot Cloudflare Workers'ga joylanadi va Telegramga ulanadi.
@@ -170,7 +170,7 @@ jobs:
               bot=$(echo "$out" | jq -r '.bot')
               echo "Bot: https://t.me/$bot"
               {
-                echo "### Ovoza boti ishlayapti"
+                echo "### Miqyos boti ishlayapti"
                 echo ""
                 echo "- Bot: https://t.me/$bot"
                 echo "- Mini ilova: $APP_URL/"

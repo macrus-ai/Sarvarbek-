@@ -1,4 +1,4 @@
-/* Ovoza — sayt skriptlari: til, menyu, tablar, katalog, kalkulyator va Telegram bot havolalari. */
+/* Miqyos — sayt skriptlari: til, menyu, tablar, katalog, kalkulyator va Telegram bot havolalari. */
 (() => {
   'use strict';
 
