@@ -375,7 +375,7 @@ async function onMessage(msg, ctx) {
   if (msg.chat?.type === 'group' || msg.chat?.type === 'supergroup') return onGroupMessage(msg, ctx);
   if (msg.chat?.type !== 'private') return undefined;
 
-  const user = await touchUser(ctx.db, msg.from, guessLang(msg.from.language_code));
+  const user = await touchUser(ctx.db, msg.from, guessLang(msg.from.language_code), botIdOf(ctx.env.BOT_TOKEN));
   const T = tr(user.lang);
   const id = user.tg_id;
   const text = typeof msg.text === 'string' ? msg.text.trim() : '';
@@ -462,7 +462,9 @@ async function onCallback(cq, ctx) {
 
   if (!cq.from || !cq.message) return ack();
 
-  const user = await touchUser(ctx.db, cq.from, guessLang(cq.from.language_code));
+  // Shaxsiy chatdagi tugma: foydalanuvchi shu botga yozgan (guruhdagi moderatsiya tugmasi hisobga olinmaydi)
+  const viaBot = cq.message.chat?.type === 'private' ? botIdOf(ctx.env.BOT_TOKEN) : null;
+  const user = await touchUser(ctx.db, cq.from, guessLang(cq.from.language_code), viaBot);
   const T = tr(user.lang);
   const [kind, value, extra] = String(cq.data || '').split(':');
   const chatId = cq.message.chat.id;
@@ -588,7 +590,7 @@ async function onCallback(cq, ctx) {
       } catch {
         /* e'tiborsiz */
       }
-      const fresh = await touchUser(ctx.db, cq.from, user.lang);
+      const fresh = await touchUser(ctx.db, cq.from, user.lang, viaBot);
       await updateUser(ctx.db, fresh.tg_id, { lang: user.lang, reg_step: 'role' });
       return ask(ctx, { ...fresh, lang: user.lang, reg_step: 'role' }, 'role');
     }

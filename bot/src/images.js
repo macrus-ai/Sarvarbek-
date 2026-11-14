@@ -57,14 +57,30 @@ export const imageUrlsOf = (origin, campaignId, key) => {
 const filePaths = new Map();
 const FILE_PATH_TTL = 50 * 60 * 1000;
 
-async function filePathOf(tg, fileId) {
-  const hit = filePaths.get(fileId);
+// ns — eski bot uchun alohida kesh (bir file_id ning yo'li botlarda har xil)
+const OLD = 'old:';
+
+async function filePathOf(tg, fileId, ns = '') {
+  const hit = filePaths.get(ns + fileId);
   if (hit && hit.until > Date.now()) return hit.path;
   const file = await tg.call('getFile', { file_id: fileId });
   if (!file?.file_path) throw new Error('getFile: file_path yo‘q');
   if (filePaths.size > 500) filePaths.clear();
-  filePaths.set(fileId, { path: file.file_path, until: Date.now() + FILE_PATH_TTL });
+  filePaths.set(ns + fileId, { path: file.file_path, until: Date.now() + FILE_PATH_TTL });
   return file.file_path;
+}
+
+// Faylni Telegramdan oladi. Rasm eski botga yuklangan va hali yangi botga ko'chirilmagan
+// bo'lsa (oldbot.js), eski bot orqali olinadi.
+async function fetchFile(ctx, fileId) {
+  let path;
+  try {
+    path = await filePathOf(ctx.tg, fileId);
+  } catch (e) {
+    if (!ctx.oldTg) throw e;
+    return fetch(ctx.oldTg.fileUrl(await filePathOf(ctx.oldTg, fileId, OLD)));
+  }
+  return fetch(ctx.tg.fileUrl(path));
 }
 
 const notFound = () => new Response('Not found', { status: 404, headers: { 'cache-control': 'no-store' } });
@@ -108,13 +124,14 @@ async function serveFile(request, ctx, exec, findFileId) {
   if (!fileId) return notFound();
   let upstream;
   try {
-    upstream = await fetch(ctx.tg.fileUrl(await filePathOf(ctx.tg, fileId)));
+    upstream = await fetchFile(ctx, fileId);
   } catch (e) {
     console.warn('image fetch failed:', e.message);
     return json({ error: 'image_unavailable' }, 502);
   }
   if (!upstream.ok) {
     filePaths.delete(fileId);
+    filePaths.delete(OLD + fileId);
     return json({ error: 'image_unavailable' }, 502);
   }
 

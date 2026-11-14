@@ -190,7 +190,7 @@ test('guruhni ulash: /ulash bloger va /ulash biznes, faqat adminlar', async () =
   await addBotToGroup(tgUser(5), -1002009);
   assert.equal(tg.sent(-1002009).length, 0);
 
-  await groupMessage(admin, { text: '/ulash@Ovozauz_bot bloger' }, A);
+  await groupMessage(admin, { text: '/ulash@miqyosbot bloger' }, A);
   assert.match(lastText(A), /yangi blogerlar keladi/);
   await groupMessage(admin, { text: '/ulash biznes' }, B);
   assert.match(lastText(B), /yangi bizneslar keladi/);

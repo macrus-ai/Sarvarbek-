@@ -48,8 +48,8 @@ Yangi bloger va biznes ro‘yxatdan o‘tgach **moderatsiyada** turadi: ilova oc
 #### Moderatsiya guruhini ulash
 
 1. Telegramda guruh oching (masalan, "Miqyos moderatsiya") va jamoangizni qo‘shing.
-2. Guruhga @Ovozauz_bot ni qo‘shing. Qo‘shgan odam `ADMIN_IDS` da bo‘lsa, guruh avtomatik ulanadi va bot "✅ Guruh ulandi" deb yozadi.
-3. Agar ulanmagan bo‘lsa, guruhda `/ulash` yozing (yoki ro‘yxatdan `/ulash@Ovozauz_bot` ni tanlang).
+2. Guruhga @miqyosbot ni qo‘shing. Qo‘shgan odam `ADMIN_IDS` da bo‘lsa, guruh avtomatik ulanadi va bot "✅ Guruh ulandi" deb yozadi.
+3. Agar ulanmagan bo‘lsa, guruhda `/ulash` yozing (yoki ro‘yxatdan `/ulash@miqyosbot` ni tanlang).
 
 Har bir oqim uchun alohida guruh ham mumkin: blogerlar guruhida `/ulash bloger`, bizneslar guruhida `/ulash biznes`, reklama e’lonlari guruhida `/ulash elon`. E’lonlar guruhi ulanmagan bo‘lsa, e’lonlar bizneslar guruhiga keladi. Guruhdagi tugmalarni guruhning istalgan a’zosi bosa oladi, shuning uchun guruhga faqat jamoani qo‘shing.
 
@@ -92,6 +92,19 @@ Botda birinchi marta ro‘yxatdan o‘tgan bloger "Ovoza kunlik agent jadvali" n
 - Rasm Telegramga yuklanadi va Telegram serverida saqlanadi (bepul, alohida xizmat kerak emas). Biznesga botda "rasm qo‘shildi" degan tasdiq keladi. Bazada faqat rasmning `file_id` si turadi.
 - Mini ilova rasmni `/img/c/<id>-<kalit>.jpg` manzilidan oladi. Worker uni Telegramdan olib beradi, bot tokeni tashqariga chiqmaydi. Kalit tasodifiy va har yangi rasmda o‘zgaradi.
 
+### Eski botdan ko‘chish (@Ovozauz_bot → @miqyosbot)
+
+2026-11-14 da platforma yangi botga ko‘chdi. Telegram foydalanuvchilarni bir botdan boshqasiga o‘tkazmaydi va bot foydalanuvchiga birinchi bo‘lib yoza olmaydi. Shuning uchun eski bot (`OLD_BOT_TOKEN`, GitHub'da `TELEGRAM_BOT_TOKEN`) shu Worker'da yo‘naltiruvchi bo‘lib qoladi (`src/oldbot.js`):
+
+- Eski botga shaxsiy chatda nima yozilsa ham, "bot @miqyosbot ga ko‘chdi" degan xabar va yangi botga tugma keladi (uz/ru). Saytdagi havola parametri (`/start business-uz`) yangi botga uzatiladi. Guruhlarda eski bot jim turadi, eski tugmalarga ogohlantirish chiqaradi.
+- `/setup` eski botning webhook'ini `/telegram/old-webhook` ga qo‘yadi, mini ilova tugmasi va buyruqlarini olib tashlaydi, tavsifi va nomini ("Miqyos (eski)") o‘zgartiradi.
+- Ma’lumotlar saqlanadi: foydalanuvchi Telegram ID bo‘yicha taniladi, yangi botda qayta ro‘yxatdan o‘tmaydi.
+- `users.bot_id`: foydalanuvchi qaysi botga yozgan. Yangi botga hali yozmaganlarga e’lon xabarlari yuborilmaydi (yuborib bo‘lmaydi) va ularning xabarlari "bloklagan" deb o‘chirilmaydi.
+- Rasmlar (statistika skrinshotlari, e’lon rasmlari) eski botning `file_id` si bilan saqlangan, yangi bot ularni o‘qiy olmaydi. Cron har daqiqada bittadan rasmni eski botdan olib, yangi bot orqali birinchi adminning (`ADMIN_IDS`) chatiga ovozsiz yuklaydi, darhol o‘chiradi va bazadagi `file_id` ni almashtiradi. Buning uchun admin @miqyosbot da `/start` bosgan bo‘lishi kerak. Ko‘chguncha rasm eski bot orqali ko‘rsatiladi. Holat: `settings.old_files_moved` (`done` — tugadi).
+- Eski foydalanuvchilarga bir martalik xabar ("yangi botga o‘ting") faqat egasi ruxsat berganda yuboriladi: `settings` jadvalida `old_bot_notice = 'go'`. Cron har daqiqada 5 tadan yuboradi, tugagach `done` bo‘ladi.
+- Moderatsiya guruhlariga @miqyosbot ni qo‘shish kerak (guruhlar o‘sha ID bilan ulangan qoladi). Qo‘shilmaguncha kartalar adminlarga shaxsan keladi.
+- Agentlar jadvali: Apps Script'dagi `BOT_TOKEN` xususiyatini yangi bot tokeniga almashtirish kerak (kalit tokendan hosil qilinadi).
+
 ## Texnik tuzilish
 
 | Qism | Qayerda |
@@ -130,7 +143,8 @@ Tokenni hech kimga yubormang va chatlarga yozmang: u bilan botingizni boshqarish
 
 | Nomi | Qiymati |
 | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | BotFather bergan token |
+| `MIQYOS_BOT_TOKEN` | BotFather bergan token (asosiy bot, @miqyosbot) |
+| `TELEGRAM_BOT_TOKEN` | *(ixtiyoriy)* eski bot (@Ovozauz_bot) tokeni: u foydalanuvchilarni yangi botga yo‘naltiradi ("Eski botdan ko‘chish" bo‘limi) |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
 | `CLOUDFLARE_ACCOUNT_ID` | *(ixtiyoriy)* Cloudflare Account ID. Kerak emas: workflow uni tokendan o‘zi topadi. Faqat tokeningiz bir nechta akkauntga tegishli bo‘lsa qo‘shing |
 | `ADMIN_IDS` | *(ixtiyoriy)* adminlarning Telegram ID'lari, vergul bilan. O‘z ID'ingizni botga `/id` yuborib bilasiz |

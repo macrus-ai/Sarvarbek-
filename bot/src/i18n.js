@@ -405,7 +405,16 @@ const uz = {
   ],
   description:
     'Miqyos — bizneslar va blogerlar uchun barter platformasi. Bizneslar reklama e’loni joylaydi, blogerlar so‘rov yuboradi, javoblar shu botga keladi.',
-  shortDescription: 'Mahsulot evaziga reklama: bizneslar va blogerlar uchun barter.'
+  shortDescription: 'Mahsulot evaziga reklama: bizneslar va blogerlar uchun barter.',
+
+  // Eski bot (oldbot.js) yangi botga yo'naltiradi
+  botMoved: (username) =>
+    `Miqyos boti yangi manzilga ko‘chdi: <b>@${esc(username)}</b>\n\nMa’lumotlaringiz saqlangan, qayta ro‘yxatdan o‘tish shart emas. Pastdagi tugmani bosing va yangi botda «Start» ni bosing. Yangi e’lonlar va javoblar endi o‘sha botga keladi.`,
+  botMovedButton: '➡️ Yangi botga o‘tish',
+  botMovedShort: (username) => `Bot @${username} ga ko‘chdi. O‘sha botni oching.`,
+  oldBotDescription: (username) =>
+    `Miqyos boti @${username} ga ko‘chdi. Ma’lumotlaringiz saqlangan: yangi botni oching va «Start» ni bosing.`,
+  oldBotShortDescription: (username) => `Miqyos boti @${username} ga ko‘chdi.`
 };
 
 const ru = {
@@ -670,7 +679,15 @@ const ru = {
   ],
   description:
     'Miqyos — бартерная платформа для бизнеса и блогеров. Бизнес размещает рекламные объявления, блогеры откликаются, ответы приходят в этот бот.',
-  shortDescription: 'Реклама за товар: бартер для бизнеса и блогеров.'
+  shortDescription: 'Реклама за товар: бартер для бизнеса и блогеров.',
+
+  botMoved: (username) =>
+    `Бот Miqyos переехал: <b>@${esc(username)}</b>\n\nВаши данные сохранены, регистрироваться заново не нужно. Нажмите кнопку ниже, а затем «Start» в новом боте. Новые объявления и ответы теперь приходят туда.`,
+  botMovedButton: '➡️ Перейти в новый бот',
+  botMovedShort: (username) => `Бот переехал в @${username}. Откройте его.`,
+  oldBotDescription: (username) =>
+    `Бот Miqyos переехал в @${username}. Ваши данные сохранены: откройте новый бот и нажмите «Start».`,
+  oldBotShortDescription: (username) => `Бот Miqyos переехал в @${username}.`
 };
 
 export const tr = (lang) => (lang === 'ru' ? ru : uz);

@@ -10,6 +10,7 @@ import { adBroadcastTargets, advanceAdBroadcast, disableAdNotifications, getCamp
 import { tr } from './i18n.js';
 import { deliver } from './services.js';
 import { TelegramError } from './telegram.js';
+import { botIdOf } from './util.js';
 
 // Mini ilovada e'lonni darhol ochadigan havola (app.js ?c= ni tushunadi)
 export const adLink = (ctx, id) => `${ctx.origin}/?c=${id}`;
@@ -44,7 +45,7 @@ export async function sendAdBroadcasts(ctx, { budget = adNotifyBatch(ctx.env) } 
     }
 
     const limit = budget;
-    const targets = await adBroadcastTargets(ctx.db, c, job.last_tg_id, limit);
+    const targets = await adBroadcastTargets(ctx.db, c, job.last_tg_id, limit, botIdOf(ctx.env.BOT_TOKEN));
     let last = job.last_tg_id;
     let sent = 0;
     for (const t of targets) {

@@ -5,8 +5,11 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import worker from '../src/index.js';
 import { webhookSecret } from '../src/telegram.js';
+import { botIdOf } from '../src/util.js';
 
 export const TOKEN = '123456:TEST-token';
+// Eski bot (oldbot.js): env.OLD_BOT_TOKEN
+export const OLD_TOKEN = '777:OLD-token';
 export const ORIGIN = 'https://ovoza.test';
 
 // D1 API'sining kerakli qismi
@@ -50,8 +53,11 @@ export function fakeTelegram() {
   let nextMessageId = 1000;
   const original = globalThis.fetch;
   let nextFile = 1;
-  // Botning Telegram'dagi ismi (getMyName / setMyName)
-  let botName = 'Ovoza';
+  // Botlarning Telegram'dagi ismi (getMyName / setMyName), token bo'yicha
+  const botNames = new Map();
+  // file_id -> token: fayl faqat shu botda bor (boshqa bot getFile/sendPhoto da "wrong file_id" oladi)
+  const fileOwners = new Map();
+  const wrongFile = () => badRequest('Bad Request: wrong file_id or the file is temporarily unavailable');
   // Haqiqiy Telegram kabi: rasmli xabarning matnini editMessageText bilan o'zgartirib bo'lmaydi
   const photoMessages = new Set();
   const badRequest = (description) =>
@@ -62,8 +68,11 @@ export function fakeTelegram() {
 
     // Faylni yuklab olish: https://api.telegram.org/file/bot<token>/<file_path>
     if (url.startsWith('https://api.telegram.org/file/')) {
+      const token = url.split('/')[4].replace(/^bot/, '');
       const filePath = url.split('/').slice(5).join('/');
-      calls.push({ method: 'file', body: { filePath } });
+      calls.push({ method: 'file', body: { filePath }, token });
+      const owner = fileOwners.get(filePath.replace(/^photos\//, '').replace(/\.jpg$/, ''));
+      if (owner && owner !== token) return new Response('Not Found', { status: 404 });
       if (failing.has('file')) return new Response('Not Found', { status: 404 });
       return new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, ...new TextEncoder().encode(filePath)]), {
         headers: { 'content-type': 'application/octet-stream' }
@@ -71,6 +80,7 @@ export function fakeTelegram() {
     }
 
     const method = url.split('/').pop();
+    const token = url.split('/')[3].replace(/^bot/, '');
     let body;
     if (init.body instanceof FormData) {
       // Fayl yuklash: maydonlar matn, fayl esa { name, type, size } ko'rinishida yoziladi
@@ -81,7 +91,9 @@ export function fakeTelegram() {
     } else {
       body = JSON.parse(init.body || '{}');
     }
-    calls.push({ method, body });
+    calls.push({ method, body, token });
+    const fileOf = method === 'getFile' ? body.file_id : method === 'sendPhoto' && typeof body.photo === 'string' ? body.photo : null;
+    if (fileOf && fileOwners.has(fileOf) && fileOwners.get(fileOf) !== token) return wrongFile();
     if (method === 'editMessageText' && photoMessages.has(body.message_id)) {
       return badRequest('Bad Request: there is no text in the message to edit');
     }
@@ -115,9 +127,11 @@ export function fakeTelegram() {
       };
     }
     if (method === 'getFile') result = { file_id: body.file_id, file_path: `photos/${body.file_id}.jpg` };
-    if (method === 'getMe') result = { id: 1, is_bot: true, username: 'ovoza_test_bot' };
-    if (method === 'getMyName') result = { name: botName };
-    if (method === 'setMyName') botName = body.name;
+    if (method === 'getMe') {
+      result = token === TOKEN ? { id: 1, is_bot: true, username: 'ovoza_test_bot' } : { id: botIdOf(token), is_bot: true, username: 'old_test_bot' };
+    }
+    if (method === 'getMyName') result = { name: botNames.get(token) ?? 'Ovoza' };
+    if (method === 'setMyName') botNames.set(token, body.name);
     return new Response(JSON.stringify({ ok: true, result }), { headers: { 'content-type': 'application/json' } });
   };
   return {
@@ -134,7 +148,11 @@ export function fakeTelegram() {
     failChat: (chatId, code = 403, description = 'Forbidden: bot was blocked by the user') =>
       failingChats.set(Number(chatId), { code, description }),
     unfailChat: (chatId) => failingChats.delete(Number(chatId)),
-    sent: (chatId) => calls.filter((c) => c.method === 'sendMessage' && c.body.chat_id === chatId),
+    // Fayl faqat shu botda bor (masalan, eski botga yuklangan rasm)
+    ownFile: (fileId, token) => fileOwners.set(fileId, token),
+    // Yangi bot yuborgan xabarlar (eskisiniki — sentByOld)
+    sent: (chatId) => calls.filter((c) => c.method === 'sendMessage' && c.body.chat_id === chatId && c.token === TOKEN),
+    sentByOld: (chatId) => calls.filter((c) => c.method === 'sendMessage' && c.body.chat_id === chatId && c.token === OLD_TOKEN),
     last: (method) => [...calls].reverse().find((c) => c.method === method)
   };
 }
@@ -172,6 +190,18 @@ export async function sendUpdate(env, update) {
     env
   );
   return res;
+}
+
+// Eski botga (@Ovozauz_bot) kelgan xabar
+export async function sendOldUpdate(env, update, { secret } = {}) {
+  return worker.fetch(
+    new Request(`${ORIGIN}/telegram/old-webhook`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': secret ?? (await webhookSecret(OLD_TOKEN)) },
+      body: JSON.stringify({ update_id: updateId++, ...update })
+    }),
+    env
+  );
 }
 
 let messageId = 1;
