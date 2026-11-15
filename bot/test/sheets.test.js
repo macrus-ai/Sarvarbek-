@@ -71,7 +71,7 @@ test('profilni qayta tahrirlash jadvalga yangi qator qo‘shmaydi', async () => 
   await press(env, blogger, 'reg:restart');
   await press(env, blogger, 'role:blogger');
   await say(env, blogger, 'Dilnoza');
-  await press(env, blogger, 'plat:TikTok');
+  await press(env, blogger, 'plat:YouTube');
   await say(env, blogger, '@dilnoza');
   await press(env, blogger, 'fol:10000-50000');
   await press(env, blogger, 'rch:1000-3000');

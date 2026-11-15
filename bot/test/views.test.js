@@ -36,7 +36,7 @@ async function adminUser(cookie, id) {
 
 const views = (u) => u.views.map((v) => [v.label, v.value]);
 
-// Telegram yoki TikTok blogeri: o'rtacha ko'rishlar bitta savol
+// Telegram yoki YouTube blogeri: o'rtacha ko'rishlar bitta savol
 async function registerOther(user, platform, profile, { lang = 'uz', approve = true } = {}) {
   await say(env, user, '/start');
   await press(env, user, `lang:${lang}`);
@@ -126,15 +126,15 @@ test('eski Instagram blogeri: yangi maydonlar "kiritilmagan", eski "Reels va pos
   assert.equal(row.reels_reach, '1000-5000');
 });
 
-test('Telegram blogeri: bitta "Postlar (o‘rtacha)", TikTok — "Videolar (o‘rtacha)"', async () => {
+test('Telegram blogeri: bitta "Postlar (o‘rtacha)", YouTube — "Videolar (o‘rtacha)"', async () => {
   const channel = tgUser(1720);
   await registerOther(channel, 'Telegram', '@kamola_news', { approve: false });
   const card = tg.sent(ADMIN).map((c) => c.body.text || '').find((t) => /#Yangi_bloger/.test(t));
   assert.match(card, /👁 Postlar \(o‘rtacha\): 1\s000 – 3\s000/);
   assert.doesNotMatch(card, /Reels|Istoriya|Qamrov|kiritilmagan/);
 
-  const tiktok = tgUser(1721);
-  await registerOther(tiktok, 'TikTok', '@kamola_tt', { approve: false });
+  const youtube = tgUser(1721);
+  await registerOther(youtube, 'YouTube', '@kamola_yt', { approve: false });
   const cookie = await login();
   assert.deepEqual(views(await adminUser(cookie, 1720)), [['Postlar (o‘rtacha)', '1 000 – 3 000']]);
   assert.deepEqual(views(await adminUser(cookie, 1721)), [['Videolar (o‘rtacha)', '1 000 – 3 000']]);

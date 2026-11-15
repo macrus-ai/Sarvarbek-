@@ -530,7 +530,7 @@
         ['Postlar (o‘rtacha)', (r) => r.posts, 16],
         ['Istoriya (o‘rtacha)', (r) => r.stories, 16],
         ['Qamrov (30 kun)', (r) => r.accounts, 18],
-        ['Ko‘rishlar (Telegram, TikTok, YouTube)', (r) => r.views, 18],
+        ['Ko‘rishlar (Telegram, YouTube)', (r) => r.views, 18],
         ['Reels va postlar (eski)', (r) => r.legacy, 16],
         ['Yo‘nalish', (r) => r.niche, 22],
         ['Auditoriya hududi', (r) => r.region, 20],

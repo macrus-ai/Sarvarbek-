@@ -74,7 +74,7 @@
     'hero.ctaBlogger': 'Я блогер',
     'hero.f1': 'Не нужен рекламный бюджет',
     'hero.f2': 'Блогеры от 1 000 подписчиков',
-    'hero.f3': 'Instagram, Telegram, TikTok и YouTube',
+    'hero.f3': 'Instagram, Telegram и YouTube',
     'hero.dealTag': 'Объявление',
     'hero.dealTitle': 'Натуральный крем для лица',
     'hero.dealPrice': '180 000 сум',

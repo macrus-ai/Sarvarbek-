@@ -28,7 +28,7 @@ window.OVOZA_DATA = {
       title: { uz: 'Ikki kishilik kechki ovqat', ru: 'Ужин на двоих' },
       seller: { uz: 'Milliy taomlar kafesi', ru: 'Кафе национальной кухни' },
       city: { uz: 'Samarqand', ru: 'Самарканд' },
-      value: 250000, platforms: ['Instagram', 'TikTok'],
+      value: 250000, platforms: ['Instagram', 'Telegram'],
       format: { uz: '1 ta video sharh', ru: '1 видеообзор' },
       minFollowers: 3000, days: 5, slots: 3, taken: 1
     },
@@ -55,7 +55,7 @@ window.OVOZA_DATA = {
       title: { uz: 'Simsiz quloqchinlar', ru: 'Беспроводные наушники' },
       seller: { uz: 'Gadjetlar do‘koni', ru: 'Магазин гаджетов' },
       city: { uz: 'Namangan', ru: 'Наманган' },
-      value: 420000, platforms: ['YouTube', 'TikTok'],
+      value: 420000, platforms: ['YouTube'],
       format: { uz: 'Shorts formatida sharh', ru: 'Обзор в формате Shorts' },
       minFollowers: 8000, days: 14, slots: 4, taken: 1
     },
@@ -91,8 +91,8 @@ window.OVOZA_DATA = {
       title: { uz: 'Sport ozuqasi to‘plami', ru: 'Набор спортивного питания' },
       seller: { uz: 'Sport ozuqa do‘koni', ru: 'Магазин спортивного питания' },
       city: { uz: 'Andijon', ru: 'Андижан' },
-      value: 340000, platforms: ['TikTok', 'Instagram'],
-      format: { uz: '2 ta TikTok video', ru: '2 видео в TikTok' },
+      value: 340000, platforms: ['Instagram', 'YouTube'],
+      format: { uz: '2 ta YouTube Shorts', ru: '2 YouTube Shorts' },
       minFollowers: 6000, days: 14, slots: 3, taken: 0
     }
   ]
