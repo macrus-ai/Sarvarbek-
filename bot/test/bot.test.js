@@ -88,12 +88,12 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   assert.match(lastText(20), /Кто вы\?/);
   await press(env, user, 'role:blogger');
   await say(env, user, 'Мадина');
-  await press(env, user, 'plat:TikTok');
-  assert.match(lastText(20), /ссылку на ваш профиль в TikTok/);
+  await press(env, user, 'plat:YouTube');
+  assert.match(lastText(20), /ссылку на ваш канал в YouTube/);
   await say(env, user, 'madina blog');
-  assert.match(lastText(20), /Это не похоже на ссылку TikTok/);
+  assert.match(lastText(20), /Это не похоже на ссылку YouTube/);
   await say(env, user, 'https://instagram.com/madina'); // boshqa platforma
-  assert.match(lastText(20), /Это не похоже на ссылку TikTok/);
+  assert.match(lastText(20), /Это не похоже на ссылку YouTube/);
   await say(env, user, '@madina');
   await press(env, user, 'fol:5000-10000');
   assert.match(lastText(20), /просмотров набирают ваши видео/);
@@ -116,7 +116,7 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   const me = await api(env, user, '/api/me');
   assert.equal(me.data.user.role, 'blogger');
   assert.equal(me.data.user.lang, 'ru');
-  assert.equal(me.data.user.platform, 'TikTok');
+  assert.equal(me.data.user.platform, 'YouTube');
   assert.equal(me.data.user.niche, 'food'); // eski "cat:" tugmasi ham ishlaydi
   assert.equal(me.data.user.region, 'samarkand');
 });
@@ -354,4 +354,23 @@ test('saytdagi havola: ro‘yxatdan o‘tgan foydalanuvchiga bosh menyu chiqadi'
   assert.match(lastText(113), /Assalomu alaykum/);
   const me = await api(env, user, '/api/me');
   assert.equal(me.data.user.role, 'business');
+});
+
+test('TikTok tanlanmaydi (O‘zbekistonda bloklangan): ro‘yxatda yo‘q, eski tugma va e’lon rad etiladi', async () => {
+  const user = tgUser(140);
+  await say(env, user, '/start');
+  await press(env, user, 'lang:uz');
+  await press(env, user, 'role:blogger');
+  await say(env, user, 'Dilnoza');
+  const keyboard = tg.sent(140).at(-1).body.reply_markup.inline_keyboard.flat().map((b) => b.text);
+  assert.deepEqual(keyboard, ['Instagram', 'Telegram', 'YouTube']);
+
+  await press(env, user, 'plat:TikTok');
+  const me = await api(env, user, '/api/me');
+  assert.equal(me.data.user.platform ?? null, null);
+
+  const business = tgUser(141);
+  await registerBusiness(env, business);
+  const res = await createCampaign(env, business, { platforms: ['TikTok'] });
+  assert.equal(res.status, 400);
 });

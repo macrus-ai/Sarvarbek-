@@ -57,7 +57,7 @@ test('kampaniya yaratish: tekshiruv va rollar', async () => {
 test('kampaniyalar ro‘yxati: filtrlar va qidiruv', async () => {
   await setup();
   await createCampaign(env, business, { title: 'Tabiiy yuz kremi', category: 'beauty', platforms: ['Instagram'] });
-  await createCampaign(env, business, { title: 'Ikki kishilik kechki ovqat', category: 'food', platforms: ['TikTok', 'Instagram'], city: 'Samarqand' });
+  await createCampaign(env, business, { title: 'Ikki kishilik kechki ovqat', category: 'food', platforms: ['YouTube', 'Instagram'], city: 'Samarqand' });
 
   const all = await api(env, blogger, '/api/campaigns');
   assert.equal(all.data.campaigns.length, 2);
@@ -66,8 +66,8 @@ test('kampaniyalar ro‘yxati: filtrlar va qidiruv', async () => {
   const food = await api(env, blogger, '/api/campaigns?category=food');
   assert.deepEqual(food.data.campaigns.map((c) => c.title), ['Ikki kishilik kechki ovqat']);
 
-  const tiktok = await api(env, blogger, '/api/campaigns?platform=TikTok');
-  assert.equal(tiktok.data.campaigns.length, 1);
+  const youtube = await api(env, blogger, '/api/campaigns?platform=YouTube');
+  assert.equal(youtube.data.campaigns.length, 1);
 
   const search = await api(env, blogger, `/api/campaigns?q=${encodeURIComponent("samarqand")}`);
   assert.equal(search.data.campaigns.length, 1);

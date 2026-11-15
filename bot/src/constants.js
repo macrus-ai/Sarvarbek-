@@ -58,7 +58,10 @@ export const REGIONS = [
 // E'lon butun O'zbekiston uchun (mahsulot yetkazib beriladi yoki onlayn xizmat)
 export const ALL_REGIONS = 'all';
 
-export const PLATFORMS = ['Instagram', 'Telegram', 'TikTok', 'YouTube'];
+// Ro'yxatdan o'tishda va e'lonlarda tanlanadigan platformalar.
+// TikTok O'zbekistonda 2021-yildan bloklangan, shuning uchun 2026-11 da ro'yxatdan olindi.
+// Blokdan chiqarilsa, uni shu ro'yxatga qaytaring: qolgan kod (havolalar, ko'rishlar, matnlar) TikTok'ni biladi.
+export const PLATFORMS = ['Instagram', 'Telegram', 'YouTube'];
 
 // Blogerning o'rtacha ko'rishlari: Telegram — post, TikTok/YouTube — video.
 // Instagramda shu oraliqlar istoriya (users.reach) va postlar (users.posts_views) uchun.
