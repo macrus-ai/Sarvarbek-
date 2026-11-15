@@ -5,16 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Miqyos</title>
   <meta name="description" content="Miqyos bizneslar va blogerlarni barter asosida bog‘laydi: siz mahsulot yoki xizmat berasiz, bloger u haqida sharh va reklama tayyorlaydi.">
-  <meta name="theme-color" content="#3730A3">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0D0B1F" media="(prefers-color-scheme: dark)">
   <link rel="canonical" href="https://ovozagroup.uz/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ovozagroup.uz/">
   <meta property="og:title" content="Miqyos: barter marketing platformasi">
   <meta property="og:description" content="Reklama uchun pul emas, mahsulot bilan to‘lang. Bizneslar va blogerlar uchun barter platformasi.">
+  <meta property="og:image" content="https://ovozagroup.uz/assets/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;600;700&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Unbounded:wght@700&amp;display=swap">
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/config.js" defer></script>
   <script src="assets/js/i18n.js" defer></script>
@@ -42,6 +47,10 @@
   <symbol id="i-send" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7zM21 3 10 13"/></g></symbol>
   <symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></g></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></g></symbol>
+  <symbol id="i-instagram" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><path d="M17 7h.01"/></g></symbol>
+  <symbol id="i-youtube" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="m10.2 9.2 4.8 2.8-4.8 2.8z"/></g></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h3l8 4V6l-8 4zM18.5 9a4 4 0 0 1 0 6M8 14.5V19h3v-3"/></g></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 13.5 6 5.5h12l2.5 8v5h-17zM3.5 13.5H8l1.2 2.5h5.6l1.2-2.5h4.5"/></g></symbol>
 </svg>
 
 <a class="skip" href="#main" data-i18n="skip">Asosiy mazmunga o‘tish</a>
@@ -82,7 +91,7 @@
   <section class="hero">
     <div class="wrap hero-inner">
       <div class="hero-copy">
-        <p class="eyebrow" data-i18n="hero.eyebrow">Barter marketing platformasi</p>
+        <p class="hero-badge"><span class="hero-badge-dot"></span><span data-i18n="hero.eyebrow">Barter marketing platformasi</span></p>
         <h1 data-i18n="hero.title">Mahsulotingiz haqida <mark>keng miqyosda</mark> gapirishsin</h1>
         <p class="hero-lead" data-i18n="hero.lead">Miqyos bizneslar va blogerlarni barter asosida bog‘laydi. Siz mahsulot yoki xizmat berasiz, bloger u haqida sharh va reklama tayyorlaydi. Reklama uchun pul to‘lamaysiz.</p>
         <div class="hero-ctas">
@@ -99,22 +108,56 @@
         </ul>
       </div>
 
-      <div class="ripple" aria-hidden="true">
-        <span class="ring r1"></span>
-        <span class="ring r2"></span>
-        <span class="ring r3"></span>
-        <span class="pulse"></span>
-        <span class="pulse pulse-2"></span>
-        <div class="deal">
-          <span class="deal-tag" data-i18n="hero.dealTag">Reklama e’loni</span>
-          <strong class="deal-title" data-i18n="hero.dealTitle">Tabiiy yuz kremi</strong>
-          <span class="deal-price" data-i18n="hero.dealPrice">180 000 so‘m</span>
-          <span class="deal-swap" data-i18n="hero.dealSwap">evaziga: 1 Reels + 2 Stories</span>
+      <!-- Mini ilova ko'rinishi (namuna): biznesning e'loni va unga kelgan so'rovlar -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="app-bar">
+              <svg class="logo-mark" viewBox="7 7 86 86"><polygon points="9,82 36,18 36,41.5 18.9,82" fill="#6A63F5"/><polygon points="18.9,82 36,41.5 36,60.7 27,82" fill="#3A33B8"/><polygon points="36,18 63,82 53.1,82 36,41.5" fill="#4F46E5"/><polygon points="36,41.5 53.1,82 45,82 36,60.7" fill="#262080"/><polygon points="55,82 63,82 59,72.5" fill="#1E1A66"/><polygon points="37,82 64,18 64,41.5 46.9,82" fill="#FF8B78"/><polygon points="46.9,82 64,41.5 64,60.7 55,82" fill="#E0533D"/><polygon points="64,18 91,82 81.1,82 64,41.5" fill="#FF6B57"/><polygon points="64,41.5 81.1,82 73,82 64,60.7" fill="#B8392A"/></svg>
+              <strong>Miqyos</strong>
+            </div>
+            <div class="app-body">
+              <div class="app-card app-deal">
+                <span class="deal-tag" data-i18n="hero.dealTag">Reklama e’loni</span>
+                <strong class="deal-title" data-i18n="hero.dealTitle">Tabiiy yuz kremi</strong>
+                <div class="deal-row">
+                  <span class="deal-price" data-i18n="hero.dealPrice">180 000 so‘m</span>
+                  <span class="deal-swap" data-i18n="hero.dealSwap">evaziga: 1 Reels + 2 Stories</span>
+                </div>
+              </div>
+              <div class="app-h"><span data-i18n="hero.requests">So‘rovlar</span><span class="app-count" data-i18n="hero.newCount">3 ta yangi</span></div>
+              <div class="app-card req">
+                <span class="ava">D</span>
+                <span class="req-who"><b>Dilnoza</b><small>Instagram · 12,4K</small></span>
+                <span class="req-ok"><svg class="i"><use href="#i-check"></use></svg><span data-i18n="hero.accepted">Qabul qilindi</span></span>
+              </div>
+              <div class="app-card req">
+                <span class="ava ava-2">S</span>
+                <span class="req-who"><b>Sardor</b><small>Telegram · 8,1K</small></span>
+                <span class="req-btn" data-i18n="hero.accept">Qabul qilish</span>
+              </div>
+              <div class="app-card req">
+                <span class="ava ava-3">M</span>
+                <span class="req-who"><b>Madina</b><small>Instagram · 31K</small></span>
+                <span class="req-btn" data-i18n="hero.accept">Qabul qilish</span>
+              </div>
+            </div>
+            <div class="app-tabbar">
+              <span><svg class="i"><use href="#i-megaphone"></use></svg><span data-i18n="hero.tabCampaigns">E’lonlarim</span></span>
+              <span class="is-on"><svg class="i"><use href="#i-inbox"></use></svg><span data-i18n="hero.requests">So‘rovlar</span></span>
+            </div>
+          </div>
         </div>
-        <div class="chip-b c1"><span class="ava">D</span><span><b>Dilnoza</b><small>Instagram · 12,4K</small></span></div>
-        <div class="chip-b c2"><span class="ava">S</span><span><b>Sardor</b><small>Telegram · 8,1K</small></span></div>
-        <div class="chip-b c3"><span class="ava">M</span><span><b>Madina</b><small>Instagram · 31K</small></span></div>
-        <div class="chip-b c4"><span class="ava">J</span><span><b>Jasur</b><small>YouTube · 5,6K</small></span></div>
+        <div class="float float-notif">
+          <span class="float-ico"><svg class="i"><use href="#i-send"></use></svg></span>
+          <span><b data-i18n="hero.notifTitle">Yangi so‘rov keldi</b><small data-i18n="hero.notifText">Jasur · YouTube · 5,6K</small></span>
+        </div>
+        <div class="float float-ok">
+          <span class="float-ico float-ico-ok"><svg class="i"><use href="#i-shield"></use></svg></span>
+          <span><b data-i18n="hero.verifiedTitle">Tekshirilgan blogerlar</b><small data-i18n="hero.verifiedText">Moderatsiyadan o‘tgan</small></span>
+        </div>
+        </div>
       </div>
     </div>
   </section>
@@ -124,9 +167,9 @@
     <div class="wrap strip-inner">
       <p class="strip-label" id="strip-label" data-i18n="strip.label">Kontent qayerda chiqadi</p>
       <ul class="strip-list">
-        <li><strong>Instagram</strong><span data-i18n="strip.ig">Reels, Stories, post</span></li>
-        <li><strong>Telegram</strong><span data-i18n="strip.tg">Kanal postlari</span></li>
-        <li><strong>YouTube</strong><span data-i18n="strip.yt">Shorts va integratsiyalar</span></li>
+        <li><span class="strip-ico"><svg class="i" aria-hidden="true"><use href="#i-instagram"></use></svg></span><div><strong>Instagram</strong><span data-i18n="strip.ig">Reels, Stories, post</span></div></li>
+        <li><span class="strip-ico"><svg class="i" aria-hidden="true"><use href="#i-send"></use></svg></span><div><strong>Telegram</strong><span data-i18n="strip.tg">Kanal postlari</span></div></li>
+        <li><span class="strip-ico"><svg class="i" aria-hidden="true"><use href="#i-youtube"></use></svg></span><div><strong>YouTube</strong><span data-i18n="strip.yt">Shorts va integratsiyalar</span></div></li>
       </ul>
     </div>
   </section>
@@ -134,15 +177,16 @@
   <!-- Qanday ishlaydi -->
   <section class="section" id="qanday">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow" data-i18n="how.eyebrow">Qanday ishlaydi</p>
-        <h2 data-i18n="how.title">Barter hamkorlik to‘rt qadamda</h2>
-        <p class="lead" data-i18n="how.lead">Platforma ikki tomonni bog‘laydi va kelishuv shartlarini ochiq qiladi.</p>
-      </div>
-
-      <div class="seg" id="how-tabs" role="tablist" aria-label="Kim uchun" data-i18n-aria="how.tabsAria">
-        <button type="button" role="tab" id="tab-how-business" aria-selected="true" aria-controls="how-business" data-i18n="role.business">Biznes uchun</button>
-        <button type="button" role="tab" id="tab-how-blogger" aria-selected="false" aria-controls="how-blogger" tabindex="-1" data-i18n="role.blogger">Bloger uchun</button>
+      <div class="section-head section-head-row">
+        <div>
+          <p class="eyebrow" data-i18n="how.eyebrow">Qanday ishlaydi</p>
+          <h2 data-i18n="how.title">Barter hamkorlik to‘rt qadamda</h2>
+          <p class="lead" data-i18n="how.lead">Platforma ikki tomonni bog‘laydi va kelishuv shartlarini ochiq qiladi.</p>
+        </div>
+        <div class="seg" id="how-tabs" role="tablist" aria-label="Kim uchun" data-i18n-aria="how.tabsAria">
+          <button type="button" role="tab" id="tab-how-business" aria-selected="true" aria-controls="how-business" data-i18n="role.business">Biznes uchun</button>
+          <button type="button" role="tab" id="tab-how-blogger" aria-selected="false" aria-controls="how-blogger" tabindex="-1" data-i18n="role.blogger">Bloger uchun</button>
+        </div>
       </div>
 
       <ol class="steps" id="how-business" role="tabpanel" aria-labelledby="tab-how-business">
@@ -178,6 +222,7 @@
             <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-users"></use></svg></span><div><strong data-i18n="ben.b3.t">Mos auditoriya</strong><p data-i18n="ben.b3.d">Blogerlarni yo‘nalish, auditoriya hududi va obunachilar soni bo‘yicha saralang. Har bir bloger moderatsiyadan o‘tgan.</p></div></li>
             <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-clock"></use></svg></span><div><strong data-i18n="ben.b4.t">Vaqtingiz tejaladi</strong><p data-i18n="ben.b4.d">Blogerlarni qidirib, har biriga alohida yozish shart emas: so‘rovlar botga o‘zi keladi.</p></div></li>
           </ul>
+          <a class="panel-cta" href="https://t.me/miqyosbot?start=business-uz" data-bot-start="business" target="_blank" rel="noopener"><span data-i18n="bot.asBusiness">Biznes sifatida boshlash</span><svg class="i" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
         </article>
 
         <article class="benefit-panel benefit-panel-blogger">
@@ -188,6 +233,7 @@
             <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-shield"></use></svg></span><div><strong data-i18n="ben.g3.t">Aniq shartlar</strong><p data-i18n="ben.g3.d">Format, muddat va talablar ariza berishdan oldin ma’lum bo‘ladi.</p></div></li>
             <li><span class="b-icon"><svg class="i" aria-hidden="true"><use href="#i-clock"></use></svg></span><div><strong data-i18n="ben.g4.t">Majburiyatsiz</strong><p data-i18n="ben.g4.d">Faqat o‘zingizga va auditoriyangizga yoqqanini tanlaysiz.</p></div></li>
           </ul>
+          <a class="panel-cta" href="https://t.me/miqyosbot?start=blogger-uz" data-bot-start="blogger" target="_blank" rel="noopener"><span data-i18n="bot.asBlogger">Bloger sifatida boshlash</span><svg class="i" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
         </article>
       </div>
     </div>
@@ -226,6 +272,9 @@
 
       <p class="results-count" id="cat-count" aria-live="polite"></p>
       <div class="camp-grid" id="cat-grid"></div>
+      <div class="more-wrap" id="cat-more-wrap" hidden>
+        <button type="button" class="btn btn-outline" id="cat-more"></button>
+      </div>
       <div class="empty" id="cat-empty" hidden>
         <p data-i18n="cat.empty">Bu filtrlar bo‘yicha e’lon yo‘q. Toifa yoki qidiruv so‘zini o‘zgartiring.</p>
         <button type="button" class="btn btn-outline btn-sm" id="cat-reset" data-i18n="cat.reset">Filtrlarni tozalash</button>
@@ -462,6 +511,12 @@
     <span class="footer-links"><a href="privacy.html" data-i18n="footer.privacy">Maxfiylik siyosati</a><a href="#top" data-i18n="footer.top">Yuqoriga</a></span>
   </div>
 </footer>
+
+<!-- Telefonda doim ko'rinib turadigan pastki tugmalar -->
+<div class="m-cta" id="m-cta">
+  <a class="btn btn-accent" href="https://t.me/miqyosbot?start=business-uz" data-bot-start="business" target="_blank" rel="noopener" data-i18n="mcta.business">Biznesim bor</a>
+  <a class="btn btn-primary" href="https://t.me/miqyosbot?start=blogger-uz" data-bot-start="blogger" target="_blank" rel="noopener" data-i18n="mcta.blogger">Blogerman</a>
+</div>
 
 </body>
 </html>
