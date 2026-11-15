@@ -138,7 +138,7 @@ export const LANGS = ['uz', 'ru'];
 export const BRAND = 'Miqyos';
 
 // Maxfiylik siyosati (saytda). wrangler.toml dagi PRIVACY_URL bilan almashtirish mumkin.
-export const DEFAULT_PRIVACY_URL = 'https://ovozagroup.uz/privacy.html';
+export const DEFAULT_PRIVACY_URL = 'https://miqyos.uz/privacy.html';
 
 export const isCategory = (id) => CATEGORIES.some((c) => c.id === id);
 export const isNiche = (id) => NICHES.some((n) => n.id === id);
