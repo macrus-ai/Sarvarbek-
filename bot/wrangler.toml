@@ -29,7 +29,7 @@ crons = ["* * * * *"]
 
 [vars]
 # Maxfiylik siyosati sahifasi (saytda)
-PRIVACY_URL = "https://ovozagroup.uz/privacy.html"
+PRIVACY_URL = "https://miqyos.uz/privacy.html"
 # "Ovoza kunlik agent jadvali" ning Apps Script web app'i (src/sheets.js): yangi bloger va bizneslar
 # jadvalga "Yangi" holatida yoziladi. Kalit bot tokenidan hosil qilinadi, manzilning o'zi maxfiy emas.
 SHEETS_URL = "https://script.google.com/macros/s/AKfycbzWOSiXkTmGtAnMH1J8KDJngMXj5PfdDmphunVWAc1GUW4Xqhzr0C9fjF4mO7Q8j25K/exec"
