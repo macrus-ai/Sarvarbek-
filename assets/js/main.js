@@ -215,18 +215,31 @@
       <div class="camp-value"><span>${esc(t('value'))}</span><strong>${money(c.value)}</strong></div>
       <dl class="camp-meta">${metaRow(t('format'), c.format[lang])}${metaRow(t('requirement'), t('followers', c.minFollowers))}${metaRow(t('deadline'), t('days', c.days))}</dl>
       <ul class="camp-platforms" aria-label="${esc(t('platforms'))}">${c.platforms.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
-      <a class="btn btn-primary btn-block" href="${botLink('blogger')}" data-bot-start="blogger" target="_blank" rel="noopener">${esc(t('applyInBot'))}</a>
+      <a class="btn btn-soft btn-block" href="${botLink('blogger')}" data-bot-start="blogger" target="_blank" rel="noopener">${esc(t('applyInBot'))}<svg class="i" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
     </article>`;
   }
 
+  // Sahifa uzayib ketmasligi uchun avval bir nechta e'lon ko'rinadi (telefonda 3 ta, kompyuterda 6 ta),
+  // qolgani "Yana ko'rsatish" tugmasi bilan ochiladi.
+  let showAll = false;
+  const pageSize = () => (window.matchMedia('(max-width: 620px)').matches ? 3 : 6);
+
   function renderCampaigns() {
     const list = DATA.campaigns.filter((c) => matches(c, false));
-    $('#cat-grid').innerHTML = list.map(cardHTML).join('');
+    const shown = showAll ? list : list.slice(0, pageSize());
+    const rest = list.length - shown.length;
+    $('#cat-grid').innerHTML = shown.map(cardHTML).join('');
     $('#cat-count').textContent = t('found', list.length);
     $('#cat-empty').hidden = list.length > 0;
+    $('#cat-more-wrap').hidden = rest <= 0;
+    $('#cat-more').textContent = t('showMore', rest);
   }
 
   function initCatalog() {
+    $('#cat-more').addEventListener('click', () => {
+      showAll = true;
+      renderCampaigns();
+    });
     $('#cat-chips').addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
       if (!chip) return;
@@ -288,6 +301,23 @@
     $('#calc').addEventListener('submit', (e) => e.preventDefault());
   }
 
+  /* ---------- Telefondagi pastki tugmalar ---------- */
+  // Bosh blokdagi tugmalar ekrandan chiqib ketganda paydo bo'ladi,
+  // ro'yxatdan o'tish bo'limi ko'ringanda yashirinadi (u yerda o'z tugmalari bor).
+  function initMobileCta() {
+    const bar = $('#m-cta');
+    const heroCtas = $('.hero-ctas');
+    const signup = $('#royxat');
+    if (!bar || !heroCtas || !signup || !('IntersectionObserver' in window)) return;
+    const visible = new Map([[heroCtas, true], [signup, false]]);
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => visible.set(entry.target, entry.isIntersecting));
+      bar.classList.toggle('is-visible', !visible.get(heroCtas) && !visible.get(signup));
+    });
+    io.observe(heroCtas);
+    io.observe(signup);
+  }
+
   /* ---------- Ishga tushirish ---------- */
   function init() {
     if (!I18N || !DATA) return;
@@ -296,6 +326,7 @@
     initTabs($('#how-tabs'));
     initCatalog();
     initCalc();
+    initMobileCta();
     $$('[data-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
     $('#year').textContent = String(new Date().getFullYear());
     setLang(storageGet(LANG_KEY) || CONFIG.defaultLang);
