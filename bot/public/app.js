@@ -677,7 +677,7 @@
     `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
   const logo = (cls = '') =>
-    `<svg class="${cls}" viewBox="2 4 96 96" aria-hidden="true"><circle cx="36" cy="38" r="28" fill="#4F46E5"/><path d="M14 52 10 82 40 64Z" fill="#4F46E5"/><circle cx="64" cy="62" r="28" fill="#FF6B57"/><path d="M86 70 92 98 60 86Z" fill="#FF6B57"/><path d="M36.29 66A28 28 0 0 0 63.71 34A28 28 0 0 0 36.29 66Z" fill="#2A1A6E"/></svg>`;
+    `<svg class="${cls}" viewBox="7 7 86 86" aria-hidden="true"><polygon points="9,82 36,18 36,41.5 18.9,82" fill="#6A63F5"/><polygon points="18.9,82 36,41.5 36,60.7 27,82" fill="#3A33B8"/><polygon points="36,18 63,82 53.1,82 36,41.5" fill="#4F46E5"/><polygon points="36,41.5 53.1,82 45,82 36,60.7" fill="#262080"/><polygon points="55,82 63,82 59,72.5" fill="#1E1A66"/><polygon points="37,82 64,18 64,41.5 46.9,82" fill="#FF8B78"/><polygon points="46.9,82 64,41.5 64,60.7 55,82" fill="#E0533D"/><polygon points="64,18 91,82 81.1,82 64,41.5" fill="#FF6B57"/><polygon points="64,41.5 81.1,82 73,82 64,60.7" fill="#B8392A"/></svg>`;
 
   /* ---------- Umumiy bloklar ---------- */
   const statusPill = (status) => {
