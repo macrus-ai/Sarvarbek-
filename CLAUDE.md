@@ -2,7 +2,7 @@
 
 Miqyos — O‘zbekistondagi bizneslar va blogerlarni barter asosida bog‘laydigan platforma.
 
-Platforma avval **Ovoza** deb atalgan, 2026-11-11 da Miqyos'ga o‘zgartirildi (Ovoza nomli telekanal va boshqa loyihalar bor edi). Foydalanuvchiga ko‘rinadigan joylarda faqat "Miqyos" yozing. Texnik nomlar ataylab eskicha qoldirilgan, ularni o‘zgartirmang: `ovoza-db` (D1), `ovoza-bot` (Worker va uning manzili), `ovoza-webhook:` va `ovoza-sheets:` kalit tuzlari, `ovoza_admin` cookie, `x-ovoza-admin`, `ovoza-lang` / `ovoza-filters-v1` (brauzer xotirasi), `OVOZA_*` / `OvozaXlsx` JS nomlari. Ularni o‘zgartirsangiz bot, webhook, jadval yoki saqlangan sozlamalar buziladi. Domen (ovozagroup.uz) miqyos.uz sotib olingach alohida almashtiriladi.
+Platforma avval **Ovoza** deb atalgan, 2026-11-11 da Miqyos'ga o‘zgartirildi (Ovoza nomli telekanal va boshqa loyihalar bor edi). Foydalanuvchiga ko‘rinadigan joylarda faqat "Miqyos" yozing. Texnik nomlar ataylab eskicha qoldirilgan, ularni o‘zgartirmang: `ovoza-db` (D1), `ovoza-bot` (Worker va uning manzili), `ovoza-webhook:` va `ovoza-sheets:` kalit tuzlari, `ovoza_admin` cookie, `x-ovoza-admin`, `ovoza-lang` / `ovoza-filters-v1` (brauzer xotirasi), `OVOZA_*` / `OvozaXlsx` JS nomlari. Ularni o‘zgartirsangiz bot, webhook, jadval yoki saqlangan sozlamalar buziladi. Sayt domeni 2026-11 da ovozagroup.uz dan miqyos.uz ga almashtirildi, eski domen yangisiga yo‘naltiradi.
 
 Bot 2026-11-14 da @Ovozauz_bot dan **@miqyosbot** ga ko‘chdi. Eski bot shu Worker'da yo‘naltiruvchi bo‘lib qoladi (`bot/src/oldbot.js`, tafsiloti `bot/README.md` dagi "Eski botdan ko‘chish" bo‘limida).
 
@@ -27,7 +27,7 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
 
 ## Loyiha tuzilishi
 
-- **Sayt** (repo ildizi): `index.html`, `privacy.html`, `assets/`. Manzil: https://ovozagroup.uz/ (GitHub Pages, ildizdagi `CNAME` fayli). `sayt-yangilash.yml` `main` ni `gh-pages` ga ko‘chiradi, shuning uchun `CNAME` `main` da turishi shart.
+- **Sayt** (repo ildizi): `index.html`, `privacy.html`, `assets/`. Manzil: https://miqyos.uz/ (GitHub Pages, ildizdagi `CNAME` fayli). `sayt-yangilash.yml` `main` ni `gh-pages` ga ko‘chiradi, shuning uchun `CNAME` `main` da turishi shart.
 - **Bot** (`bot/`): Cloudflare Workers + D1. Manzil: https://ovoza-bot.axborotmarkazi-uz.workers.dev, Telegram bot: @miqyosbot (eski @Ovozauz_bot yangisiga yo‘naltiradi).
   - `src/index.js` — marshrutlar. `bot.js` — Telegram xabarlari va ro‘yxatdan o‘tish. `api.js` — mini ilova API (Telegram initData HMAC). `admin.js` — admin panel API va kirish. `services.js` — moderatsiya, bildirishnomalar, umumiy logika. `db.js` — SQL. `i18n.js` — barcha matnlar (uz/ru). `images.js` — rasmlar (Telegram `file_id`, proksi). `constants.js` — hududlar, yo‘nalishlar va boshqalar. `broadcast.js` — yangi e’lon haqida blogerlarga xabar (cron har daqiqada, `index.js` dagi `scheduled`). `sheets.js` — yangi bloger/biznesni agentlar jadvaliga (Google Sheets, Apps Script `SHEETS_URL`) yozish. `oldbot.js` — eski botdan ko‘chish: yo‘naltirish, rasmlarni ko‘chirish, eski foydalanuvchilarga bir martalik xabar.
   - Apps Script yoki boshqa xizmat botning webhook'ini hech qachon o‘zgartirmasin (`setWebhook`): webhook faqat shu Worker'ga qaraydi, aks holda bot ishlamay qoladi.
