@@ -374,3 +374,11 @@ test('TikTok tanlanmaydi (O‘zbekistonda bloklangan): ro‘yxatda yo‘q, eski 
   const res = await createCampaign(env, business, { platforms: ['TikTok'] });
   assert.equal(res.status, 400);
 });
+
+test('/help Instagram va menejer havolasini ko‘rsatadi', async () => {
+  const user = tgUser(4242);
+  await say(env, user, '/help');
+  const text = lastText(user.id);
+  assert.match(text, /instagram\.com\/miqyos\.uz/);
+  assert.match(text, /t\.me\/Miqyos_menejer/);
+});

@@ -217,7 +217,7 @@ const uz = {
   errNotApproved: 'Profilingiz hali tasdiqlanmagan.',
   home: (name) => `Assalomu alaykum, ${esc(name)}! Reklama e’lonlari va so‘rovlar ilovada.`,
   help:
-    '<b>Miqyos</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/xabarlar — yangi e’lonlar haqida xabarlar (blogerlar uchun)\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam\n\n📸 Instagram: <a href="https://www.instagram.com/miqyos.uz/">@miqyos.uz</a>',
+    '<b>Miqyos</b> — bizneslar va blogerlar uchun barter platformasi.\n\n/start — ro‘yxatdan o‘tish yoki bosh menyu\n/app — ilovani ochish\n/xabarlar — yangi e’lonlar haqida xabarlar (blogerlar uchun)\n/lang — tilni o‘zgartirish\n/privacy — maxfiylik siyosati\n/delete — ma’lumotlarimni o‘chirish\n/help — yordam\n\n📸 Instagram: <a href="https://www.instagram.com/miqyos.uz/">@miqyos.uz</a>\n💬 Menejer: <a href="https://t.me/Miqyos_menejer">@Miqyos_menejer</a>',
   notRegistered: 'Avval ro‘yxatdan o‘ting: /start',
   langSaved: 'Til saqlandi: O‘zbekcha 🇺🇿',
   privacy: (url) => `Qaysi ma’lumotlar yig‘iladi va qanday ishlatiladi: <a href="${esc(url)}">maxfiylik siyosati</a>.\n\nMa’lumotlaringizni o‘chirish uchun /delete yuboring.`,
@@ -496,7 +496,7 @@ const ru = {
   errNotApproved: 'Ваш профиль ещё не одобрен.',
   home: (name) => `Здравствуйте, ${esc(name)}! Рекламные объявления и отклики — в приложении.`,
   help:
-    '<b>Miqyos</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/xabarlar — уведомления о новых объявлениях (для блогеров)\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь\n\n📸 Instagram: <a href="https://www.instagram.com/miqyos.uz/">@miqyos.uz</a>',
+    '<b>Miqyos</b> — бартерная платформа для бизнеса и блогеров.\n\n/start — регистрация или главное меню\n/app — открыть приложение\n/xabarlar — уведомления о новых объявлениях (для блогеров)\n/lang — сменить язык\n/privacy — политика конфиденциальности\n/delete — удалить мои данные\n/help — помощь\n\n📸 Instagram: <a href="https://www.instagram.com/miqyos.uz/">@miqyos.uz</a>\n💬 Менеджер: <a href="https://t.me/Miqyos_menejer">@Miqyos_menejer</a>',
   notRegistered: 'Сначала пройдите регистрацию: /start',
   langSaved: 'Язык сохранён: Русский 🇷🇺',
   privacy: (url) => `Какие данные собираются и как используются: <a href="${esc(url)}">политика конфиденциальности</a>.\n\nЧтобы удалить свои данные, отправьте /delete.`,
