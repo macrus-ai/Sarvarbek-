@@ -36,6 +36,7 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
   - `migrations/000N_*.sql` — sxema o‘zgarsa, yangi fayl qo‘shiladi. Deploy uni o‘zi qo‘llaydi.
   - `bot/README.md` — mahsulotning to‘liq tavsifi. Funksiya o‘zgarsa, README ham yangilanadi.
 - `.github/workflows/bot.yml` — testlar, `wrangler deploy --dry-run`, `main` da esa migratsiya, deploy va `/setup`.
+- `.claude/skills/yt-*` — YouTube agent: 11 ta skill (`/yt-script`, `/yt-package`, `/yt-plan`, `/yt-viral`, `/yt-seo`, `/yt-shorts`, `/yt-edit`, `/yt-retention`, `/yt-chapters`, `/yt-comment`, `/yt-audit`). Manba: Jakeschincariol/youtube-agent-skill (MIT). Ovoz profili: `.claude/youtube/voice.md`.
 
 ## Asosiy qoidalar (mahsulot)
 
