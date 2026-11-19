@@ -1,5 +1,8 @@
 # YouTube kanal: 1-oy rejasi (biznes yo'nalishi)
 
+> ESKIRGAN (2026-11-19): kanal AI darslari yo'nalishida davom etadi (1-video "Sun'iy intellektdan o'zbek tilida
+> foydalanish", 2-video "AI bilan rasm va taqdimot"). Format: oq doska uslubi, `oq-doska/README.md`. Yangi reja kerak.
+
 Tuzilgan: 2026-11-19, `/yt-plan` bilan. Vaqt: haftasiga 10+ soat. Format: yuzsiz, qo'lda chizilgan
 rasmlar va ovoz. Til: o'zbekcha lotin, sarlavhaning kirillcha nusxasi tavsifda.
 

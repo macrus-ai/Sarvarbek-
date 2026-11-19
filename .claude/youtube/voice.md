@@ -1,6 +1,7 @@
 # voice.md — kanal ovozi (YouTube agent shu faylni o'qiydi)
 
-Holati: QORALAMA (2026-11-19). Hali birorta video olinmagan. Birinchi 3 ta video yozilgach,
+Holati: QORALAMA (2026-11-19). DIQQAT: kanal mavzusi AI darslari (biznes emas) — tomoshabin bo'limini yangilash kerak.
+Ovoz: AI diktor (ElevenLabs v4, "Vlad"), egasining o'z ovozi emas. Format: oq doska, `oq-doska/README.md`. Hali birorta video olinmagan. Birinchi 3 ta video yozilgach,
 "How I actually talk" bo'limiga ularning matni qo'shiladi va profil aniqlashtiriladi.
 
 ## Who I am talking to
