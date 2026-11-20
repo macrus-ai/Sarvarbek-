@@ -132,13 +132,17 @@ class Timeline:
 def plan_lines(chains, t0, t1, tl, travel_speed=2600.0):
     total = sum(len(c) for c in chains)
     gaps = [np.abs(chains[i][0] - chains[i - 1][-1]).sum() for i in range(1, len(chains))]
-    travel = sum(max(0.04, g / travel_speed) for g in gaps)
-    speed = total / max((t1 - t0) - travel, 0.5)  # skeleton px per second
+    hops = [max(0.04, g / travel_speed) for g in gaps]
+    window = max(t1 - t0, 0.2)
+    if sum(hops) > 0.35 * window:  # many strokes: shorten pen travel so lines always finish on time
+        k = 0.35 * window / sum(hops)
+        hops = [h * k for h in hops]
+    speed = total / max(window - sum(hops), 0.05)  # skeleton px per second
     t = t0
     pts, times = [], []
     for i, c in enumerate(chains):
         if i:
-            t += max(0.04, gaps[i - 1] / travel_speed)
+            t += hops[i - 1]
         n = len(c)
         ts = t + np.arange(n) / speed
         step = max(1, n // 40)
@@ -308,7 +312,7 @@ def main():
     # groups: person (lines, then colour) and then background (lines, then colour)
     groups = [(person_area, [i for i in big if in_p(i)])] if a.person else []
     groups.append((~person_area, [i for i in big if not in_p(i)]))
-    t_end = 0.4 + min(T * 0.80, T - 1.2)
+    t_end = 0.3 + min(T * 0.68, T - 1.6)  # drawing done well before the scene ends
     if len(groups) == 2:
         ws = [0.30, 0.18, 0.32, 0.20]
     else:
