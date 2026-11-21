@@ -67,8 +67,9 @@ test('bloger: Instagram havolasi, to‘rtta ko‘rsatkich va statistika skrinsho
     '100\u00a0000 – 500\u00a0000', '500\u00a0000 – 1\u00a0000\u00a0000', '1\u00a0000\u00a0000+'
   ]);
   await press(env, blogger, 'acc:100000-500000');
-  assert.match(lastText(800), /Statistika skrinshotini rasm qilib yuboring/);
+  assert.match(lastText(800), /Auditoriya statistikasi skrinshotini/);
   assert.match(lastText(800), /Professional panel/);
+  assert.match(lastText(800), /majburiy/);
   await sendPhoto(env, blogger, 'stats-800');
   await press(env, blogger, 'niche:lifestyle');
   await press(env, blogger, 'rgn:samarkand');
@@ -141,11 +142,13 @@ test('so‘rov: biznes avval profil va statistikani ko‘radi, Telegram va telef
   assert.equal(reqs[0].blogger.phone, '+998 93 555 66 77');
 });
 
-test('statistikasiz bloger so‘rovi oddiy matn bo‘lib keladi', async () => {
+test('eski (statistikasiz) bloger so‘rovi oddiy matn bo‘lib keladi', async () => {
   const business = tgUser(820);
   const blogger = tgUser(821);
   await registerBusiness(env, business);
   await registerBlogger(env, blogger);
+  // Majburiy bo'lishidan oldin ro'yxatdan o'tgan blogerda skrinshot yo'q
+  await env.DB.prepare('UPDATE users SET stats_file_id = NULL, stats_key = NULL WHERE tg_id = ?1').bind(821).run();
   const { data } = await createCampaign(env, business, { minFollowers: 0 });
   tg.clear();
   await api(env, blogger, `/api/campaigns/${data.campaign.id}/apply`, { method: 'POST', body: {} });

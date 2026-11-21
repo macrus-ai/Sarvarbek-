@@ -158,25 +158,28 @@ const uz = {
       : `👁 ${platform === 'Telegram' ? 'Postlaringiz' : 'Videolaringiz'} o‘rtacha nechta ko‘rish to‘playdi?`,
   askStats: (platform) =>
     [
-      '📊 Statistika skrinshotini rasm qilib yuboring.',
+      '📊 Auditoriya statistikasi skrinshotini rasm (foto) qilib yuboring. Bu majburiy: bizneslar aynan shu rasmga qarab tanlaydi.',
       '',
       {
-        Instagram: 'Instagram: Professional panel → Statistika → Auditoriya (shaharlar, yosh, jins).',
-        TikTok: 'TikTok: Analitika → Obunachilar (shaharlar, yosh, jins).',
-        YouTube: 'YouTube Studio → Analitika → Auditoriya.',
-        Telegram: 'Telegram: kanal → Statistika (obunachilar va ko‘rishlar).'
+        Instagram:
+          'Instagram → Professional panel → Statistika → Umumiy obunachilar. Rasmda ko‘rinsin:\n• shaharlar (Eng ko‘p joylashuvlar)\n• yosh va jins\n• davr: oxirgi 30 kun',
+        TikTok:
+          'TikTok → Analitika → Obunachilar. Rasmda ko‘rinsin:\n• jins va yosh\n• eng ko‘p hududlar (shaharlar)\n• davr: oxirgi 28 kun',
+        YouTube:
+          'YouTube Studio → Analitika → Auditoriya. Rasmda ko‘rinsin:\n• yosh va jins\n• mamlakatlar va shaharlar\n• davr: oxirgi 28 kun',
+        Telegram:
+          'Telegram → kanal → Statistika. Rasmda ko‘rinsin:\n• obunachilar soni va o‘sishi\n• postlarning o‘rtacha ko‘rishi\n• davr: oxirgi 30 kun'
       }[platform] || '',
       '',
-      'Bizneslar shu rasm orqali auditoriyangizni ko‘radi.'
+      'Telefon ekranidan oddiy skrinshot yetarli. Ma’lumotlar ochiq va o‘qiladigan bo‘lsin.'
     ].join('\n'),
   askReels: '🎬 Reels videolaringiz o‘rtacha nechta ko‘rish to‘playdi?',
   askPosts: '🖼 Postlaringiz (rasm va karusellar) o‘rtacha nechta ko‘rish to‘playdi?',
   askAccounts:
     '📈 Qamrov: oxirgi 30 kunda kontentingizni nechta akkaunt ko‘rgan?\n\nInstagram: Professional panel → Statistika → “Qamrab olingan akkauntlar” (Accounts reached), oxirgi 30 kun.',
-  statsSkip: 'O‘tkazib yuborish',
   backButton: '⬅️ Orqaga',
   backDone: 'Oldingi savolga qaytdik.',
-  errStats: 'Iltimos, skrinshotni rasm (foto) sifatida yuboring yoki “O‘tkazib yuborish” tugmasini bosing.',
+  errStats: 'Statistika skrinshoti majburiy. Iltimos, uni rasm (foto) sifatida yuboring, fayl emas.',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
   askRegion:
@@ -439,25 +442,28 @@ const ru = {
       : `👁 Сколько в среднем просмотров набирают ваши ${platform === 'Telegram' ? 'посты' : 'видео'}?`,
   askStats: (platform) =>
     [
-      '📊 Отправьте скриншот статистики фотографией.',
+      '📊 Отправьте скриншот статистики аудитории фотографией. Это обязательно: бизнесы выбирают именно по этому скриншоту.',
       '',
       {
-        Instagram: 'Instagram: Профессиональная панель → Статистика → Аудитория (города, возраст, пол).',
-        TikTok: 'TikTok: Аналитика → Подписчики (города, возраст, пол).',
-        YouTube: 'YouTube Studio → Аналитика → Аудитория.',
-        Telegram: 'Telegram: канал → Статистика (подписчики и просмотры).'
+        Instagram:
+          'Instagram → Профессиональная панель → Статистика → Все подписчики. На скриншоте должно быть видно:\n• города (Основные местоположения)\n• возраст и пол\n• период: последние 30 дней',
+        TikTok:
+          'TikTok → Аналитика → Подписчики. На скриншоте должно быть видно:\n• пол и возраст\n• основные регионы (города)\n• период: последние 28 дней',
+        YouTube:
+          'YouTube Studio → Аналитика → Аудитория. На скриншоте должно быть видно:\n• возраст и пол\n• страны и города\n• период: последние 28 дней',
+        Telegram:
+          'Telegram → канал → Статистика. На скриншоте должно быть видно:\n• число подписчиков и рост\n• средние просмотры постов\n• период: последние 30 дней'
       }[platform] || '',
       '',
-      'По этому скриншоту бизнес увидит вашу аудиторию.'
+      'Достаточно обычного скриншота с экрана телефона. Данные должны быть открыты и читаемы.'
     ].join('\n'),
   askReels: '🎬 Сколько в среднем просмотров набирают ваши reels?',
   askPosts: '🖼 Сколько в среднем просмотров набирают ваши посты (фото и карусели)?',
   askAccounts:
     '📈 Охват: сколько аккаунтов увидели ваш контент за последние 30 дней?\n\nInstagram: Профессиональная панель → Статистика → «Охваченные аккаунты» (Accounts reached), последние 30 дней.',
-  statsSkip: 'Пропустить',
   backButton: '⬅️ Назад',
   backDone: 'Вернулись к предыдущему вопросу.',
-  errStats: 'Пожалуйста, отправьте скриншот как фото или нажмите «Пропустить».',
+  errStats: 'Скриншот статистики обязателен. Пожалуйста, отправьте его как фото, не как файл.',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
   askRegion:
