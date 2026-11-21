@@ -5,7 +5,7 @@ Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilova
 ## Qanday ishlaydi
 
 1. **Ro‘yxatdan o‘tish (bot ichida).** `/start` → til (o‘zbekcha / ruscha) → "Biznes egasiman" yoki "Blogerman".
-   - **Biznes:** ism, do‘kon yoki kompaniya nomi, toifa, telefon ("Raqamni yuborish" tugmasi).
+   - **Biznes:** ism, do‘kon yoki kompaniya nomi, soha (17 ta katta soha; avval soha tugmasi, keyin uning ichidan aniq tur), telefon ("Raqamni yuborish" tugmasi).
    - **Bloger:** ism, asosiy tarmoq, profil havolasi ("Instagram profilingiz havolasini yuboring"; @username ham bo‘ladi, bot uni to‘liq havolaga aylantiradi va boshqa saytning havolasini qabul qilmaydi), obunachilar soni, ko‘rishlar (pastga qarang), statistika skrinshoti (ixtiyoriy: savoldan oldin namuna rasm ko‘rsatiladi; rasm yuborgan bloger ✅ “Tasdiqlangan” belgisi oladi va biznesga kelgan so‘rovlarda birinchi chiqadi; rasmni keyinroq ham chatga yuborish mumkin), yo‘nalish (21 ta variant, oxirgisi "Boshqa"), auditoriyasi joylashgan hudud (14 ta hudud), telefon.
    - **Bloger ko‘rishlari (oraliq tugmalar bilan).** Instagram blogeridan to‘rtta savol, shu tartibda: Reels o‘rtacha ko‘rishlari, Postlar o‘rtacha ko‘rishlari, Istoriya (storis) o‘rtacha ko‘rishlari, Qamrov — oxirgi 30 kunda qamrab olingan akkauntlar (Instagram statistikasidagi "Qamrab olingan akkauntlar" / "Accounts reached"; 5 000 gacha … 1 000 000+). Telegram, TikTok va YouTube blogeridan bitta savol: postlar (Telegram) yoki videolar (TikTok, YouTube) o‘rtacha ko‘rishlari. Hamma joyda (moderatsiya kartasi, admin panel, biznesga keladigan so‘rov, mini ilova) aniq nom bilan ko‘rinadi: "Reels (o‘rtacha)", "Postlar (o‘rtacha)", "Istoriya (o‘rtacha)", "Qamrov (30 kun)"; boshqa platformalarda "Postlar (o‘rtacha)" yoki "Videolar (o‘rtacha)". Bloger Instagramdan boshqa tarmoqqa o‘tsa, Instagram ko‘rsatkichlari o‘chiriladi.
    - **Eski Instagram blogerlari** (bu yangilanishdan oldin ro‘yxatdan o‘tganlar) da reels, postlar va qamrov bo‘sh: moderatsiya kartasi va admin panelda "kiritilmagan" deb chiqadi, avvalgi birlashgan "Reels va postlar" qiymati esa "Reels va postlar (eski)" deb ko‘rsatiladi (yangi reels yoki postlar kiritilgach ko‘rinmaydi). Ularga xabar yuborilmaydi; "✏️ Ma’lumotlarni yangilash" orqali o‘zlari to‘ldirishi mumkin. Bazada: `reach` (Instagramda istoriya), `reels_views`, `posts_views`, `accounts_reached`, eski `reels_reach` (migratsiya `0008`).
@@ -168,7 +168,7 @@ Tugagach, workflow sahifasidagi **Summary** da bot havolasi va mini ilova manzil
 
 - **Bot xabarlari:** `src/i18n.js` (o‘zbekcha va ruscha).
 - **Mini ilova matnlari:** `public/app.js` boshidagi `TEXT`.
-- **Biznes toifalari (`CATEGORIES`), bloger yo‘nalishlari (`NICHES`, 20 ta + "Boshqa"), hududlar (`REGIONS`), platformalar, obunachilar oraliqlari:** `src/constants.js`.
+- **Biznes sohalari (`SECTORS`: 17 ta soha, 81 ta tur; `CATEGORIES` — hamma turlar tekis ro‘yxatda; bazada faqat tur id’si saqlanadi, eski id’lar (beauty, food, ...) tur sifatida qolgan; soha id’si ("g_...") faqat e’lon filtrida ishlaydi), bloger yo‘nalishlari (`NICHES`, 20 ta + "Boshqa"), hududlar (`REGIONS`), platformalar, obunachilar oraliqlari:** `src/constants.js`.
 - **Cheklovlar** (faol e’lonlar soni, matn uzunligi, rasm hajmi va boshqalar): `src/constants.js` dagi `LIMITS`.
 
 ## Kompyuterda ishlatish (dasturchilar uchun)

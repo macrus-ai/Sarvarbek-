@@ -67,7 +67,7 @@ test('eksport: faqat admin uchun, blogerlar, bizneslar, e’lonlar va so‘rovla
   assert.equal(b.applications, 1);
   const biz = users.rows.find((r) => r.role === 'business');
   assert.equal(biz.company, 'Tabiiy kosmetika');
-  assert.equal(biz.category, 'Go‘zallik');
+  assert.equal(biz.category, 'Boshqa (go‘zallik)');
   assert.equal(biz.campaigns, 1);
 
   const campaigns = (await panel(cookie, '/api/admin/export/campaigns')).data;

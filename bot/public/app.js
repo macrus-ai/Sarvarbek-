@@ -587,7 +587,7 @@
     const f = state.filters;
     const known = (list, id) => !id || (list || []).some((x) => (x.id ?? x) === id);
     if (saved && typeof saved === 'object') {
-      if (known(state.meta.categories, saved.category)) f.category = saved.category || '';
+      if (known(state.meta.sectors, saved.category)) f.category = saved.category || '';
       if (known(state.meta.platforms, saved.platform)) f.platform = saved.platform || '';
       if (known(state.meta.regions, saved.region)) f.region = saved.region || '';
       f.sort = saved.sort === 'value' ? 'value' : 'new';
@@ -726,7 +726,8 @@
 
   // Bloger: reklama e'lonlari ro'yxati
   function browseHTML() {
-    const cats = [{ id: '', label: t('allCats') }, ...state.meta.categories.map((c) => ({ id: c.id, label: c[state.lang] }))];
+    // Filtr: katta sohalar (har birida e'lonning aniq turi bo'yicha hamma e'lonlar chiqadi)
+    const cats = [{ id: '', label: t('allCats') }, ...state.meta.sectors.map((s) => ({ id: s.id, label: s[state.lang] }))];
     const count = activeFilterCount();
     return `
       <h1 class="view-title">${esc(t('browseTitle'))}</h1>
@@ -1030,8 +1031,11 @@
         ${label}${control}${e[name] ? `<span class="err-text">${esc(t(`e_${name}`))}</span>` : extra}
       </div>`;
     const lbl = (id, text, opt = false) => `<label for="${id}">${esc(text)}${opt ? `<span class="opt">${esc(t('optional'))}</span>` : ''}</label>`;
-    const categories = state.meta.categories
-      .map((c) => `<option value="${c.id}" ${f.category === c.id ? 'selected' : ''}>${esc(c[state.lang])}</option>`)
+    // Tanlash ro'yxati sohalar bo'yicha guruhlangan: <optgroup> ichida aniq turlar
+    const categories = state.meta.sectors
+      .map((s) => `<optgroup label="${esc(s[state.lang])}">${s.items
+        .map((c) => `<option value="${c.id}" ${f.category === c.id ? 'selected' : ''}>${esc(c[state.lang])}</option>`)
+        .join('')}</optgroup>`)
       .join('');
     const platforms = state.meta.platforms
       .map((p) => `<button type="button" class="chip" data-act="toggle-platform" data-id="${esc(p)}" aria-pressed="${f.platforms.includes(p)}">${esc(p)}</button>`)

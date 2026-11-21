@@ -31,7 +31,8 @@ test('ro‘yxatdan o‘tmagan foydalanuvchi', async () => {
   const me = await api(env, tgUser(300), '/api/me');
   assert.equal(me.status, 200);
   assert.equal(me.data.registered, false);
-  assert.equal(me.data.meta.categories.length, 7);
+  assert.equal(me.data.meta.sectors.length, 17);
+  assert.ok(me.data.meta.categories.some((c) => c.id === 'dental'));
   const list = await api(env, tgUser(300), '/api/campaigns');
   assert.equal(list.status, 403);
   assert.equal(list.data.error, 'not_registered');
@@ -229,4 +230,26 @@ test('faol kampaniyalar soni cheklangan', async () => {
   const extra = await createCampaign(env, business, { title: 'Ortiqcha kampaniya' });
   assert.equal(extra.status, 409);
   assert.equal(extra.data.error, 'too_many_campaigns');
+});
+
+test('e’lonlar filtri: aniq tur yoki butun soha bo‘yicha', async () => {
+  await setup();
+  await createCampaign(env, business, { title: 'Stomatologiya aksiyasi', category: 'dental' });
+  await createCampaign(env, business, { title: 'Dorixona aksiyasi', category: 'pharmacy' });
+  await createCampaign(env, business, { title: 'Krem', category: 'beauty' });
+  const titles = async (query) =>
+    (await api(env, blogger, `/api/campaigns${query}`)).data.campaigns.map((c) => c.title).sort();
+
+  assert.deepEqual(await titles('?category=dental'), ['Stomatologiya aksiyasi']);
+  assert.deepEqual(await titles('?category=g_health'), ['Dorixona aksiyasi', 'Stomatologiya aksiyasi']);
+  assert.deepEqual(await titles('?category=g_beauty'), ['Krem']);
+  assert.equal((await titles('?category=nomalum')).length, 3); // noma'lum qiymat filtrsiz
+});
+
+test('e’lon yaratishda yangi tur qabul qilinadi, noma‘lum tur rad etiladi', async () => {
+  await setup();
+  const ok = await createCampaign(env, business, { title: 'Avtoyuvish', category: 'carservice' });
+  assert.equal(ok.data.campaign.category, 'carservice');
+  const bad = await createCampaign(env, business, { title: 'Xato', category: 'g_health' });
+  assert.equal(bad.status, 400);
 });
