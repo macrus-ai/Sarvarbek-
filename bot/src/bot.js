@@ -39,6 +39,26 @@ const NOT_INSTAGRAM = { reels_reach: null, reels_views: null, posts_views: null,
 
 const statsKeyboard = (T) => ({ inline_keyboard: [[{ text: T.statsSkip, callback_data: 'stats:skip' }]] });
 
+// "Orqaga" tugmasi: birinchi ikki qadamdan (til, rol) boshqa hamma savolda chiqadi
+const NO_BACK = new Set(['lang', 'role']);
+const backButton = (T, step) => ({ text: T.backButton, callback_data: `back:${step}` });
+
+// Savolning klaviaturasiga "Orqaga" qo'shadi (matnli savolda alohida tugma, telefon savolida oddiy tugma)
+function withBack(T, step, markup) {
+  if (NO_BACK.has(step)) return markup;
+  if (markup?.keyboard) return { ...markup, keyboard: [...markup.keyboard, [{ text: T.backButton }]] };
+  return { inline_keyboard: [...(markup?.inline_keyboard || []), [backButton(T, step)]] };
+}
+
+// Oldingi savol: Instagramga xos qadamlar o'tkazib yuboriladi; ismdan keyin — rol tanlash
+function prevStep(user) {
+  const flow = FLOW[user.role] || [];
+  const i = flow.indexOf(user.reg_step);
+  if (i <= 0) return i === 0 ? 'role' : null;
+  for (let j = i - 1; j >= 0; j -= 1) if (stepApplies(flow[j], user)) return flow[j];
+  return 'role';
+}
+
 export async function handleUpdate(update, ctx) {
   if (update.message) return onMessage(update.message, ctx);
   if (update.callback_query) return onCallback(update.callback_query, ctx);
@@ -87,6 +107,7 @@ function ask(ctx, user, step) {
   const T = tr(user.lang);
   const id = user.tg_id;
   const lang = user.lang === 'ru' ? 'ru' : 'uz';
+  const send = (to, text, opts = {}) => ctx.tg.send(to, text, { ...opts, reply_markup: withBack(T, step, opts.reply_markup) });
   const categoryButtons = () => ({
     inline_keyboard: rows(CATEGORIES.map((c) => ({ text: c[lang], callback_data: `cat:${c.id}` })), 2)
   });
@@ -96,9 +117,9 @@ function ask(ctx, user, step) {
 
   switch (step) {
     case 'lang':
-      return ctx.tg.send(id, T.chooseLang, { reply_markup: langKeyboard('lang') });
+      return send(id, T.chooseLang, { reply_markup: langKeyboard('lang') });
     case 'role':
-      return ctx.tg.send(id, T.welcome(privacyUrl(ctx.env, lang)), {
+      return send(id, T.welcome(privacyUrl(ctx.env, lang)), {
         reply_markup: {
           inline_keyboard: [
             [{ text: T.roleBusiness, callback_data: 'role:business' }],
@@ -107,41 +128,41 @@ function ask(ctx, user, step) {
         }
       });
     case 'name':
-      return ctx.tg.send(id, T.askName);
+      return send(id, T.askName);
     case 'company':
-      return ctx.tg.send(id, T.askCompany);
+      return send(id, T.askCompany);
     case 'category':
-      return ctx.tg.send(id, T.askCategory, { reply_markup: categoryButtons() });
+      return send(id, T.askCategory, { reply_markup: categoryButtons() });
     case 'niche':
-      return ctx.tg.send(id, T.askNiche, { reply_markup: nicheButtons() });
+      return send(id, T.askNiche, { reply_markup: nicheButtons() });
     case 'region':
-      return ctx.tg.send(id, T.askRegion, {
+      return send(id, T.askRegion, {
         reply_markup: { inline_keyboard: rows(REGIONS.map((r) => ({ text: r[lang], callback_data: `rgn:${r.id}` })), 2) }
       });
     case 'platform':
-      return ctx.tg.send(id, T.askPlatform, {
+      return send(id, T.askPlatform, {
         reply_markup: { inline_keyboard: rows(PLATFORMS.map((p) => ({ text: p, callback_data: `plat:${p}` })), 2) }
       });
     case 'profile':
-      return ctx.tg.send(id, T.askProfile(user.platform));
+      return send(id, T.askProfile(user.platform));
     case 'reels':
-      return ctx.tg.send(id, T.askReels, { reply_markup: rangeButtons(REELS_REACH, reelsLabel, 'rls', lang) });
+      return send(id, T.askReels, { reply_markup: rangeButtons(REELS_REACH, reelsLabel, 'rls', lang) });
     case 'posts':
-      return ctx.tg.send(id, T.askPosts, { reply_markup: rangeButtons(REACH, reachLabel, 'pst', lang) });
+      return send(id, T.askPosts, { reply_markup: rangeButtons(REACH, reachLabel, 'pst', lang) });
     case 'reach':
-      return ctx.tg.send(id, T.askReach(user.platform), { reply_markup: rangeButtons(REACH, reachLabel, 'rch', lang) });
+      return send(id, T.askReach(user.platform), { reply_markup: rangeButtons(REACH, reachLabel, 'rch', lang) });
     case 'accounts':
-      return ctx.tg.send(id, T.askAccounts, { reply_markup: rangeButtons(ACCOUNTS_REACHED, accountsLabel, 'acc', lang) });
+      return send(id, T.askAccounts, { reply_markup: rangeButtons(ACCOUNTS_REACHED, accountsLabel, 'acc', lang) });
     case 'stats':
-      return ctx.tg.send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
+      return send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
     case 'followers':
-      return ctx.tg.send(id, T.askFollowers, {
+      return send(id, T.askFollowers, {
         reply_markup: {
           inline_keyboard: rows(FOLLOWERS.map((f) => ({ text: followersLabel(f.id), callback_data: `fol:${f.id}` })), 2)
         }
       });
     case 'phone':
-      return ctx.tg.send(id, T.askPhone, { reply_markup: phoneKeyboard(T) });
+      return send(id, T.askPhone, { reply_markup: phoneKeyboard(T) });
     default:
       return undefined;
   }
@@ -476,6 +497,7 @@ async function onMessage(msg, ctx) {
 
 async function onPhone(ctx, user, msg, text) {
   const T = tr(user.lang);
+  if (text === T.backButton) return goBack(ctx, user, { remove: true });
   let phone;
   if (msg.contact) {
     if (msg.contact.user_id !== msg.from.id) return ctx.tg.send(user.tg_id, T.errContactNotOwn, { reply_markup: phoneKeyboard(T) });
@@ -488,6 +510,15 @@ async function onPhone(ctx, user, msg, text) {
   const updated = await save(ctx, user, { phone });
   await ctx.tg.send(user.tg_id, T.phoneSaved, { reply_markup: { remove_keyboard: true } });
   return proceed(ctx, updated);
+}
+
+// Bitta qadam orqaga: oldingi savol qaytadan beriladi, avvalgi javob saqlanib turadi (yangisi yozilganda almashadi)
+async function goBack(ctx, user, { remove = false } = {}) {
+  const prev = prevStep(user);
+  if (!prev) return undefined;
+  await updateUser(ctx.db, user.tg_id, { reg_step: prev });
+  if (remove) await ctx.tg.send(user.tg_id, tr(user.lang).backDone, { reply_markup: { remove_keyboard: true } });
+  return ask(ctx, { ...user, reg_step: prev }, prev);
 }
 
 /* ---------- Tugmalar ---------- */
@@ -525,6 +556,13 @@ async function onCallback(cq, ctx) {
       await updateUser(ctx.db, user.tg_id, { notify_ads: on ? 1 : 0 });
       await ack();
       return ctx.tg.send(user.tg_id, on ? T.notifyOn : T.notifyOff, { reply_markup: notifyKeyboard(T, on) });
+    }
+    // "Orqaga": faqat hozirgi savolning o'zidagi tugma ishlaydi
+    case 'back': {
+      if (user.reg_step !== value || NO_BACK.has(value) || user.reg_step === 'done' || !prevStep(user)) return stale();
+      await ack();
+      await markChosen(T.backButton);
+      return goBack(ctx, user);
     }
     case 'lang': {
       if (user.reg_step !== 'lang' || (value !== 'uz' && value !== 'ru')) return stale();

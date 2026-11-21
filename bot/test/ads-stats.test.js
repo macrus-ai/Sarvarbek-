@@ -45,7 +45,7 @@ test('bloger: Instagram havolasi, to‘rtta ko‘rsatkich va statistika skrinsho
   assert.match(lastText(800), /Instagram havolasiga o‘xshamaydi/);
   await say(env, blogger, 'https://www.instagram.com/dilnoza.blog/?igsh=xyz');
   await press(env, blogger, 'fol:10000-50000');
-  const buttons = () => tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  const buttons = () => tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:'));
   // Instagram: reels → postlar → istoriya → qamrov (30 kun)
   assert.match(lastText(800), /Reels videolaringiz o‘rtacha nechta ko‘rish/);
   assert.equal(buttons().length, 6);

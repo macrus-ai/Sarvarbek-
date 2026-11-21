@@ -137,7 +137,7 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   await press(env, user, 'rch:1000-3000');
   await press(env, user, 'stats:skip');
 
-  const buttons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  const buttons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:'));
   assert.equal(buttons.length, 21);
   assert.deepEqual(buttons.at(-1), { text: 'Boshqa', callback_data: 'niche:other' });
   assert.ok(buttons.every((b) => b.callback_data.startsWith('niche:')));
@@ -145,7 +145,7 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   assert.equal(new Set(buttons.map((b) => b.callback_data)).size, 21);
 
   await press(env, user, 'niche:travel');
-  const regions = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  const regions = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:'));
   assert.equal(regions.length, 14);
   assert.deepEqual(regions[0], { text: 'Toshkent shahri', callback_data: 'rgn:tashkent_city' });
   await press(env, user, 'rgn:all'); // e'lon uchun bor, bloger uchun yo'q
@@ -173,7 +173,7 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   await press(env, business, 'role:business');
   await say(env, business, 'Aziz');
   await say(env, business, 'Aziz market');
-  const cats = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
+  const cats = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:'));
   assert.equal(cats.length, 7);
   assert.ok(cats.every((b) => b.callback_data.startsWith('cat:')));
   tg.clear();
@@ -412,7 +412,7 @@ test('TikTok tanlanmaydi (O‘zbekistonda bloklangan): ro‘yxatda yo‘q, eski 
   await press(env, user, 'lang:uz');
   await press(env, user, 'role:blogger');
   await say(env, user, 'Dilnoza');
-  const keyboard = tg.sent(140).at(-1).body.reply_markup.inline_keyboard.flat().map((b) => b.text);
+  const keyboard = tg.sent(140).at(-1).body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:')).map((b) => b.text);
   assert.deepEqual(keyboard, ['Instagram', 'Telegram', 'YouTube']);
 
   await press(env, user, 'plat:TikTok');
@@ -431,4 +431,28 @@ test('/help Instagram va menejer havolasini ko‘rsatadi', async () => {
   const text = lastText(user.id);
   assert.match(text, /instagram\.com\/miqyos\.uz/);
   assert.match(text, /t\.me\/Miqyos_menejer/);
+});
+
+test('"Orqaga" tugmasi: oldingi savolga qaytadi, javobni to‘g‘rilash mumkin', async () => {
+  const user = tgUser(150);
+  await say(env, user, '/start');
+  await press(env, user, 'lang:uz');
+  await press(env, user, 'role:blogger');
+  await say(env, user, 'Xato Ism');
+  const back = () => tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().find((b) => b.callback_data?.startsWith('back:'));
+  assert.equal(back().callback_data, 'back:platform');
+  await press(env, user, 'back:platform');
+  assert.match(lastText(150), /Ismingiz/i);
+  await say(env, user, 'To‘g‘ri Ism');
+  await press(env, user, 'plat:Instagram');
+  await say(env, user, 'https://instagram.com/togri');
+  await press(env, user, 'fol:1000-5000');
+  assert.equal(back().callback_data, 'back:reels');
+  await press(env, user, 'back:reels');
+  assert.match(lastText(150), /Obunachilaringiz soni/);
+  await press(env, user, 'back:reels'); // eskirgan tugma: hech narsa o‘zgarmaydi
+  await press(env, user, 'back:followers');
+  assert.match(lastText(150), /profilingiz havolasini/);
+  await press(env, user, 'back:profile');
+  assert.match(lastText(150), /ijtimoiy tarmog/);
 });
