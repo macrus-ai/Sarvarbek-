@@ -16,6 +16,7 @@ import {
   moderateCampaign, moderationEnabled, pendingKeyboard, resubmitKeyboard, sendAdCard, sendModerationCard
 } from './services.js';
 import { addToSheet } from './sheets.js';
+import { checkInstagram } from './igcheck.js';
 import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, normalizeProfile, now, privacyUrl } from './util.js';
 
 // Ro'yxatdan o'tish qadamlari.
@@ -476,6 +477,10 @@ async function onMessage(msg, ctx) {
       // Havola platformaga tegishli bo'lishi kerak; "@user" ham to'liq havolaga aylanadi
       const url = text.startsWith('/') ? null : normalizeProfile(user.platform, text);
       if (!url) return ctx.tg.send(id, T.errProfile(user.platform));
+      // Instagram: akkaunt haqiqatan bormi. Tekshirib bo'lmasa, o'tkazib yuboriladi (moderator ko'radi)
+      if (user.platform === 'Instagram' && (await checkInstagram(ctx.env, url)) === 'missing') {
+        return ctx.tg.send(id, T.errProfileMissing);
+      }
       return advance(ctx, user, { profile: url });
     }
     case 'stats': {
