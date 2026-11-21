@@ -234,6 +234,12 @@ export const sendPhoto = (env, from, fileId) =>
     ]
   });
 
+// Skrinshot yuboradi, lekin saqlamaydi: kartalar matn bo'lib qoladi (eski, skrinshotsiz blogerlar kabi)
+export async function sendStatsUnsaved(env, user) {
+  await sendPhoto(env, user, `stats-${user.id}`);
+  await env.DB.prepare('UPDATE users SET stats_file_id = NULL, stats_key = NULL WHERE tg_id = ?1').bind(user.id).run();
+}
+
 export const shareContact = (env, from, phone) =>
   say(env, from, undefined, { contact: { phone_number: phone, user_id: from.id, first_name: from.first_name } });
 
@@ -317,7 +323,7 @@ export async function registerBlogger(
     posts = '3000-10000', // Instagram: postlar
     reach = '1000-3000', // Instagram: istoriya (storis)
     accounts = '20000-100000', // Instagram: qamrov (30 kun)
-    stats = false, // true — statistika skrinshotini yuboradi
+    stats = false, // true — skrinshot saqlanadi; false — bot uni so'raydi, lekin saqlanmaydi (eski blogerlar kabi)
     approve: approved = true
   } = {}
 ) {
@@ -332,8 +338,8 @@ export async function registerBlogger(
   await press(env, user, `pst:${posts}`);
   await press(env, user, `rch:${reach}`);
   await press(env, user, `acc:${accounts}`);
-  if (stats) await sendPhoto(env, user, `stats-${user.id}`);
-  else await press(env, user, 'stats:skip');
+  await sendPhoto(env, user, `stats-${user.id}`);
+  if (!stats) await env.DB.prepare('UPDATE users SET stats_file_id = NULL, stats_key = NULL WHERE tg_id = ?1').bind(user.id).run();
   await press(env, user, `niche:${niche}`);
   await press(env, user, `rgn:${region}`);
   await shareContact(env, user, '+998935556677');

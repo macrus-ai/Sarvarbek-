@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import { sheetsKey } from '../src/sheets.js';
-import { TOKEN, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, shareContact, tgUser } from './helpers.js';
+import { TOKEN, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, shareContact, tgUser, sendStatsUnsaved } from './helpers.js';
 
 const SHEETS_URL = 'https://script.google.com/macros/s/TEST/exec';
 
@@ -75,7 +75,7 @@ test('profilni qayta tahrirlash jadvalga yangi qator qo‘shmaydi', async () => 
   await say(env, blogger, '@dilnoza');
   await press(env, blogger, 'fol:10000-50000');
   await press(env, blogger, 'rch:1000-3000');
-  await press(env, blogger, 'stats:skip');
+  await sendStatsUnsaved(env, blogger);
   await press(env, blogger, 'niche:beauty');
   await press(env, blogger, 'rgn:tashkent_city');
   await shareContact(env, blogger, '+998935556677');

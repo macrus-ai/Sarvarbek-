@@ -37,8 +37,6 @@ const stepApplies = (step, user) => !INSTAGRAM_STEPS.has(step) || user.platform 
 // Platforma Instagram bo'lmasa, Instagramga xos javoblar tozalanadi (eski reels_reach ham)
 const NOT_INSTAGRAM = { reels_reach: null, reels_views: null, posts_views: null, accounts_reached: null };
 
-const statsKeyboard = (T) => ({ inline_keyboard: [[{ text: T.statsSkip, callback_data: 'stats:skip' }]] });
-
 // "Orqaga" tugmasi: birinchi ikki qadamdan (til, rol) boshqa hamma savolda chiqadi
 const NO_BACK = new Set(['lang', 'role']);
 const backButton = (T, step) => ({ text: T.backButton, callback_data: `back:${step}` });
@@ -154,7 +152,7 @@ function ask(ctx, user, step) {
     case 'accounts':
       return send(id, T.askAccounts, { reply_markup: rangeButtons(ACCOUNTS_REACHED, accountsLabel, 'acc', lang) });
     case 'stats':
-      return send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
+      return send(id, T.askStats(user.platform));
     case 'followers':
       return send(id, T.askFollowers, {
         reply_markup: {
@@ -483,7 +481,7 @@ async function onMessage(msg, ctx) {
     case 'stats': {
       // Statistika skrinshoti: rasm (Telegram file_id saqlanadi)
       const photo = Array.isArray(msg.photo) ? msg.photo[msg.photo.length - 1] : null;
-      if (!photo?.file_id) return ctx.tg.send(id, T.errStats, { reply_markup: statsKeyboard(T) });
+      if (!photo?.file_id) return ctx.tg.send(id, T.errStats);
       return advance(ctx, user, { stats_file_id: photo.file_id, stats_key: newImageKey() });
     }
     case 'phone':
@@ -674,13 +672,6 @@ async function onCallback(cq, ctx) {
       await ack();
       await markChosen(reachLabel(value, user.lang));
       return advance(ctx, user, { reach: value });
-    }
-    case 'stats': {
-      // Skrinshotsiz davom etish (oldin yuborilgan bo'lsa, o'shanisi saqlanib qoladi)
-      if (value !== 'skip' || user.reg_step !== 'stats') return stale();
-      await ack();
-      await markChosen(T.statsSkip);
-      return advance(ctx, user, {});
     }
     case 'plat': {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();
