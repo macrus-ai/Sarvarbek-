@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import {
   api, approve, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, shareContact,
-  tgUser, sendStatsUnsaved } from './helpers.js';
+  tgUser
+} from './helpers.js';
 
 // createEnv() da ADMIN_IDS = '999'
 const ADMIN = 999;
@@ -58,7 +59,7 @@ test('admin yangi foydalanuvchini moderatsiya kartasi bilan bir marta oladi', as
   await say(env, blogger, '@dilnoza_yt');
   await press(env, blogger, 'fol:10000-50000');
   await press(env, blogger, 'rch:3000-10000'); // YouTube: reels, postlar va qamrov savollari yo'q
-  await sendStatsUnsaved(env, blogger);
+  await press(env, blogger, 'stats:skip');
   await press(env, blogger, 'niche:beauty');
   await press(env, blogger, 'rgn:tashkent_city');
   await shareContact(env, blogger, '+998935556677');

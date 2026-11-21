@@ -351,7 +351,7 @@ export async function listBusinessRequests(db, businessId) {
        JOIN campaigns c ON c.id = a.campaign_id
        JOIN users g ON g.tg_id = a.blogger_id
        WHERE c.business_id = ?1
-       ORDER BY (a.status = 'pending') DESC, a.created_at DESC, a.id DESC
+       ORDER BY (a.status = 'pending') DESC, (g.stats_file_id IS NOT NULL) DESC, a.created_at DESC, a.id DESC
        LIMIT 300`
     )
     .bind(businessId)

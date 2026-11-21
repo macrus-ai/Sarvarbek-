@@ -37,6 +37,8 @@ const stepApplies = (step, user) => !INSTAGRAM_STEPS.has(step) || user.platform 
 // Platforma Instagram bo'lmasa, Instagramga xos javoblar tozalanadi (eski reels_reach ham)
 const NOT_INSTAGRAM = { reels_reach: null, reels_views: null, posts_views: null, accounts_reached: null };
 
+const statsKeyboard = (T) => ({ inline_keyboard: [[{ text: T.statsSkip, callback_data: 'stats:skip' }]] });
+
 // "Orqaga" tugmasi: birinchi ikki qadamdan (til, rol) boshqa hamma savolda chiqadi
 const NO_BACK = new Set(['lang', 'role']);
 const backButton = (T, step) => ({ text: T.backButton, callback_data: `back:${step}` });
@@ -101,7 +103,7 @@ const phoneKeyboard = (T) => ({
 
 /* ---------- Savollar ---------- */
 
-function ask(ctx, user, step) {
+async function ask(ctx, user, step) {
   const T = tr(user.lang);
   const id = user.tg_id;
   const lang = user.lang === 'ru' ? 'ru' : 'uz';
@@ -152,7 +154,13 @@ function ask(ctx, user, step) {
     case 'accounts':
       return send(id, T.askAccounts, { reply_markup: rangeButtons(ACCOUNTS_REACHED, accountsLabel, 'acc', lang) });
     case 'stats':
-      return send(id, T.askStats(user.platform));
+      // Namuna rasm (ochiq manzildan); yuborilmasa, savol baribir chiqadi
+      try {
+        await ctx.tg.photo(id, `${ctx.origin}/namuna-statistika.png`, T.statsSample);
+      } catch (e) {
+        console.warn('stats sample failed:', e.message);
+      }
+      return send(id, T.askStats(user.platform), { reply_markup: statsKeyboard(T) });
     case 'followers':
       return send(id, T.askFollowers, {
         reply_markup: {
@@ -481,15 +489,24 @@ async function onMessage(msg, ctx) {
     case 'stats': {
       // Statistika skrinshoti: rasm (Telegram file_id saqlanadi)
       const photo = Array.isArray(msg.photo) ? msg.photo[msg.photo.length - 1] : null;
-      if (!photo?.file_id) return ctx.tg.send(id, T.errStats);
+      if (!photo?.file_id) return ctx.tg.send(id, T.errStats, { reply_markup: statsKeyboard(T) });
       return advance(ctx, user, { stats_file_id: photo.file_id, stats_key: newImageKey() });
     }
     case 'phone':
       return onPhone(ctx, user, msg, text);
-    default:
+    default: {
+      // Ro'yxatdan o'tgan bloger keyinroq statistika skrinshotini yuborsa: saqlanadi, adminlarga kartada boradi
+      const late = Array.isArray(msg.photo) ? msg.photo[msg.photo.length - 1] : null;
+      if (late?.file_id && user.role === 'blogger' && isRegistered(user)) {
+        const saved = await save(ctx, user, { stats_file_id: late.file_id, stats_key: newImageKey() });
+        await ctx.tg.send(id, T.statsLate);
+        if (user.moderation === 'approved') await sendModerationCard(ctx, saved, 'updated');
+        return undefined;
+      }
       if (BUTTON_STEPS.has(user.reg_step)) return ctx.tg.send(id, T.useButtons);
       if (!isRegistered(user)) return start(ctx, user);
       return sendHome(ctx, user);
+    }
   }
 }
 
@@ -672,6 +689,13 @@ async function onCallback(cq, ctx) {
       await ack();
       await markChosen(reachLabel(value, user.lang));
       return advance(ctx, user, { reach: value });
+    }
+    case 'stats': {
+      // Skrinshotsiz davom etish (oldin yuborilgan bo'lsa, o'shanisi saqlanib qoladi)
+      if (value !== 'skip' || user.reg_step !== 'stats') return stale();
+      await ack();
+      await markChosen(T.statsSkip);
+      return advance(ctx, user, {});
     }
     case 'plat': {
       if (user.reg_step !== 'platform' || !isPlatform(value)) return stale();
