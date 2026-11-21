@@ -192,6 +192,8 @@ const uz = {
   errCompany: 'Nom 2–80 belgidan iborat bo‘lsin. Qaytadan yozing:',
   errProfile: (platform) =>
     `Bu ${esc(platform)} havolasiga o‘xshamaydi. Havolani yoki @username ni yuboring.\n\nMasalan: ${EXAMPLE[platform] || 'https://…'}`,
+  errProfileMissing:
+    '❌ Bunday Instagram akkaunt topilmadi. Manzilni tekshirib, qayta yuboring.\n\nAkkauntingiz Professional (Business yoki Creator) bo‘lishi kerak, shaxsiy akkaunt topilmaydi.',
   errPhone: 'Raqamni pastdagi tugma orqali yuboring yoki +998 90 123 45 67 ko‘rinishida yozing.',
   errContactNotOwn: 'Iltimos, o‘zingizning raqamingizni yuboring.',
   useButtons: 'Iltimos, yuqoridagi tugmalardan birini tanlang.',
@@ -476,6 +478,8 @@ const ru = {
   errCompany: 'Название должно быть от 2 до 80 символов. Напишите ещё раз:',
   errProfile: (platform) =>
     `Это не похоже на ссылку ${esc(platform)}. Отправьте ссылку или @username.\n\nНапример: ${EXAMPLE[platform] || 'https://…'}`,
+  errProfileMissing:
+    '❌ Такой аккаунт Instagram не найден. Проверьте адрес и отправьте ещё раз.\n\nАккаунт должен быть Professional (Business или Creator), личный аккаунт не находится.',
   errPhone: 'Отправьте номер кнопкой ниже или напишите в формате +998 90 123 45 67.',
   errContactNotOwn: 'Пожалуйста, отправьте свой собственный номер.',
   useButtons: 'Пожалуйста, выберите один из вариантов выше.',

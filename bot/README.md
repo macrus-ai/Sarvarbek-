@@ -150,6 +150,7 @@ Tokenni hech kimga yubormang va chatlarga yozmang: u bilan botingizni boshqarish
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token |
 | `CLOUDFLARE_ACCOUNT_ID` | *(ixtiyoriy)* Cloudflare Account ID. Kerak emas: workflow uni tokendan o‘zi topadi. Faqat tokeningiz bir nechta akkauntga tegishli bo‘lsa qo‘shing |
 | `ADMIN_IDS` | *(ixtiyoriy)* adminlarning Telegram ID'lari, vergul bilan. O‘z ID'ingizni botga `/id` yuborib bilasiz |
+| `META_IG_USER_ID`, `META_ACCESS_TOKEN` | *(ixtiyoriy)* Instagram akkaunt mavjudligini tekshirish (Meta Graph API, Business Discovery, `src/igcheck.js`). Bloger Instagram havolasini yuborganda bot akkaunt borligini tekshiradi, topilmasa qayta so‘raydi. Ikkalasi ham berilmasa yoki Meta javob bermasa, tekshiruv o‘tkazib yuboriladi va profilni moderator ko‘radi. Faqat Professional (Business/Creator) akkauntlar topiladi |
 
 ### 4. Joylash
 
