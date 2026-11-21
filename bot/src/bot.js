@@ -5,7 +5,7 @@ import {
   findFollowers, findReach, findReelsReach, isCategory, isNiche, isPlatform, isRegion
 } from './constants.js';
 import {
-  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, listPendingCampaigns,
+  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getRefStats, getSetting, getStats, getUser, listPendingCampaigns,
   listPendingUsers, setSetting, touchUser, updateUser
 } from './db.js';
 import { createLoginLink } from './admin.js';
@@ -61,10 +61,13 @@ const langKeyboard = (prefix, role = null) => ({
   ]]
 });
 
-// Saytdagi havola: t.me/<bot>?start=business-uz (rol va ixtiyoriy til)
+// Saytdagi havola: t.me/<bot>?start=business-uz (rol va ixtiyoriy til).
+// Oxiriga referal kod qo'shilishi mumkin: blogger-uz-ref-dildora (yoki faqat ref-dildora).
 export function parseStartPayload(payload) {
-  const m = String(payload || '').toLowerCase().match(/^(business|blogger)(?:[-_](uz|ru))?$/);
-  return { role: m ? m[1] : null, lang: m && m[2] ? m[2] : null };
+  const s = String(payload || '').toLowerCase();
+  const r = s.match(/(?:^|[-_])ref[-_]([a-z0-9]{1,30})$/);
+  const m = (r ? s.slice(0, r.index) : s).match(/^(business|blogger)(?:[-_](uz|ru))?$/);
+  return { role: m ? m[1] : null, lang: m && m[2] ? m[2] : null, ref: r ? r[1] : null };
 }
 
 // Oraliq tugmalari (ko'rishlar, qamrov), ikki ustunda
@@ -353,7 +356,8 @@ async function onGroupMessage(msg, ctx) {
 
 async function start(ctx, user, payload) {
   if (isRegistered(user)) return sendHome(ctx, user);
-  const { role, lang } = parseStartPayload(payload);
+  const { role, lang, ref } = parseStartPayload(payload);
+  if (ref && !user.ref) await updateUser(ctx.db, user.tg_id, { ref });
   if (role && lang) return beginAs(ctx, user, role, lang);
   await updateUser(ctx.db, user.tg_id, { reg_step: 'lang' });
   return ctx.tg.send(user.tg_id, tr(user.lang).chooseLang, { reply_markup: langKeyboard('lang', role) });
@@ -389,6 +393,16 @@ async function onMessage(msg, ctx) {
     if (cmd === 'xabarlar' || cmd === 'notify') return notifySettings(ctx, user);
     if (cmd === 'stats' && isAdmin(id, ctx.env)) return ctx.tg.send(id, T.stats(await getStats(ctx.db)));
     if (cmd === 'moderatsiya' && isAdmin(id, ctx.env)) return sendPendingList(ctx, id, user.lang);
+    // Referal hisobot: /ref — hamma kodlar, /ref dildora — bitta kod
+    if (cmd === 'ref' && isAdmin(id, ctx.env)) {
+      const code = (text.split(/\s+/)[1] || '').toLowerCase().replace(/[^a-z0-9]/g, '') || null;
+      const rows = await getRefStats(ctx.db, code);
+      if (!rows.length) return ctx.tg.send(id, code ? `“${code}” kodi bilan hech kim kelmagan.` : 'Referal kodli foydalanuvchi hali yo‘q.');
+      const lines = rows.map(
+        (r) => `<b>${esc(r.ref)}</b>: jami ${r.total}, ro‘yxatdan o‘tgan ${r.registered}, tasdiqlangan bloger ${r.bloggers}, biznes ${r.businesses}`
+      );
+      return ctx.tg.send(id, `Referal hisobot:\n\n${lines.join('\n')}`);
+    }
     // Admin panelga kirish: havola faqat tugmada (matnda bo'lsa, Telegram uni ko'rib chiqib "ishlatib" qo'yishi mumkin)
     if (cmd === 'admin' && isAdmin(id, ctx.env)) {
       return ctx.tg.send(id, T.adminPanel, {
