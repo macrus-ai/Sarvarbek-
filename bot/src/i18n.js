@@ -174,6 +174,8 @@ const uz = {
   askAccounts:
     '📈 Qamrov: oxirgi 30 kunda kontentingizni nechta akkaunt ko‘rgan?\n\nInstagram: Professional panel → Statistika → “Qamrab olingan akkauntlar” (Accounts reached), oxirgi 30 kun.',
   statsSkip: 'O‘tkazib yuborish',
+  backButton: '⬅️ Orqaga',
+  backDone: 'Oldingi savolga qaytdik.',
   errStats: 'Iltimos, skrinshotni rasm (foto) sifatida yuboring yoki “O‘tkazib yuborish” tugmasini bosing.',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
@@ -453,6 +455,8 @@ const ru = {
   askAccounts:
     '📈 Охват: сколько аккаунтов увидели ваш контент за последние 30 дней?\n\nInstagram: Профессиональная панель → Статистика → «Охваченные аккаунты» (Accounts reached), последние 30 дней.',
   statsSkip: 'Пропустить',
+  backButton: '⬅️ Назад',
+  backDone: 'Вернулись к предыдущему вопросу.',
   errStats: 'Пожалуйста, отправьте скриншот как фото или нажмите «Пропустить».',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
