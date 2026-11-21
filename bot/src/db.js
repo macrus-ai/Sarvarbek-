@@ -80,6 +80,18 @@ export async function getRefStats(db, code = null) {
   return res.results ?? [];
 }
 
+// Shu referal kod bilan kelgan foydalanuvchilar (eng yangisi birinchi). Telefon chiqarilmaydi.
+export async function listRefUsers(db, code, limit = 30) {
+  const res = await db
+    .prepare(
+      `SELECT tg_id, name, username, role, reg_step, moderation, platform, profile, followers, company, created_at
+       FROM users WHERE ref = ?1 ORDER BY created_at DESC LIMIT ?2`
+    )
+    .bind(code, limit)
+    .all();
+  return res.results ?? [];
+}
+
 /* ---------- Moderatsiya ---------- */
 
 // Qaror faqat holat haqiqatan o'zgarsa yoziladi: ikki moderator bir vaqtda bossa, biri "allaqachon" oladi.

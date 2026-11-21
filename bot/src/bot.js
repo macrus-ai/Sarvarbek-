@@ -5,7 +5,7 @@ import {
   findFollowers, findReach, findReelsReach, isCategory, isNiche, isPlatform, isRegion
 } from './constants.js';
 import {
-  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getRefStats, getSetting, getStats, getUser, listPendingCampaigns,
+  closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getRefStats, getSetting, getStats, getUser, listPendingCampaigns, listRefUsers,
   listPendingUsers, setSetting, touchUser, updateUser
 } from './db.js';
 import { createLoginLink } from './admin.js';
@@ -401,7 +401,30 @@ async function onMessage(msg, ctx) {
       const lines = rows.map(
         (r) => `<b>${esc(r.ref)}</b>: jami ${r.total}, ro‘yxatdan o‘tgan ${r.registered}, tasdiqlangan bloger ${r.bloggers}, biznes ${r.businesses}`
       );
-      return ctx.tg.send(id, `Referal hisobot:\n\n${lines.join('\n')}`);
+      let detail = '';
+      if (code) {
+        const users = await listRefUsers(ctx.db, code);
+        const status = { approved: 'tasdiqlangan ✅', rejected: 'rad etilgan ❌' };
+        detail =
+          '\n\n' +
+          users
+            .map((u, i) => {
+              const done = u.reg_step === 'done';
+              const who = `${esc(u.name || 'ism yo‘q')}${u.username ? ` (@${esc(u.username)})` : ''}`;
+              const kind = u.role === 'business' ? 'biznes' : u.role === 'blogger' ? 'bloger' : 'rol tanlanmagan';
+              const info = [
+                kind,
+                done ? status[u.moderation] || 'tasdiq kutmoqda ⏳' : 'ro‘yxatdan o‘tishni tugatmagan',
+                u.role === 'blogger' && u.platform ? esc(u.platform) : null,
+                u.role === 'blogger' && u.followers ? `${esc(followersLabel(u.followers))} obunachi` : null,
+                u.role === 'business' && u.company ? esc(u.company) : null
+              ].filter(Boolean);
+              const link = u.profile ? `\n   ${esc(u.profile)}` : '';
+              return `${i + 1}. ${who}\n   ${info.join(', ')}${link}`;
+            })
+            .join('\n');
+      }
+      return ctx.tg.send(id, `Referal hisobot:\n\n${lines.join('\n')}${detail}`);
     }
     // Admin panelga kirish: havola faqat tugmada (matnda bo'lsa, Telegram uni ko'rib chiqib "ishlatib" qo'yishi mumkin)
     if (cmd === 'admin' && isAdmin(id, ctx.env)) {

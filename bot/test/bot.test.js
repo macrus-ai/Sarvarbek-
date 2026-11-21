@@ -370,6 +370,21 @@ test('referal havola: rol va til tayyor, kod saqlanadi va /ref hisobotda ko‘ri
   assert.doesNotMatch(lastText(114), /Referal hisobot/);
 });
 
+test('/ref <kod>: shu kod bilan kelgan blogerlar ro‘yxati (ism, holat, obunachi), telefonsiz', async () => {
+  const done = tgUser(117, { username: 'dilnoza_b' });
+  await registerBlogger(env, done);
+  await env.DB.prepare("UPDATE users SET ref = 'dildora' WHERE tg_id = 117").run();
+  await say(env, tgUser(118), '/start blogger-uz-ref-dildora');
+
+  const admin = tgUser(999);
+  await say(env, admin, '/ref dildora');
+  const text = lastText(999);
+  assert.match(text, /jami 2, ro‘yxatdan o‘tgan 1, tasdiqlangan bloger 1/);
+  assert.match(text, /Dilnoza \(@dilnoza_b\)\s+bloger, tasdiqlangan ✅, Instagram/);
+  assert.match(text, /ro‘yxatdan o‘tishni tugatmagan/);
+  assert.doesNotMatch(text, /\+998/);
+});
+
 test('referal havola: faqat kod bo‘lsa ham ishlaydi, ro‘yxatdan o‘tgan foydalanuvchiga yozilmaydi', async () => {
   const user = tgUser(115);
   await say(env, user, '/start ref-dildora');
