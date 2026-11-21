@@ -347,6 +347,41 @@ test('saytdagi havola: noma’lum parametr oddiy boshlanishga olib keladi', asyn
   assert.equal(question.body.reply_markup.inline_keyboard[0][0].callback_data, 'lang:uz');
 });
 
+const refOf = (id) => env.DB.prepare('SELECT ref FROM users WHERE tg_id = ?1').bind(id).first('ref');
+
+test('referal havola: rol va til tayyor, kod saqlanadi va /ref hisobotda ko‘rinadi', async () => {
+  const user = tgUser(114);
+  await say(env, user, '/start blogger-uz-ref-Dildora');
+  assert.match(lastText(114), /Ismingizni yozing/);
+  const me = await api(env, user, '/api/me');
+  assert.equal(me.data.user.role, 'blogger');
+  assert.equal(await refOf(114), 'dildora');
+
+  // Ikkinchi marta boshqa kod bilan kirsa, birinchisi o‘zgarmaydi
+  await say(env, user, '/start ref-boshqa');
+  assert.equal(await refOf(114), 'dildora');
+
+  const admin = tgUser(999);
+  await say(env, admin, '/ref');
+  assert.match(lastText(999), /dildora.*jami 1, ro‘yxatdan o‘tgan 0/);
+  await say(env, admin, '/ref nomalum');
+  assert.match(lastText(999), /hech kim kelmagan/);
+  await say(env, user, '/ref');
+  assert.doesNotMatch(lastText(114), /Referal hisobot/);
+});
+
+test('referal havola: faqat kod bo‘lsa ham ishlaydi, ro‘yxatdan o‘tgan foydalanuvchiga yozilmaydi', async () => {
+  const user = tgUser(115);
+  await say(env, user, '/start ref-dildora');
+  assert.equal(await refOf(115), 'dildora');
+  assert.equal(tg.sent(115).at(-1).body.reply_markup.inline_keyboard[0][0].callback_data, 'lang:uz');
+
+  const old = tgUser(116);
+  await registerBusiness(env, old);
+  await say(env, old, '/start blogger-uz-ref-dildora');
+  assert.equal(await refOf(116), null);
+});
+
 test('saytdagi havola: ro‘yxatdan o‘tgan foydalanuvchiga bosh menyu chiqadi', async () => {
   const user = tgUser(113);
   await registerBusiness(env, user);

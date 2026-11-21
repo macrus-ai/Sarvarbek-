@@ -7,7 +7,7 @@ const USER_FIELDS = [
   'first_name', 'username', 'lang', 'role', 'reg_step', 'name', 'phone', 'company',
   'category', 'platform', 'profile', 'followers', 'niche', 'region', 'registered_at',
   'moderation', 'moderated_by', 'moderated_at', 'reach', 'reels_reach', 'reels_views', 'posts_views',
-  'accounts_reached', 'stats_file_id', 'stats_key', 'notify_ads'
+  'accounts_reached', 'stats_file_id', 'stats_key', 'notify_ads', 'ref'
 ];
 
 /* ---------- Foydalanuvchilar ---------- */
@@ -58,6 +58,26 @@ export async function updateUser(db, id, fields) {
     .prepare(`UPDATE users SET ${sets}, updated_at = ?${keys.length + 1} WHERE tg_id = ?${keys.length + 2}`)
     .bind(...values, now(), id)
     .run();
+}
+
+// Referal kodlar bo'yicha hisobot: kod, jami kelganlar, ro'yxatdan o'tganlar, tasdiqlangan blogerlar va bizneslar.
+// code berilsa — faqat shu kod.
+export async function getRefStats(db, code = null) {
+  const res = await db
+    .prepare(
+      `SELECT ref,
+              COUNT(*) AS total,
+              SUM(CASE WHEN reg_step = 'done' THEN 1 ELSE 0 END) AS registered,
+              SUM(CASE WHEN reg_step = 'done' AND role = 'blogger' AND moderation = 'approved' THEN 1 ELSE 0 END) AS bloggers,
+              SUM(CASE WHEN reg_step = 'done' AND role = 'business' AND moderation = 'approved' THEN 1 ELSE 0 END) AS businesses
+       FROM users
+       WHERE ref IS NOT NULL AND (?1 IS NULL OR ref = ?1)
+       GROUP BY ref
+       ORDER BY total DESC`
+    )
+    .bind(code)
+    .all();
+  return res.results ?? [];
 }
 
 /* ---------- Moderatsiya ---------- */
