@@ -174,9 +174,13 @@ const CAMPAIGN_ORDER = {
 export async function listActiveCampaigns(db, { viewerId, category, platform, region, sort = 'new' }) {
   const where = ["c.status = 'active'", "c.moderation = 'approved'"];
   const args = [viewerId];
-  if (category) {
-    args.push(category);
-    where.push(`c.category = ?${args.length}`);
+  // category — tur id'lari ro'yxati (bitta tur yoki butun soha)
+  if (category?.length) {
+    const marks = category.map((c) => {
+      args.push(c);
+      return `?${args.length}`;
+    });
+    where.push(`c.category IN (${marks.join(',')})`);
   }
   if (platform) {
     args.push(platform);

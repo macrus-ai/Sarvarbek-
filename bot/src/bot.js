@@ -1,8 +1,8 @@
 // Telegram xabarlari: ro'yxatdan o'tish, buyruqlar va tugmalar
 
 import {
-  ACCOUNTS_REACHED, CATEGORIES, FOLLOWERS, NICHES, PLATFORMS, REACH, REELS_REACH, REGIONS, findAccountsReached,
-  findFollowers, findReach, findReelsReach, isCategory, isNiche, isPlatform, isRegion
+  ACCOUNTS_REACHED, FOLLOWERS, NICHES, PLATFORMS, REACH, REELS_REACH, REGIONS, SECTORS, findAccountsReached,
+  findFollowers, findSector, findReach, findReelsReach, isCategory, isNiche, isPlatform, isRegion
 } from './constants.js';
 import {
   closeBusinessCampaigns, closeCampaignByAdmin, deleteUserData, getRefStats, getSetting, getStats, getUser, listPendingCampaigns, listRefUsers,
@@ -109,8 +109,9 @@ async function ask(ctx, user, step) {
   const id = user.tg_id;
   const lang = user.lang === 'ru' ? 'ru' : 'uz';
   const send = (to, text, opts = {}) => ctx.tg.send(to, text, { ...opts, reply_markup: withBack(T, step, opts.reply_markup) });
+  // Birinchi bosqich: katta sohalar (har biri alohida qatorda, nomlari uzun)
   const categoryButtons = () => ({
-    inline_keyboard: rows(CATEGORIES.map((c) => ({ text: c[lang], callback_data: `cat:${c.id}` })), 2)
+    inline_keyboard: SECTORS.map((s) => [{ text: s[lang], callback_data: `sec:${s.id}` }])
   });
   const nicheButtons = () => ({
     inline_keyboard: rows(NICHES.map((n) => ({ text: n[lang], callback_data: `niche:${n.id}` })), 2)
@@ -625,6 +626,34 @@ async function onCallback(cq, ctx) {
       if (user.role === 'business' && value === 'blogger') await closeBusinessCampaigns(ctx.db, user.tg_id);
       await updateUser(ctx.db, user.tg_id, { role: value, reg_step: 'name' });
       return ask(ctx, { ...user, role: value, reg_step: 'name' }, 'name');
+    }
+    // Biznes sohasi: katta soha tanlanganda xabar o'sha sohaning turlariga almashadi ("list" — sohalarga qaytish)
+    case 'sec': {
+      const sector = findSector(value);
+      if (user.reg_step !== 'category' || (value !== 'list' && !sector)) return stale();
+      await ack();
+      const lang = user.lang === 'ru' ? 'ru' : 'uz';
+      try {
+        if (value === 'list') {
+          await ctx.tg.edit(chatId, messageId, T.askCategory, {
+            reply_markup: withBack(T, 'category', {
+              inline_keyboard: SECTORS.map((s) => [{ text: s[lang], callback_data: `sec:${s.id}` }])
+            })
+          });
+        } else {
+          await ctx.tg.edit(chatId, messageId, `${T.askCategory}\n\n<b>${esc(sector[lang])}</b>\n${T.askCategoryType}`, {
+            reply_markup: {
+              inline_keyboard: [
+                ...sector.items.map((c) => [{ text: c[lang], callback_data: `cat:${c.id}` }]),
+                [{ text: T.backButton, callback_data: 'sec:list' }]
+              ]
+            }
+          });
+        }
+      } catch {
+        /* xabar juda eski bo'lsa tahrirlab bo'lmaydi */
+      }
+      return undefined;
     }
     // Biznes toifasi (cat:) yoki bloger yo'nalishi (niche:). Eski "cat:" tugmalari yo'nalish uchun ham ishlaydi.
     case 'cat':

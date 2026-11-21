@@ -1,7 +1,8 @@
 // Mini ilova uchun API. Har bir so'rov Telegram initData bilan tekshiriladi.
 
 import {
-  ALL_REGIONS, CATEGORIES, FOLLOWERS, LIMITS, NICHES, PLATFORMS, REGIONS, isCampaignRegion, isCategory, isPlatform, isRegion
+  ALL_REGIONS, CATEGORIES, FOLLOWERS, LIMITS, NICHES, PLATFORMS, REGIONS, SECTORS, findSector, isCampaignRegion, isCategory,
+  isPlatform, isRegion
 } from './constants.js';
 import {
   countActiveCampaigns, createCampaign, enqueueAdBroadcast, getCampaign, listActiveCampaigns, listBloggerApplications,
@@ -15,6 +16,7 @@ import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } fr
 
 const META = {
   categories: CATEGORIES,
+  sectors: SECTORS,
   niches: NICHES,
   regions: REGIONS,
   platforms: PLATFORMS,
@@ -266,7 +268,8 @@ async function route(ctx, user, method, path, url, request) {
     const q = normSearch(params.get('q'));
     let rows = await listActiveCampaigns(db, {
       viewerId: id,
-      category: isCategory(category) ? category : null,
+      // category: aniq tur id'si yoki katta soha id'si ("g_food": sohaning hamma turlari)
+      category: findSector(category) ? findSector(category).items.map((c) => c.id) : isCategory(category) ? [category] : null,
       platform: isPlatform(platform) ? platform : null,
       region: isRegion(region) ? region : null,
       sort

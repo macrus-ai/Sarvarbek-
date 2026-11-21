@@ -47,7 +47,7 @@ test('biznes bot orqali ro‘yxatdan o‘tadi', async () => {
   assert.match(lastText(10), /kompaniyangiz nomini/);
 
   await say(env, user, 'Tabiiy kosmetika');
-  assert.match(lastText(10), /qaysi toifaga/);
+  assert.match(lastText(10), /qaysi sohaga/);
 
   await say(env, user, 'kosmetika');
   assert.match(lastText(10), /tugmalardan birini/);
@@ -164,9 +164,11 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   const meta = (await api(env, ru, '/api/me')).data.meta;
   assert.equal(meta.niches.length, 21);
   assert.equal(meta.niches.at(-1).ru, 'Другое');
-  assert.equal(meta.categories.length, 7);
+  assert.equal(meta.sectors.length, 17);
+  assert.equal(meta.categories.length, meta.sectors.reduce((n, s) => n + s.items.length, 0));
+  assert.equal(new Set(meta.categories.map((c) => c.id)).size, meta.categories.length); // id'lar takrorlanmaydi
 
-  // Biznes toifasi ro'yxati o'zgarmagan, yo'nalish tugmasi u yerda ishlamaydi
+  // Biznes sohasi: avval katta soha tugmalari, yo'nalish tugmasi u yerda ishlamaydi
   const business = tgUser(23);
   await say(env, business, '/start');
   await press(env, business, 'lang:uz');
@@ -174,13 +176,53 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   await say(env, business, 'Aziz');
   await say(env, business, 'Aziz market');
   const cats = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:'));
-  assert.equal(cats.length, 7);
-  assert.ok(cats.every((b) => b.callback_data.startsWith('cat:')));
+  assert.equal(cats.length, 17);
+  assert.ok(cats.every((b) => b.callback_data.startsWith('sec:')));
   tg.clear();
   await press(env, business, 'niche:travel');
   assert.match(tg.last('answerCallbackQuery').body.text, /eskirgan|eski/i);
-  await press(env, business, 'cat:travel');
+  await press(env, business, 'cat:lifestyle'); // faqat bloger yo'nalishi, biznes turi emas
   assert.equal((await api(env, business, '/api/me')).data.user.category, null);
+});
+
+test('biznes sohasi: soha tanlanganda turlar chiqadi, orqaga sohalarga qaytaradi', async () => {
+  const user = tgUser(24);
+  await say(env, user, '/start');
+  await press(env, user, 'lang:uz');
+  await press(env, user, 'role:business');
+  await say(env, user, 'Aziz');
+  await say(env, user, 'Dental Plus');
+
+  // Soha tanlandi: xabar o'sha sohaning turlariga almashadi
+  await press(env, user, 'sec:g_health');
+  const edit = tg.last('editMessageText').body;
+  assert.match(edit.text, /Tibbiyot va salomatlik/);
+  const buttons = edit.reply_markup.inline_keyboard.flat();
+  assert.ok(buttons.some((b) => b.callback_data === 'cat:dental'));
+  assert.equal(buttons.at(-1).callback_data, 'sec:list');
+  assert.ok(buttons.slice(0, -1).every((b) => b.callback_data.startsWith('cat:')));
+
+  // Orqaga: yana sohalar
+  await press(env, user, 'sec:list');
+  const back = tg.last('editMessageText').body.reply_markup.inline_keyboard.flat();
+  assert.equal(back.filter((b) => b.callback_data.startsWith('sec:')).length, 17);
+
+  // Tur tanlandi: keyingi savol (telefon) va tur saqlanadi
+  await press(env, user, 'cat:dental');
+  assert.match(lastText(24), /telefon raqamingizni/);
+  await shareContact(env, user, '998901112299');
+  assert.equal((await api(env, user, '/api/me')).data.user.category, 'dental');
+
+  // Noma'lum soha tugmasi eskirgan hisoblanadi
+  const other = tgUser(25);
+  await say(env, other, '/start');
+  await press(env, other, 'lang:uz');
+  await press(env, other, 'role:business');
+  await say(env, other, 'Aziz');
+  await say(env, other, 'Market');
+  tg.clear();
+  await press(env, other, 'sec:g_yoq');
+  assert.match(tg.last('answerCallbackQuery').body.text, /eskirgan|eski/i);
 });
 
 test('eskirgan tugma bosilsa ogohlantiradi', async () => {

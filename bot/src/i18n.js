@@ -148,7 +148,8 @@ const uz = {
     `<b>Miqyos</b> platformasiga xush kelibsiz! ${role === 'business' ? 'Biznes' : 'Bloger'} sifatida ro‘yxatdan o‘tamiz, bir nechta savolga javob bering.\n\nDavom etib, <a href="${esc(url)}">maxfiylik siyosati</a>ga rozilik bildirasiz.`,
   askName: 'Ismingizni yozing:',
   askCompany: 'Do‘kon yoki kompaniyangiz nomini yozing:',
-  askCategory: 'Mahsulot yoki xizmatingiz qaysi toifaga kiradi?',
+  askCategory: 'Biznesingiz qaysi sohaga kiradi?',
+  askCategoryType: 'Aniq turini tanlang:',
   askPlatform: 'Asosiy ijtimoiy tarmog‘ingizni tanlang:',
   askProfile: (platform) =>
     `${PLATFORM_ICON[platform] || '🔗'} ${esc(platform)} ${platform === 'Instagram' || platform === 'TikTok' ? 'profilingiz' : 'kanalingiz'} havolasini yuboring.\n\nMasalan: ${EXAMPLE[platform] || 'https://…'}`,
@@ -434,7 +435,8 @@ const ru = {
     `Добро пожаловать в <b>Miqyos</b>! Регистрация для ${role === 'business' ? 'бизнеса' : 'блогера'}: ответьте на несколько вопросов.\n\nПродолжая, вы соглашаетесь с <a href="${esc(url)}">политикой конфиденциальности</a>.`,
   askName: 'Напишите ваше имя:',
   askCompany: 'Напишите название магазина или компании:',
-  askCategory: 'К какой категории относится ваш товар или услуга?',
+  askCategory: 'К какой сфере относится ваш бизнес?',
+  askCategoryType: 'Выберите точный вид:',
   askPlatform: 'Выберите основную соцсеть:',
   askProfile: (platform) =>
     `${PLATFORM_ICON[platform] || '🔗'} Отправьте ссылку на ${platform === 'Instagram' || platform === 'TikTok' ? 'ваш профиль' : 'ваш канал'} в ${esc(platform)}.\n\nНапример: ${EXAMPLE[platform] || 'https://…'}`,
