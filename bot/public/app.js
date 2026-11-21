@@ -151,6 +151,7 @@
       viewsVideo: 'Videolar (o‘rtacha)',
       upTo: (n) => `${n} gacha`,
       stats: 'Statistika',
+      verified: 'Tasdiqlangan',
       contactHidden: 'Telegram va telefon raqami so‘rovni qabul qilgach ko‘rinadi.',
       close: 'Yopish',
       err_campaign_rejected: 'Rad etilgan e’lonni qayta ochib bo‘lmaydi. Yangisini joylang.',
@@ -346,6 +347,7 @@
       viewsVideo: 'Видео (в среднем)',
       upTo: (n) => `до ${n}`,
       stats: 'Статистика',
+      verified: 'Подтверждён',
       contactHidden: 'Telegram и телефон будут видны после того, как вы примете отклик.',
       close: 'Закрыть',
       err_campaign_rejected: 'Отклонённое объявление нельзя открыть снова. Разместите новое.',
@@ -939,7 +941,7 @@
     return `<article class="card">
       <div class="row"><span class="muted">${esc(r.campaign.title)}</span>${statusPill(r.status)}</div>
       <div class="person"><span class="ava">${esc(initial(b.name))}</span>
-        <div><strong>${esc(b.name)}</strong>${b.username ? `<span class="muted">@${esc(b.username)}</span>` : ''}</div>
+        <div><strong>${esc(b.name)}</strong>${b.verified ? `<span class="pill pill-accepted">✅ ${esc(t('verified'))}</span>` : ''}${b.username ? `<span class="muted">@${esc(b.username)}</span>` : ''}</div>
       </div>
       <div class="facts"><span>${esc(b.platform)} · ${esc(followersLabel(b.followers))}</span>${reach}<span>${esc(nicheName(b.niche))}</span>${b.region ? `<span>${icon('pin')}${esc(t('audience'))}: ${esc(regionName(b.region))}</span>` : ''}</div>
       ${profile}

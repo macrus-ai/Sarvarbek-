@@ -3,7 +3,8 @@ import { afterEach, beforeEach, test } from 'node:test';
 import worker from '../src/index.js';
 import {
   ORIGIN, api, approve, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say,
-  sendUpdate, shareContact, tgUser, sendPhoto } from './helpers.js';
+  sendUpdate, shareContact, tgUser
+} from './helpers.js';
 
 let tg;
 let env;
@@ -97,11 +98,10 @@ test('bloger ruscha ro‘yxatdan o‘tadi, telefonni qo‘lda yozadi', async () 
   await press(env, user, 'fol:5000-10000');
   assert.match(lastText(20), /просмотров набирают ваши видео/);
   await press(env, user, 'rch:3000-10000');
-  assert.match(lastText(20), /скриншот статистики аудитории/);
+  assert.match(lastText(20), /скриншот статистики/);
   await say(env, user, 'нет скриншота');
-  assert.match(lastText(20), /Скриншот статистики обязателен/);
-  assert.equal(tg.last('sendMessage').body.reply_markup, undefined); // “O‘tkazib yuborish” tugmasi yo‘q
-  await sendPhoto(env, user, 'stats-1');
+  assert.match(lastText(20), /отправьте скриншот как фото/);
+  await press(env, user, 'stats:skip');
   await press(env, user, 'cat:food');
   assert.match(lastText(20), /В каком регионе ваша аудитория/);
   await say(env, user, 'Самарканд'); // matn emas, tugma kerak
@@ -135,7 +135,7 @@ test('bloger yo‘nalishi: 20 ta yo‘nalish va "Boshqa", biznes toifalari alohi
   assert.match(reach.text, /Videolaringiz o‘rtacha nechta ko‘rish/);
   assert.deepEqual(reach.reply_markup.inline_keyboard.flat().map((b) => b.text)[0], '500 gacha');
   await press(env, user, 'rch:1000-3000');
-  await sendPhoto(env, user, 'stats-1');
+  await press(env, user, 'stats:skip');
 
   const buttons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat().filter((b) => !b.callback_data.startsWith('back:'));
   assert.equal(buttons.length, 21);

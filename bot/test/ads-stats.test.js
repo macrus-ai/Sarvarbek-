@@ -68,8 +68,9 @@ test('bloger: Instagram havolasi, to‘rtta ko‘rsatkich va statistika skrinsho
   ]);
   await press(env, blogger, 'acc:100000-500000');
   assert.match(lastText(800), /Auditoriya statistikasi skrinshotini/);
+  // Savoldan oldin namuna rasm yuboriladi
+  assert.equal(photosTo(800).at(-1).body.photo, 'https://ovoza.test/namuna-statistika.png');
   assert.match(lastText(800), /Professional panel/);
-  assert.match(lastText(800), /majburiy/);
   await sendPhoto(env, blogger, 'stats-800');
   await press(env, blogger, 'niche:lifestyle');
   await press(env, blogger, 'rgn:samarkand');
@@ -114,6 +115,7 @@ test('so‘rov: biznes avval profil va statistikani ko‘radi, Telegram va telef
   assert.equal(note.body.photo, `stats-811`);
   const caption = note.body.caption;
   assert.match(caption, /Yangi so‘rov/);
+  assert.match(caption, /✅ Tasdiqlangan/);
   assert.match(caption, /📸 Instagram: <a href="https:\/\/instagram\.com\/dilnoza\.blog">instagram\.com\/dilnoza\.blog<\/a>/);
   assert.match(caption, /Istoriya \(o‘rtacha\): 500 – 1\s000/);
   assert.match(caption, /Telegrami va telefon raqami so‘rovni qabul qilganingizdan keyin/);
@@ -124,6 +126,7 @@ test('so‘rov: biznes avval profil va statistikani ko‘radi, Telegram va telef
   assert.equal(reqs[0].blogger.username, null);
   assert.equal(reqs[0].blogger.phone, null);
   assert.equal(reqs[0].blogger.reach, '500-1000');
+  assert.equal(reqs[0].blogger.verified, true);
   assert.match(reqs[0].blogger.statsImage, /^\/img\/s\/811-[0-9a-f]{16}\.jpg$/);
   const img = await getImage(env, reqs[0].blogger.statsImage);
   assert.equal(img.status, 200);
@@ -142,13 +145,11 @@ test('so‘rov: biznes avval profil va statistikani ko‘radi, Telegram va telef
   assert.equal(reqs[0].blogger.phone, '+998 93 555 66 77');
 });
 
-test('eski (statistikasiz) bloger so‘rovi oddiy matn bo‘lib keladi', async () => {
+test('statistikasiz bloger so‘rovi oddiy matn bo‘lib keladi', async () => {
   const business = tgUser(820);
   const blogger = tgUser(821);
   await registerBusiness(env, business);
   await registerBlogger(env, blogger);
-  // Majburiy bo'lishidan oldin ro'yxatdan o'tgan blogerda skrinshot yo'q
-  await env.DB.prepare('UPDATE users SET stats_file_id = NULL, stats_key = NULL WHERE tg_id = ?1').bind(821).run();
   const { data } = await createCampaign(env, business, { minFollowers: 0 });
   tg.clear();
   await api(env, blogger, `/api/campaigns/${data.campaign.id}/apply`, { method: 'POST', body: {} });
@@ -254,4 +255,29 @@ test('moderatorlar bo‘lmasa e’lon darhol chiqadi', async () => {
   assert.equal(data.campaign.moderation, 'approved');
   assert.equal((await api(env, blogger, '/api/campaigns')).data.campaigns.length, 1);
   await approve(env, blogger); // ADMIN_IDS bo'sh — hech narsa qilmaydi
+});
+
+test('skrinshotsiz bloger keyinroq rasm yuborsa “Tasdiqlangan” bo‘ladi, so‘rovlarda tasdiqlanganlar birinchi', async () => {
+  const business = tgUser(830);
+  const plain = tgUser(831);
+  const proven = tgUser(832);
+  await registerBusiness(env, business);
+  await registerBlogger(env, plain); // rasmsiz
+  await registerBlogger(env, proven); // rasmsiz
+  const { data } = await createCampaign(env, business, { minFollowers: 0 });
+  const apply = (u) => api(env, u, `/api/campaigns/${data.campaign.id}/apply`, { method: 'POST', body: {} });
+  await apply(plain);
+  await apply(proven);
+  let reqs = (await api(env, business, '/api/requests')).data.requests;
+  assert.deepEqual(reqs.map((r) => r.blogger.verified), [false, false]);
+
+  tg.clear();
+  await sendPhoto(env, proven, 'late-832'); // ro'yxatdan o'tgandan keyin rasm yubordi
+  assert.match(lastText(832), /“Tasdiqlangan” belgisi/);
+  assert.ok(photosTo(ADMIN).some((c) => c.body.photo === 'late-832'), 'adminlarga kartada boradi');
+
+  reqs = (await api(env, business, '/api/requests')).data.requests;
+  assert.equal(reqs[0].blogger.id, 832, 'tasdiqlangan birinchi');
+  assert.equal(reqs[0].blogger.verified, true);
+  assert.equal(reqs[1].blogger.verified, false);
 });

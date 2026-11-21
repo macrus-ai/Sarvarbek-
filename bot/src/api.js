@@ -120,6 +120,7 @@ function requestOut(r) {
       accountsReached: r.accounts_reached || null,
       reelsReach: r.reels_reach || null,
       statsImage: statsImageUrl(r.blogger_id, r.stats_key),
+      verified: Boolean(r.stats_key),
       niche: r.niche,
       region: r.region || null,
       phone: r.status === 'accepted' && r.phone ? formatPhone(r.phone) : null

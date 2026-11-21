@@ -4,7 +4,8 @@ import { afterEach, beforeEach, test } from 'node:test';
 import worker from '../src/index.js';
 import {
   ORIGIN, api, createCampaign, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, shareContact,
-  tgUser, sendStatsUnsaved } from './helpers.js';
+  tgUser
+} from './helpers.js';
 
 // createEnv() da ADMIN_IDS = '999'
 const ADMIN = 999;
@@ -45,7 +46,7 @@ async function registerOther(user, platform, profile, { lang = 'uz', approve = t
   await say(env, user, profile);
   await press(env, user, 'fol:5000-10000');
   await press(env, user, 'rch:1000-3000');
-  await sendStatsUnsaved(env, user);
+  await press(env, user, 'stats:skip');
   await press(env, user, 'niche:news');
   await press(env, user, 'rgn:bukhara');
   await shareContact(env, user, '+998935556677');
@@ -114,7 +115,7 @@ test('eski Instagram blogeri: yangi maydonlar "kiritilmagan", eski "Reels va pos
   await press(env, old, 'pst:1000-3000');
   await press(env, old, 'rch:500-1000');
   await press(env, old, 'acc:0-5000');
-  await sendStatsUnsaved(env, old);
+  await press(env, old, 'stats:skip');
   await press(env, old, 'niche:beauty');
   await press(env, old, 'rgn:tashkent_city');
   await shareContact(env, old, '+998935556677');
@@ -164,7 +165,7 @@ test('ruscha: Instagram savollari va ko‘rsatkichlar nomi', async () => {
   const buttons = tg.last('sendMessage').body.reply_markup.inline_keyboard.flat();
   assert.equal(buttons[0].text, 'до 5 000');
   await press(env, user, 'acc:1000000+');
-  await sendStatsUnsaved(env, user);
+  await press(env, user, 'stats:skip');
   await press(env, user, 'niche:beauty');
   await press(env, user, 'rgn:samarkand');
   await shareContact(env, user, '+998935556677');

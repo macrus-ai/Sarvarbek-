@@ -158,28 +158,28 @@ const uz = {
       : `👁 ${platform === 'Telegram' ? 'Postlaringiz' : 'Videolaringiz'} o‘rtacha nechta ko‘rish to‘playdi?`,
   askStats: (platform) =>
     [
-      '📊 Auditoriya statistikasi skrinshotini rasm (foto) qilib yuboring. Bu majburiy: bizneslar aynan shu rasmga qarab tanlaydi.',
+      '📊 Auditoriya statistikasi skrinshotini yuboring (ixtiyoriy, lekin tavsiya etamiz). Rasm yuborganlar ✅ “Tasdiqlangan” belgisi oladi, e’lonlarda birinchi ko‘rinadi va bizneslar ularni ko‘proq tanlaydi.',
       '',
       {
-        Instagram:
-          'Instagram → Professional panel → Statistika → Umumiy obunachilar. Rasmda ko‘rinsin:\n• shaharlar (Eng ko‘p joylashuvlar)\n• yosh va jins\n• davr: oxirgi 30 kun',
-        TikTok:
-          'TikTok → Analitika → Obunachilar. Rasmda ko‘rinsin:\n• jins va yosh\n• eng ko‘p hududlar (shaharlar)\n• davr: oxirgi 28 kun',
-        YouTube:
-          'YouTube Studio → Analitika → Auditoriya. Rasmda ko‘rinsin:\n• yosh va jins\n• mamlakatlar va shaharlar\n• davr: oxirgi 28 kun',
-        Telegram:
-          'Telegram → kanal → Statistika. Rasmda ko‘rinsin:\n• obunachilar soni va o‘sishi\n• postlarning o‘rtacha ko‘rishi\n• davr: oxirgi 30 kun'
+        Instagram: 'Instagram → Professional panel → Statistika → Umumiy obunachilar. Rasmda shaharlar, yosh, jins va davr (oxirgi 30 kun) ko‘rinsin.',
+        TikTok: 'TikTok → Analitika → Obunachilar. Rasmda jins, yosh va hududlar (shaharlar) ko‘rinsin.',
+        YouTube: 'YouTube Studio → Analitika → Auditoriya. Rasmda yosh, jins va geografiya ko‘rinsin.',
+        Telegram: 'Telegram → kanal → Statistika. Rasmda obunachilar o‘sishi va postlarning o‘rtacha ko‘rishi ko‘rinsin.'
       }[platform] || '',
       '',
-      'Telefon ekranidan oddiy skrinshot yetarli. Ma’lumotlar ochiq va o‘qiladigan bo‘lsin.'
+      'Yuqoridagi namunaga qarang. Hozir vaqt bo‘lmasa, “Keyinroq yuboraman” ni bosing: rasmni keyin shu chatga yuborsangiz ham bo‘ladi.'
     ].join('\n'),
   askReels: '🎬 Reels videolaringiz o‘rtacha nechta ko‘rish to‘playdi?',
   askPosts: '🖼 Postlaringiz (rasm va karusellar) o‘rtacha nechta ko‘rish to‘playdi?',
   askAccounts:
     '📈 Qamrov: oxirgi 30 kunda kontentingizni nechta akkaunt ko‘rgan?\n\nInstagram: Professional panel → Statistika → “Qamrab olingan akkauntlar” (Accounts reached), oxirgi 30 kun.',
+  statsSkip: 'Keyinroq yuboraman',
+  statsSample: '👆 Namuna: statistikangiz shunday ko‘rinsin',
+  statsLate: '✅ Rahmat! Skrinshot saqlandi, endi profilingizda “Tasdiqlangan” belgisi bor. Adminlar ko‘rib chiqadi.',
+  verified: '✅ Tasdiqlangan',
   backButton: '⬅️ Orqaga',
   backDone: 'Oldingi savolga qaytdik.',
-  errStats: 'Statistika skrinshoti majburiy. Iltimos, uni rasm (foto) sifatida yuboring, fayl emas.',
+  errStats: 'Iltimos, skrinshotni rasm (foto) sifatida yuboring yoki “Keyinroq yuboraman” tugmasini bosing.',
   askFollowers: 'Obunachilaringiz soni qancha?',
   askNiche: 'Blogingiz yo‘nalishini tanlang:',
   askRegion:
@@ -340,7 +340,7 @@ const uz = {
       `Reklama e’loni: «${esc(a.title)}»`,
       '',
       ...[
-        `👤 ${esc(a.blogger_name)}`,
+        `👤 ${esc(a.blogger_name)}${a.stats_file_id ? ' · ✅ Tasdiqlangan' : ''}`,
         profileLine(a.platform, a.profile),
         `👥 ${followersLabel(a.followers)} obunachi`,
         ...viewsLines(a, 'uz'),
@@ -442,28 +442,28 @@ const ru = {
       : `👁 Сколько в среднем просмотров набирают ваши ${platform === 'Telegram' ? 'посты' : 'видео'}?`,
   askStats: (platform) =>
     [
-      '📊 Отправьте скриншот статистики аудитории фотографией. Это обязательно: бизнесы выбирают именно по этому скриншоту.',
+      '📊 Отправьте скриншот статистики аудитории (по желанию, но рекомендуем). Кто отправит, получает отметку ✅ «Подтверждён», показывается в откликах первым, и бизнесы выбирают таких чаще.',
       '',
       {
-        Instagram:
-          'Instagram → Профессиональная панель → Статистика → Все подписчики. На скриншоте должно быть видно:\n• города (Основные местоположения)\n• возраст и пол\n• период: последние 30 дней',
-        TikTok:
-          'TikTok → Аналитика → Подписчики. На скриншоте должно быть видно:\n• пол и возраст\n• основные регионы (города)\n• период: последние 28 дней',
-        YouTube:
-          'YouTube Studio → Аналитика → Аудитория. На скриншоте должно быть видно:\n• возраст и пол\n• страны и города\n• период: последние 28 дней',
-        Telegram:
-          'Telegram → канал → Статистика. На скриншоте должно быть видно:\n• число подписчиков и рост\n• средние просмотры постов\n• период: последние 30 дней'
+        Instagram: 'Instagram → Профессиональная панель → Статистика → Все подписчики. На скриншоте должны быть города, возраст, пол и период (последние 30 дней).',
+        TikTok: 'TikTok → Аналитика → Подписчики. На скриншоте должны быть пол, возраст и регионы (города).',
+        YouTube: 'YouTube Studio → Аналитика → Аудитория. На скриншоте должны быть возраст, пол и география.',
+        Telegram: 'Telegram → канал → Статистика. На скриншоте должны быть рост подписчиков и средние просмотры постов.'
       }[platform] || '',
       '',
-      'Достаточно обычного скриншота с экрана телефона. Данные должны быть открыты и читаемы.'
+      'Смотрите образец выше. Если сейчас нет времени, нажмите «Отправлю позже»: скриншот можно прислать в этот чат и потом.'
     ].join('\n'),
   askReels: '🎬 Сколько в среднем просмотров набирают ваши reels?',
   askPosts: '🖼 Сколько в среднем просмотров набирают ваши посты (фото и карусели)?',
   askAccounts:
     '📈 Охват: сколько аккаунтов увидели ваш контент за последние 30 дней?\n\nInstagram: Профессиональная панель → Статистика → «Охваченные аккаунты» (Accounts reached), последние 30 дней.',
+  statsSkip: 'Отправлю позже',
+  statsSample: '👆 Образец: так должна выглядеть ваша статистика',
+  statsLate: '✅ Спасибо! Скриншот сохранён, теперь в профиле есть отметка «Подтверждён». Админы посмотрят.',
+  verified: '✅ Подтверждён',
   backButton: '⬅️ Назад',
   backDone: 'Вернулись к предыдущему вопросу.',
-  errStats: 'Скриншот статистики обязателен. Пожалуйста, отправьте его как фото, не как файл.',
+  errStats: 'Пожалуйста, отправьте скриншот как фото или нажмите «Отправлю позже».',
   askFollowers: 'Сколько у вас подписчиков?',
   askNiche: 'Выберите тематику блога:',
   askRegion:
@@ -620,7 +620,7 @@ const ru = {
       `Объявление: «${esc(a.title)}»`,
       '',
       ...[
-        `👤 ${esc(a.blogger_name)}`,
+        `👤 ${esc(a.blogger_name)}${a.stats_file_id ? ' · ✅ Подтверждён' : ''}`,
         profileLine(a.platform, a.profile),
         `👥 ${followersLabel(a.followers)} подписчиков`,
         ...viewsLines(a, 'ru'),
