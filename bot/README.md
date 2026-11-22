@@ -72,6 +72,7 @@ Bo‘limlar:
 - **Moderatsiya:** tasdiq kutayotgan profillar (statistika skrinshoti bilan) va e’lonlar, rasmi tepada katta kartochkalarda. Tasdiqlash yoki rad etish botdagi tugmalar bilan bir xil ishlaydi: foydalanuvchiga xabar boradi.
 - **Foydalanuvchilar:** qidiruv (ism, kompaniya, @username, telefon, Telegram ID), rol va holat filtri. Batafsil oynada: tasdiqlash, rad etish, bloklash, o‘chirish; biznesning e’lonlari, blogerning so‘rovlari.
 - **Reklama e’lonlari:** qidiruv, moderatsiya va holat filtri; e’lonni tasdiqlash, rad etish yoki yopish, unga kelgan so‘rovlar.
+  - **✏️ Tahrirlash** (e’lon oynasida va moderatsiya kartasida): nomi, toifa, qiymat, platformalar, format, kerakli obunachilar, muddat, o‘rinlar, hudud, shahar, tavsif. Tekshiruv mini ilovadagi bilan bir xil (`validateCampaign`), xato maydon qizil bilan ko‘rsatiladi; o‘rinlarni qabul qilingan blogerlardan kam qilib bo‘lmaydi. Saqlangach biznesga botda "e’loningiz moderator tomonidan tahrirlandi" xabari boradi. Rasm, holat, moderatsiya va so‘rovlar o‘zgarmaydi; blogerlarga qayta xabar yuborilmaydi. API: `PATCH /api/admin/campaigns/:id`, ro‘yxatlar `GET /api/admin/campaign-options`.
 - **So‘rovlar:** blogerlarning barcha so‘rovlari holati bilan.
 - **Sozlamalar:** ulangan moderatsiya guruhlari (uzish mumkin), chiqish.
 

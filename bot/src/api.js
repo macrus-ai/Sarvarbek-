@@ -151,7 +151,8 @@ function toInt(v) {
 
 const between = (n, min, max) => Number.isInteger(n) && n >= min && n <= max;
 
-function validateCampaign(b) {
+// Admin panel ham e'lonni tahrirlashda shu tekshiruvdan foydalanadi
+export function validateCampaign(b) {
   const errors = [];
   const title = text(b.title);
   const format = text(b.format);

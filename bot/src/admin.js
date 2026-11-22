@@ -3,7 +3,9 @@
 //   - GET /admin/login?t=... — havola ochilganda brauzerga sessiya cookie'si beriladi (30 kun);
 //   - /api/admin/* — panel API'si (faqat ADMIN_IDS dagilar uchun).
 
-import { closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, setSetting } from './db.js';
+import { validateCampaign } from './api.js';
+import { ALL_REGIONS, LIMITS, PLATFORMS, REGIONS, SECTORS } from './constants.js';
+import { closeCampaignByAdmin, deleteUserData, getSetting, getStats, getUser, setSetting, updateCampaignByAdmin } from './db.js';
 import { catLabel, followersLabel, nicheLabel, regionLabel, tr, viewsFacts } from './i18n.js';
 import { imageOut, statsImageUrl } from './images.js';
 import { AppError, MOD_CHAT_KEYS, moderate, moderateCampaign } from './services.js';
@@ -174,6 +176,8 @@ function campaignOut(c) {
     status: c.status,
     moderation: c.moderation || 'approved',
     image: imageOut(c.id, c),
+    // Tahrirlash oynasi uchun asl kodlar (nomlar emas)
+    raw: { category: c.category, region: c.region || ALL_REGIONS },
     applications: Number(c.applications) || 0,
     accepted: Number(c.accepted) || 0,
     pending: Number(c.pending) || 0,
@@ -615,6 +619,35 @@ async function route(ctx, admin, method, path, url, request) {
     if (!row) throw new AppError('not_found', 404);
     const { applications } = await listApplications(db, null, { campaignId: id });
     return json({ campaign: campaignOut(row), applications });
+  }
+
+  // E'lonni tahrirlash oynasi uchun ro'yxatlar (toifalar, hududlar, platformalar, chegaralar)
+  if (method === 'GET' && path === '/api/admin/campaign-options') {
+    return json({
+      sectors: SECTORS.map((s) => ({ label: s.uz, items: s.items.map((c) => ({ id: c.id, label: c.uz })) })),
+      regions: [{ id: ALL_REGIONS, label: regionLabel(ALL_REGIONS, UZ) }, ...REGIONS.map((r) => ({ id: r.id, label: r.uz }))],
+      platforms: PLATFORMS,
+      limits: LIMITS
+    });
+  }
+
+  // E'lonni tahrirlash: mini ilovadagi bilan bir xil tekshiruv. Biznesga xabar boradi.
+  if (method === 'PATCH' && (m = path.match(/^\/api\/admin\/campaigns\/(\d+)$/))) {
+    const id = Number(m[1]);
+    const current = await db.prepare(`${CAMPAIGN_ADMIN_SELECT} WHERE c.id = ?1`).bind(id).first();
+    if (!current) throw new AppError('not_found', 404);
+    const data = validateCampaign(await readJson(request));
+    // Qabul qilingan blogerlardan kam o'rin qoldirib bo'lmaydi
+    if (data.slots < (Number(current.accepted) || 0)) throw new AppError('invalid', 400, { fields: ['slots'] });
+    await updateCampaignByAdmin(db, id, data);
+    const row = await db.prepare(`${CAMPAIGN_ADMIN_SELECT} WHERE c.id = ?1`).bind(id).first();
+    const lang = (await getUser(db, row.business_id))?.lang;
+    try {
+      await ctx.tg.send(row.business_id, tr(lang).toBusinessEdited(row.title));
+    } catch (e) {
+      console.warn('notify business failed:', e.message);
+    }
+    return json({ campaign: campaignOut(row) });
   }
 
   // E'lon: moderatsiya qarori va yopish
