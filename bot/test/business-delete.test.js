@@ -109,3 +109,20 @@ test('Instagram blogerining to‘rtta ko‘rsatkichi biznesga keladi', async () 
   assert.equal(request.blogger.accountsReached, '500000-1000000');
   assert.equal(request.blogger.reelsReach, null);
 });
+
+test('ilova ichidan biznesni o‘chirish: faqat biznes, e’lonlar o‘chadi va bot xabar yuboradi', async () => {
+  const business = tgUser(910);
+  const blogger = tgUser(911);
+  await registerBusiness(env, business);
+  await registerBlogger(env, blogger);
+  await createCampaign(env, business, { title: 'E’lon', minFollowers: 0 });
+
+  assert.equal((await api(env, blogger, '/api/me/delete', { method: 'POST', body: {} })).status, 403);
+  assert.equal((await api(env, blogger, '/api/me')).data.registered, true);
+
+  tg.clear();
+  assert.equal((await api(env, business, '/api/me/delete', { method: 'POST', body: {} })).status, 200);
+  assert.equal((await api(env, business, '/api/me')).data.registered, false);
+  assert.equal((await api(env, blogger, '/api/campaigns')).data.campaigns.length, 0);
+  assert.match(lastText(910), /o‘chirildi/);
+});

@@ -5,7 +5,7 @@ import {
   isPlatform, isRegion
 } from './constants.js';
 import {
-  countActiveCampaigns, createCampaign, enqueueAdBroadcast, getCampaign, listActiveCampaigns, listBloggerApplications,
+  countActiveCampaigns, createCampaign, deleteUserData, enqueueAdBroadcast, getCampaign, listActiveCampaigns, listBloggerApplications,
   listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser, updateUser
 } from './db.js';
 import { tr } from './i18n.js';
@@ -245,6 +245,17 @@ export async function handleApi(request, ctx) {
       if (!isRegion(region)) throw new AppError('invalid', 400, { fields: ['region'] });
       await updateUser(ctx.db, user.tg_id, { region });
       return json({ user: userOut({ ...user, region }) });
+    }
+    // Biznesni o'chirish (faqat ilova ichidan): profil, e'lonlar va so'rovlar o'chadi, bot qayta ro'yxatdan o'tishni taklif qiladi
+    if (method === 'POST' && path === '/api/me/delete') {
+      if (user.role !== 'business') throw new AppError('forbidden', 403);
+      await deleteUserData(ctx.db, user.tg_id);
+      try {
+        await ctx.tg.send(user.tg_id, tr(user.lang).bizDeleted);
+      } catch {
+        /* xabar yetmasa ham o'chirish bajarildi */
+      }
+      return json({ ok: true });
     }
     return await route(ctx, user, method, path, url, request);
   } catch (e) {

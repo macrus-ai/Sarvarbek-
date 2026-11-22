@@ -21,13 +21,12 @@ export class AppError extends Error {
 export const appUrl = (ctx, tab) => `${ctx.origin}/${tab ? `?tab=${tab}` : ''}`;
 
 // Tasdiqlangan foydalanuvchining bosh menyusi. Bloger ma'lumotlarini yangilaydi,
-// biznes esa o'chirib, qaytadan ro'yxatdan o'tadi (eski e'lonlar qolmasin).
+// biznes esa ilova ichidan o'chirib, qaytadan ro'yxatdan o'tadi (eski e'lonlar qolmasin).
 export const homeKeyboard = (T, ctx, role) => ({
   inline_keyboard: [
     [{ text: T.openApp, web_app: { url: appUrl(ctx) } }],
-    role === 'business'
-      ? [{ text: T.deleteBusiness, callback_data: 'biz:delete' }]
-      : [{ text: T.updateProfile, callback_data: 'reg:restart' }]
+    // Biznesni o'chirish tugmasi bu yerda yo'q: tasodifan bosilmasin. U faqat ilova ichida (E'lonlarim sahifasining pastida)
+    ...(role === 'business' ? [] : [[{ text: T.updateProfile, callback_data: 'reg:restart' }]])
   ]
 });
 export const pendingKeyboard = (T) => ({ inline_keyboard: [[{ text: T.editProfile, callback_data: 'reg:restart' }]] });
