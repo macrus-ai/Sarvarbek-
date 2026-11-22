@@ -65,15 +65,17 @@ Hamma jarayonni brauzerdan boshqarish uchun: `https://ovoza-bot.axborotmarkazi-u
 
 **Kirish:** botga `/admin` yuboring (faqat `ADMIN_IDS` dagilar uchun), bot "🔐 Admin panelni ochish" tugmasini beradi. Havola 10 daqiqa ichida bir marta ishlaydi, brauzer 30 kun eslab qoladi. Parol yo‘q. Admin `ADMIN_IDS` dan olib tashlansa, panelga darhol kira olmaydi.
 
+**Ko‘rinishi:** ko‘k-firuza fon ustida shaffof "shisha" panellar (yorug‘ va qorong‘i rejim, telefonga moslashgan). Chapda guruhlangan menyu (Asosiy, Ma’lumotlar, Tizim) va kutayotganlar soni; tepada foydalanuvchi qidiruvi (Enter — "Foydalanuvchilar" bo‘limida ochiladi), Excel tugmasi, moderatsiya qo‘ng‘irog‘i (kutayotgan bo‘lsa qizil nuqta).
+
 Bo‘limlar:
-- **Bosh sahifa:** blogerlar, bizneslar, moderatsiyadagilar, faol e’lonlar, so‘rovlar, so‘nggi 7 kun.
-- **Moderatsiya:** tasdiq kutayotgan profillar (statistika skrinshoti bilan) va e’lonlar. Tasdiqlash yoki rad etish botdagi tugmalar bilan bir xil ishlaydi: foydalanuvchiga xabar boradi.
+- **Bosh sahifa:** salomlashish va kutayotgan ishlar soni; so‘nggi 14 kunlik ustunli grafik (yangi foydalanuvchilar yoki so‘rovlar, Toshkent vaqti bo‘yicha, `/api/admin/stats` dagi `daily`); foydalanuvchilar tarkibi (donut: blogerlar, bizneslar, ro‘yxatdan o‘tmoqda); ko‘rsatkich kartalari (moderatsiyadagilar, blogerlar, bizneslar, faol e’lonlar, so‘rovlar, so‘nggi 7 kun).
+- **Moderatsiya:** tasdiq kutayotgan profillar (statistika skrinshoti bilan) va e’lonlar, rasmi tepada katta kartochkalarda. Tasdiqlash yoki rad etish botdagi tugmalar bilan bir xil ishlaydi: foydalanuvchiga xabar boradi.
 - **Foydalanuvchilar:** qidiruv (ism, kompaniya, @username, telefon, Telegram ID), rol va holat filtri. Batafsil oynada: tasdiqlash, rad etish, bloklash, o‘chirish; biznesning e’lonlari, blogerning so‘rovlari.
 - **Reklama e’lonlari:** qidiruv, moderatsiya va holat filtri; e’lonni tasdiqlash, rad etish yoki yopish, unga kelgan so‘rovlar.
 - **So‘rovlar:** blogerlarning barcha so‘rovlari holati bilan.
 - **Sozlamalar:** ulangan moderatsiya guruhlari (uzish mumkin), chiqish.
 
-**Excel’ga yuklab olish** (bosh sahifa va "Foydalanuvchilar" bo‘limidagi tugma): `miqyos-YYYY-MM-DD.xlsx` fayl, to‘rt varaq — Blogerlar (barcha ko‘rsatkichlari bilan), Bizneslar, E’lonlar, So‘rovlar. Faqat ro‘yxatdan o‘tishni tugatganlar kiradi. Panel ma’lumotni `/api/admin/export/{users|campaigns|applications}?page=N` dan 500 tadan oladi, faylni esa brauzerning o‘zi yasaydi (`public/admin/xlsx.js`, tashqi kutubxonasiz): bepul tarifda serverning bitta so‘rovga protsessor vaqti qisqa. Fayl zaxira nusxa sifatida ham saqlab qo‘yish uchun qulay.
+**Excel’ga yuklab olish** (bosh sahifa va "Foydalanuvchilar" bo‘limidagi tugma, tepa qatordagi ⬇ tugma): `miqyos-YYYY-MM-DD.xlsx` fayl, to‘rt varaq — Blogerlar (barcha ko‘rsatkichlari bilan), Bizneslar, E’lonlar, So‘rovlar. Faqat ro‘yxatdan o‘tishni tugatganlar kiradi. Panel ma’lumotni `/api/admin/export/{users|campaigns|applications}?page=N` dan 500 tadan oladi, faylni esa brauzerning o‘zi yasaydi (`public/admin/xlsx.js`, tashqi kutubxonasiz): bepul tarifda serverning bitta so‘rovga protsessor vaqti qisqa. Fayl zaxira nusxa sifatida ham saqlab qo‘yish uchun qulay.
 
 Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlanadi, panel boshqa saytdan so‘rov yuborishga va ramkaga qo‘yishga yo‘l qo‘ymaydi.
 
