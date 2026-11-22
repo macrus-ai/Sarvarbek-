@@ -16,6 +16,7 @@
       requests: { status: '', page: 1 }
     },
     chart: 'users',
+    options: null, // e'lonni tahrirlash uchun toifalar, hududlar (bir marta yuklanadi)
     busy: false
   };
 
@@ -85,7 +86,7 @@
       showLogin();
       throw Object.assign(new Error('unauthorized'), { code: 'unauthorized', silent: true });
     }
-    if (!res.ok) throw Object.assign(new Error(data?.error || 'server'), { code: data?.error || 'server' });
+    if (!res.ok) throw Object.assign(new Error(data?.error || 'server'), { code: data?.error || 'server', data });
     return data;
   }
 
@@ -106,6 +107,7 @@
     star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/>',
     bell: '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+    pencil: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
     pin: '<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
   };
@@ -396,6 +398,9 @@
     if (c.status === 'active' && c.moderation === 'approved') {
       buttons.push(`<button type="button" class="btn btn-danger" data-act="ad-close" data-id="${c.id}">Yopish</button>`);
     }
+    if (c.moderation !== 'rejected') {
+      buttons.push(`<button type="button" class="btn btn-soft" data-act="ad-edit" data-id="${c.id}">${icon('pencil')}<span>Tahrirlash</span></button>`);
+    }
     return buttons.join('');
   }
 
@@ -623,6 +628,125 @@
         <div class="related">${related || '<p class="muted small">Hali so‘rov yo‘q</p>'}</div>`);
     } catch (e) {
       if (!e.silent) openDrawer(`${drawerHead('Xatolik', '', '')}<p>${esc(errorText(e))}</p>`);
+    }
+  }
+
+  /* ---------- E'lonni tahrirlash ---------- */
+  const FIELD_ERRORS = {
+    title: 'Nomi 3–80 belgi bo‘lsin',
+    category: 'Toifani tanlang',
+    value: 'Qiymat 1 000 so‘mdan katta bo‘lsin',
+    platforms: 'Kamida bitta platforma tanlang',
+    format: 'Formatni yozing (2–80 belgi)',
+    minFollowers: 'Obunachilar sonini to‘g‘ri yozing',
+    days: 'Muddat 1–90 kun',
+    slots: 'O‘rinlar 1–100, qabul qilingan blogerlardan kam bo‘lmasin',
+    region: 'Hududni tanlang',
+    city: 'Shahar nomi juda uzun',
+    description: 'Tavsif 600 belgidan oshmasin'
+  };
+
+  async function editAd(id) {
+    openDrawer(loading);
+    try {
+      const [{ campaign: c }, opts] = await Promise.all([
+        api(`/api/admin/campaigns/${id}`),
+        state.options || api('/api/admin/campaign-options')
+      ]);
+      state.options = opts;
+      const L = opts.limits;
+      const field = (name, label, control, hint = '') =>
+        `<label class="field" data-field="${name}"><span>${esc(label)}</span>${control}${hint ? `<small class="muted">${esc(hint)}</small>` : ''}<em class="err" hidden></em></label>`;
+      const input = (name, value, attrs = '') => `<input class="control" name="${name}" value="${esc(value ?? '')}" ${attrs}>`;
+      const sectors = opts.sectors
+        .map((g) => `<optgroup label="${esc(g.label)}">${g.items.map((i) => `<option value="${esc(i.id)}" ${i.id === c.raw.category ? 'selected' : ''}>${esc(i.label)}</option>`).join('')}</optgroup>`)
+        .join('');
+      // Eski toifa endi ro'yxatda bo'lmasa ham tanlangan holda ko'rinadi
+      const known = opts.sectors.some((g) => g.items.some((i) => i.id === c.raw.category));
+      const regions = opts.regions.map((r) => `<option value="${esc(r.id)}" ${r.id === c.raw.region ? 'selected' : ''}>${esc(r.label)}</option>`).join('');
+      const platforms = opts.platforms
+        .map((pl) => `<label class="check"><input type="checkbox" name="platforms" value="${esc(pl)}" ${c.platforms.includes(pl) ? 'checked' : ''}><span>${esc(pl)}</span></label>`)
+        .join('');
+      openDrawer(`${drawerHead('E’lonni tahrirlash', `ID ${c.id} · ${esc(c.business.company)}`, '')}
+        <p class="notice">Saqlangach, biznesga botda “e’loningiz tahrirlandi” degan xabar boradi. Rasm, holat va so‘rovlar o‘zgarmaydi.</p>
+        <form class="edit-form" data-edit-ad="${c.id}" novalidate>
+          ${field('title', 'Nomi', input('title', c.title, `maxlength="${L.titleMax}" required`))}
+          ${field('category', 'Toifa', `<select class="control" name="category">${known ? '' : `<option value="${esc(c.raw.category)}" selected>${esc(c.category)}</option>`}${sectors}</select>`)}
+          <div class="two">
+            ${field('value', 'Mahsulot qiymati (so‘m)', input('value', c.value, 'type="number" inputmode="numeric" min="1000" step="1000"'))}
+            ${field('minFollowers', 'Kerakli obunachilar', input('minFollowers', c.minFollowers || '', 'type="number" inputmode="numeric" min="0" placeholder="Talab yo‘q"'))}
+          </div>
+          ${field('platforms', 'Platformalar', `<div class="checks">${platforms}</div>`)}
+          ${field('format', 'Format', input('format', c.format, `maxlength="${L.formatMax}" placeholder="Masalan: 1 Reels + 2 Stories"`))}
+          <div class="two">
+            ${field('days', 'Muddat (kun)', input('days', c.days, `type="number" inputmode="numeric" min="1" max="${L.daysMax}"`))}
+            ${field('slots', 'O‘rinlar', input('slots', c.slots, `type="number" inputmode="numeric" min="${Math.max(1, c.accepted)}" max="${L.slotsMax}"`), c.accepted ? `Qabul qilingan: ${c.accepted}` : '')}
+          </div>
+          <div class="two">
+            ${field('region', 'Hudud', `<select class="control" name="region">${regions}</select>`)}
+            ${field('city', 'Shahar yoki manzil', input('city', c.city, `maxlength="${L.cityMax}" placeholder="Ixtiyoriy"`))}
+          </div>
+          ${field('description', 'Tavsif', `<textarea class="control" name="description" rows="5" maxlength="${L.descriptionMax}" placeholder="Ixtiyoriy">${esc(c.description)}</textarea>`)}
+          <div class="btn-row sticky-actions">
+            <button type="button" class="btn btn-soft" data-act="open-ad" data-id="${c.id}">Bekor qilish</button>
+            <button type="submit" class="btn btn-primary">${icon('check')}<span>Saqlash</span></button>
+          </div>
+        </form>`);
+      document.querySelector('.edit-form [name="title"]')?.focus();
+    } catch (e) {
+      if (!e.silent) openDrawer(`${drawerHead('Xatolik', '', '')}<p>${esc(errorText(e))}</p>`);
+    }
+  }
+
+  async function saveAd(form) {
+    if (state.busy) return;
+    const fd = new FormData(form);
+    const num = (k) => (String(fd.get(k) || '').trim() === '' ? '' : Number(fd.get(k)));
+    const body = {
+      title: String(fd.get('title') || '').trim(),
+      category: fd.get('category'),
+      value: num('value'),
+      platforms: fd.getAll('platforms'),
+      format: String(fd.get('format') || '').trim(),
+      minFollowers: num('minFollowers'),
+      days: num('days'),
+      slots: num('slots'),
+      region: fd.get('region'),
+      city: String(fd.get('city') || '').trim(),
+      description: String(fd.get('description') || '').trim()
+    };
+    form.querySelectorAll('.field').forEach((f) => {
+      f.classList.remove('bad');
+      f.querySelector('.err').hidden = true;
+    });
+    const button = form.querySelector('[type=submit]');
+    state.busy = true;
+    button.disabled = true;
+    const id = Number(form.dataset.editAd);
+    try {
+      await api(`/api/admin/campaigns/${id}`, { method: 'PATCH', body });
+      toast('Saqlandi. Biznesga botda xabar bordi.');
+      state.busy = false;
+      // Orqadagi ro'yxat ham yangilanadi, keyin e'lon oynasi qayta ochiladi
+      await render();
+      openAd(id);
+    } catch (e) {
+      const fields = e.data?.fields || [];
+      if (fields.length) {
+        fields.forEach((name) => {
+          const f = form.querySelector(`[data-field="${name}"]`);
+          if (!f) return;
+          f.classList.add('bad');
+          const err = f.querySelector('.err');
+          err.textContent = FIELD_ERRORS[name] || 'Tekshiring';
+          err.hidden = false;
+        });
+        form.querySelector('.bad')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        toast('Ba’zi maydonlarni tuzating');
+      } else if (!e.silent) toast(errorText(e));
+    } finally {
+      state.busy = false;
+      button.disabled = false;
     }
   }
 
@@ -868,6 +992,9 @@
         act(el, () => api(`/api/admin/campaigns/${id}/moderation`, { method: 'POST', body: { action: el.dataset.action } }), approve ? 'E’lon tasdiqlandi: blogerlarga ko‘rinadi' : 'E’lon rad etildi');
         break;
       }
+      case 'ad-edit':
+        editAd(id);
+        break;
       case 'ad-close':
         if (!window.confirm('E’lon yopilsinmi? Blogerlar uni ko‘rmaydi, biznesga xabar boradi.')) return;
         act(el, () => api(`/api/admin/campaigns/${id}/close`, { method: 'POST' }), 'E’lon yopildi');
@@ -905,6 +1032,12 @@
   });
 
   document.addEventListener('submit', (event) => {
+    const edit = event.target.closest('form[data-edit-ad]');
+    if (edit) {
+      event.preventDefault();
+      saveAd(edit);
+      return;
+    }
     const form = event.target.closest('form[data-form]');
     if (!form) return;
     event.preventDefault();

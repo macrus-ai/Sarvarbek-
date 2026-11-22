@@ -336,6 +336,8 @@ const uz = {
   adminAlreadyClosed: 'E’lon allaqachon yopilgan.',
   toBusinessClosed: (title) =>
     `«${esc(title)}» reklama e’loningiz moderator tomonidan yopildi. Savollar bo‘lsa, shu botga yozing.`,
+  toBusinessEdited: (title) =>
+    `✏️ «${esc(title)}» reklama e’loningiz moderator tomonidan tahrirlandi. Yangi ko‘rinishini ilovadagi "Mening e’lonlarim" bo‘limida ko‘ring. Savollar bo‘lsa, shu botga yozing.`,
   // Telegram profili va telefon raqami faqat qabul qilingach ko'rsatiladi (statusAccepted)
   newApplication: (a, decided = false) =>
     [
@@ -620,6 +622,8 @@ const ru = {
   adminAlreadyClosed: 'Объявление уже закрыто.',
   toBusinessClosed: (title) =>
     `Ваше рекламное объявление «${esc(title)}» закрыто модератором. Если есть вопросы, напишите в этот бот.`,
+  toBusinessEdited: (title) =>
+    `✏️ Ваше рекламное объявление «${esc(title)}» отредактировано модератором. Посмотрите, как оно выглядит, в разделе «Мои объявления» в приложении. Если есть вопросы, напишите в этот бот.`,
   newApplication: (a, decided = false) =>
     [
       '🆕 <b>Новый отклик</b>',

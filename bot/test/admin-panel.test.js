@@ -215,3 +215,61 @@ test('panel: guruhlar sozlamasi', async () => {
   assert.equal(s.groups.ads, null);
   assert.equal(s.groups.business.id, -100700);
 });
+
+test('panel: reklama e’lonini tahrirlash, biznesga xabar boradi', async () => {
+  const business = tgUser(1530);
+  await registerBusiness(env, business, { company: 'Miqyos' });
+  const { data } = await createCampaign(env, business, { title: 'Har bir video uchun pul', value: 50000, slots: 2 });
+  const id = data.campaign.id;
+  const cookie = await login();
+
+  const opts = (await panel(cookie, '/api/admin/campaign-options')).data;
+  assert.ok(opts.sectors.length && opts.regions.some((r) => r.id === 'all') && opts.platforms.includes('Instagram'));
+
+  const before = (await panel(cookie, `/api/admin/campaigns/${id}`)).data.campaign;
+  assert.equal(before.raw.category, 'beauty');
+
+  const body = {
+    title: 'Har bir reklama videosi uchun',
+    category: 'cafe',
+    value: 75000,
+    platforms: ['Instagram', 'Telegram'],
+    format: '1 Reels',
+    minFollowers: 2000,
+    days: 10,
+    slots: 3,
+    region: 'samarkand',
+    city: 'Samarqand',
+    description: 'Yangi tavsif'
+  };
+
+  // CSRF sarlavhasisiz o'zgartirib bo'lmaydi
+  assert.equal((await panel(cookie, `/api/admin/campaigns/${id}`, { method: 'PATCH', body, csrf: false })).status, 403);
+
+  tg.clear();
+  const res = await panel(cookie, `/api/admin/campaigns/${id}`, { method: 'PATCH', body });
+  assert.equal(res.status, 200);
+  const c = res.data.campaign;
+  assert.equal(c.title, 'Har bir reklama videosi uchun');
+  assert.equal(c.value, 75000);
+  assert.deepEqual(c.platforms, ['Instagram', 'Telegram']);
+  assert.equal(c.raw.category, 'cafe');
+  assert.equal(c.raw.region, 'samarkand');
+  assert.equal(c.region, 'Samarqand');
+  assert.equal(c.slots, 3);
+  assert.equal(c.description, 'Yangi tavsif');
+  assert.equal(c.status, 'active');
+  assert.equal(c.moderation, 'approved');
+  assert.match(lastText(1530), /tahrirlandi/);
+
+  // Mini ilovada ham yangi ma'lumot
+  const mine = await api(env, business, '/api/my/campaigns');
+  assert.equal(mine.data.campaigns.find((x) => x.id === id).title, 'Har bir reklama videosi uchun');
+
+  // Noto'g'ri qiymat — qaysi maydon xato ekani qaytadi
+  const bad = await panel(cookie, `/api/admin/campaigns/${id}`, { method: 'PATCH', body: { ...body, title: 'ab', value: 1 } });
+  assert.equal(bad.status, 400);
+  assert.deepEqual(bad.data.fields.sort(), ['title', 'value']);
+
+  assert.equal((await panel(cookie, '/api/admin/campaigns/99999', { method: 'PATCH', body })).status, 404);
+});

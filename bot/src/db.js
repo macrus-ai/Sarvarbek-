@@ -456,6 +456,22 @@ export function disableAdNotifications(db, ids) {
 }
 
 // Admin kampaniyani yopadi (egasidan qat'i nazar). Yopilgan kampaniyani qaytaradi.
+// Admin e'lonni tahrirlaydi (rasm, holat va moderatsiya o'zgarmaydi)
+export async function updateCampaignByAdmin(db, id, c) {
+  const res = await db
+    .prepare(
+      `UPDATE campaigns SET title = ?1, category = ?2, value = ?3, platforms = ?4, format = ?5, min_followers = ?6,
+         days = ?7, slots = ?8, city = ?9, description = ?10, region = ?11, updated_at = ?12
+       WHERE id = ?13`
+    )
+    .bind(
+      c.title, c.category, c.value, c.platforms.join(','), c.format, c.minFollowers, c.days, c.slots,
+      c.city || null, c.description || null, c.region || 'all', now(), id
+    )
+    .run();
+  return res.meta.changes;
+}
+
 export async function closeCampaignByAdmin(db, id) {
   const res = await db
     .prepare("UPDATE campaigns SET status = 'closed', updated_at = ?1 WHERE id = ?2 AND status = 'active'")
