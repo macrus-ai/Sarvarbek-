@@ -463,6 +463,26 @@ async function dashboardStats(db) {
     )
     .bind(week)
     .first();
+  // Grafik uchun so'nggi 14 kun (Toshkent vaqti, UTC+5): har kuni yangi foydalanuvchi va so'rovlar
+  const TZ = 5 * 3600;
+  const DAY = 24 * 3600;
+  const today = Math.floor((now() + TZ) / DAY);
+  const first = today - 13;
+  const { results } = await db
+    .prepare(
+      `SELECT 'users' AS k, CAST((registered_at + ?2) / ?3 AS INTEGER) AS d, COUNT(*) AS n
+         FROM users WHERE reg_step = 'done' AND registered_at >= ?1 GROUP BY d
+       UNION ALL
+       SELECT 'applications' AS k, CAST((created_at + ?2) / ?3 AS INTEGER) AS d, COUNT(*) AS n
+         FROM applications WHERE created_at >= ?1 GROUP BY d`
+    )
+    .bind(first * DAY - TZ, TZ, DAY)
+    .all();
+  const daily = Array.from({ length: 14 }, (_, i) => ({ date: (first + i) * DAY - TZ, users: 0, applications: 0 }));
+  for (const r of results || []) {
+    const day = daily[Number(r.d) - first];
+    if (day) day[r.k] = Number(r.n) || 0;
+  }
   return {
     bloggers: base.bloggers,
     businesses: base.businesses,
@@ -473,7 +493,8 @@ async function dashboardStats(db) {
     accepted: base.accepted,
     waitingApplications: extra.waiting_applications,
     incomplete: extra.incomplete,
-    week: { users: extra.new_users, ads: extra.new_ads, applications: extra.new_applications }
+    week: { users: extra.new_users, ads: extra.new_ads, applications: extra.new_applications },
+    daily
   };
 }
 

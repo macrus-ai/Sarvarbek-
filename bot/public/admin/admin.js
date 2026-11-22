@@ -15,6 +15,7 @@
       ads: { q: '', moderation: '', status: '', page: 1 },
       requests: { status: '', page: 1 }
     },
+    chart: 'users',
     busy: false
   };
 
@@ -96,6 +97,16 @@
     megaphone: '<path d="M3 11v2a2 2 0 0 0 2 2h1l5 4V5L6 9H5a2 2 0 0 0-2 2z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
     inbox: '<path d="M3 13h5l2 3h4l2-3h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/>',
     download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+    check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    userPlus: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M16 11h6"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+    star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+    logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/>',
+    bell: '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+    pin: '<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
   };
   const icon = (name) =>
@@ -103,34 +114,59 @@
   const logo = `<svg class="logo" viewBox="7 7 86 86" aria-hidden="true"><polygon points="9,82 36,18 36,41.5 18.9,82" fill="#6A63F5"/><polygon points="18.9,82 36,41.5 36,60.7 27,82" fill="#3A33B8"/><polygon points="36,18 63,82 53.1,82 36,41.5" fill="#4F46E5"/><polygon points="36,41.5 53.1,82 45,82 36,60.7" fill="#262080"/><polygon points="55,82 63,82 59,72.5" fill="#1E1A66"/><polygon points="37,82 64,18 64,41.5 46.9,82" fill="#FF8B78"/><polygon points="46.9,82 64,41.5 64,60.7 55,82" fill="#E0533D"/><polygon points="64,18 91,82 81.1,82 64,41.5" fill="#FF6B57"/><polygon points="64,41.5 81.1,82 73,82 64,60.7" fill="#B8392A"/></svg>`;
 
   /* ---------- Karkas ---------- */
+  // [manzil, nom, ikonka, guruh]
   const ROUTES = [
-    ['', 'Bosh sahifa', 'home'],
-    ['moderation', 'Moderatsiya', 'shield'],
-    ['users', 'Foydalanuvchilar', 'users'],
-    ['ads', 'Reklama e’lonlari', 'megaphone'],
-    ['requests', 'So‘rovlar', 'inbox'],
-    ['settings', 'Sozlamalar', 'gear']
+    ['', 'Bosh sahifa', 'home', 'Asosiy'],
+    ['moderation', 'Moderatsiya', 'shield', 'Asosiy'],
+    ['users', 'Foydalanuvchilar', 'users', 'Ma’lumotlar'],
+    ['ads', 'Reklama e’lonlari', 'megaphone', 'Ma’lumotlar'],
+    ['requests', 'So‘rovlar', 'inbox', 'Ma’lumotlar'],
+    ['settings', 'Sozlamalar', 'gear', 'Tizim']
   ];
 
   const currentRoute = () => location.hash.replace(/^#\/?/, '').split('?')[0];
+  const initials = (name) =>
+    String(name || 'A').trim().split(/\s+/).slice(0, 2).map((w) => w[0] || '').join('').toUpperCase() || 'A';
 
   function shell(content) {
     const route = currentRoute();
-    const pending = state.stats ? state.stats.pendingUsers + state.stats.pendingAds : 0;
-    const nav = ROUTES.map(
-      ([id, label, ic]) =>
-        `<a href="#/${id}" ${route === id ? 'aria-current="page"' : ''}>${icon(ic)}<span>${esc(label)}</span>${
-          id === 'moderation' && pending ? `<span class="count">${pending}</span>` : ''
-        }</a>`
-    ).join('');
+    const s = state.stats;
+    const pending = s ? s.pendingUsers + s.pendingAds : 0;
+    const counts = { moderation: pending, requests: s ? s.waitingApplications : 0 };
+    let group = '';
+    const nav = ROUTES.map(([id, label, ic, g]) => {
+      const title = g !== group ? `<div class="nav-group">${esc(g)}</div>` : '';
+      group = g;
+      return `${title}<a href="#/${id}" ${route === id ? 'aria-current="page"' : ''}>${icon(ic)}<span>${esc(label)}</span>${
+        counts[id] ? `<span class="count">${fmt(counts[id])}</span>` : ''
+      }</a>`;
+    }).join('');
+    const name = state.me?.name || 'Admin';
+    const q = route === 'users' ? state.filters.users.q : '';
     return `<div class="layout">
-      <aside class="side">
-        <div class="brand">${logo}<div>Miqyos<small>Admin panel</small></div></div>
+      <aside class="side glass">
+        <div class="brand"><span class="logo-box">${logo}</span><div><b>Miqyos</b><small>Boshqaruv markazi</small></div></div>
         <nav class="nav" aria-label="Bo‘limlar">${nav}</nav>
-        <div class="side-foot"><span>${esc(state.me?.name || 'Admin')} · ID ${esc(state.me?.id)}</span>
-          <button type="button" class="btn btn-ghost" data-act="logout">Chiqish</button></div>
+        <div class="side-foot">
+          <div class="who"><span class="avatar sm">${esc(initials(name))}</span><span><b>${esc(name)}</b><small>ID ${esc(state.me?.id)}</small></span></div>
+          <button type="button" class="btn" data-act="logout">${icon('logout')}<span>Chiqish</span></button>
+        </div>
       </aside>
-      <main class="main" id="main">${content}</main>
+      <div class="content">
+        <header class="topbar glass">
+          <form class="search" data-form="search" role="search">
+            ${icon('search')}
+            <label class="sr-only" for="top-q">Foydalanuvchini qidirish</label>
+            <input id="top-q" name="q" type="search" placeholder="Ism, kompaniya, @username, telefon yoki ID" value="${esc(q)}">
+          </form>
+          <div class="top-actions">
+            <button type="button" class="round hide-sm" data-act="export" title="Excel’ga yuklab olish" aria-label="Excel’ga yuklab olish">${icon('download')}</button>
+            <a class="round light" href="#/moderation" title="Moderatsiya" aria-label="Moderatsiya${pending ? `: ${pending} ta kutmoqda` : ''}">${icon('bell')}${pending ? '<span class="dot"></span>' : ''}</a>
+            <div class="me"><span class="avatar">${esc(initials(name))}</span><div><b>${esc(name)}</b><small>Admin</small></div></div>
+          </div>
+        </header>
+        <main class="main" id="main">${content}</main>
+      </div>
     </div>`;
   }
 
@@ -140,7 +176,7 @@
     const bot = state.bot ? `@${esc(state.bot)}` : 'Miqyos botiga';
     const link = state.bot ? `<a class="btn btn-primary" href="https://t.me/${esc(state.bot)}" target="_blank" rel="noopener">Botni ochish</a>` : '';
     root.innerHTML = `<div class="login"><div class="card">
-      ${logo}
+      <span class="logo-box">${logo}</span>
       <h1>Miqyos admin panel</h1>
       <ol>
         <li>Telegramda ${bot} <code>/admin</code> buyrug‘ini yuboring.</li>
@@ -170,29 +206,109 @@
   }
 
   /* ---------- Bosh sahifa ---------- */
+  const WEEKDAYS = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+  const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+
+  function greeting() {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 11) return 'Xayrli tong';
+    if (h >= 11 && h < 17) return 'Xayrli kun';
+    if (h >= 17 && h < 22) return 'Xayrli kech';
+    return 'Xayrli tun';
+  }
+
+  // Server kunni Toshkent vaqtida (UTC+5) beradi; brauzer qaysi zonada bo'lsa ham o'sha kun ko'rinadi
+  const tashkentDay = (ts) => new Date((ts + 5 * 3600) * 1000);
+
+  // Grafik: so'nggi 14 kun, ustunlar
+  function barChart(daily, kind) {
+    const values = daily.map((d) => d[kind] || 0);
+    const max = Math.max(...values);
+    // O'qdagi qiymatlar "chiroyli" sonlarga yaxlitlanadi
+    const step = max <= 4 ? 1 : Math.ceil(max / 4 / (max > 40 ? 10 : 1)) * (max > 40 ? 10 : 1);
+    const top = Math.max(4, step * 4);
+    const axis = [4, 3, 2, 1, 0].map((k) => `<span>${fmt((top / 4) * k)}</span>`).join('');
+    const bars = daily
+      .map((d, i) => {
+        const v = d[kind] || 0;
+        const day = tashkentDay(d.date);
+        const label = `${day.getUTCDate()}-${MONTHS[day.getUTCMonth()]}: ${v}`;
+        return `<div class="bar ${i === daily.length - 1 ? 'today' : ''}" style="--h:${(v / top) * 100}%;--i:${i}" title="${esc(label)}"><b>${fmt(v)}</b></div>`;
+      })
+      .join('');
+    const labels = daily.map((d) => `<span>${tashkentDay(d.date).getUTCDate()}</span>`).join('');
+    return `<div class="bars ${kind === 'applications' ? 'apps' : ''}" role="img" aria-label="So‘nggi 14 kun">
+      <div class="axis" aria-hidden="true">${axis}</div><div class="plot">${bars}</div><div class="labels" aria-hidden="true">${labels}</div></div>`;
+  }
+
+  // Donut: foydalanuvchilar tarkibi
+  function donut(parts) {
+    const total = parts.reduce((n, p) => n + p.value, 0);
+    const r = 60;
+    const c = 2 * Math.PI * r;
+    const gap = parts.filter((p) => p.value).length > 1 ? 6 : 0;
+    let offset = 0;
+    const arcs = parts
+      .filter((p) => p.value)
+      .map((p) => {
+        const len = Math.max(0, (p.value / total) * c - gap);
+        const arc = `<circle r="${r}" cx="80" cy="80" stroke="${p.color}" stroke-dasharray="${len} ${c - len}" stroke-dashoffset="${-offset}"/>`;
+        offset += (p.value / total) * c;
+        return arc;
+      })
+      .join('');
+    const legend = parts
+      .map((p) => `<a href="${p.href}"><i style="background:${p.color}"></i><span>${esc(p.label)}</span><b>${fmt(p.value)}</b></a>`)
+      .join('');
+    return `<div class="donut-wrap"><div class="donut"><svg viewBox="0 0 160 160" aria-hidden="true">
+        <circle r="${r}" cx="80" cy="80" stroke="var(--field)"/>${arcs}</svg>
+        <div class="center"><strong>${fmt(total)}</strong><span>jami</span></div></div>
+      <div class="legend">${legend}</div></div>`;
+  }
+
   async function viewDashboard() {
     const s = state.stats;
-    const kpi = (label, value, extra = '', href = '', alert = false) => {
-      const tag = href ? 'a' : 'div';
-      return `<${tag} class="kpi ${alert ? 'alert' : ''}" ${href ? `href="${href}"` : ''}><span>${esc(label)}</span><strong>${fmt(value)}</strong>${extra ? `<small>${esc(extra)}</small>` : ''}</${tag}>`;
+    const kpi = ({ label, value, sub = '', href = '', ic, alert = false, tag = '' }) => {
+      const el = href ? 'a' : 'div';
+      return `<${el} class="kpi ${alert ? 'alert' : ''}" ${href ? `href="${href}"` : ''}>
+        <span class="ic">${icon(ic)}</span>${tag ? `<span class="tag">${tag}</span>` : ''}
+        <strong>${fmt(value)}</strong><span class="lbl">${esc(label)}</span>${sub ? `<small>${esc(sub)}</small>` : ''}</${el}>`;
     };
     const pending = s.pendingUsers + s.pendingAds;
-    return `<div class="head"><div><h1>Bosh sahifa</h1><p>Platformaning hozirgi holati</p></div>${exportButton}</div>
-      ${pending ? `<p class="notice" style="margin-bottom:14px">⏳ Tasdiqlashni kutmoqda: ${s.pendingUsers} ta profil va ${s.pendingAds} ta reklama e’loni. <a href="#/moderation">Moderatsiyaga o‘tish</a></p>` : ''}
-      <div class="kpis">
-        ${kpi('Moderatsiyada: profillar', s.pendingUsers, '', '#/moderation', s.pendingUsers > 0)}
-        ${kpi('Moderatsiyada: e’lonlar', s.pendingAds, '', '#/moderation', s.pendingAds > 0)}
-        ${kpi('Blogerlar', s.bloggers, '', '#/users?role=blogger')}
-        ${kpi('Bizneslar', s.businesses, '', '#/users?role=business')}
-        ${kpi('Faol reklama e’lonlari', s.activeAds, '', '#/ads')}
-        ${kpi('So‘rovlar', s.applications, `Qabul qilingan: ${fmt(s.accepted)} · kutilmoqda: ${fmt(s.waitingApplications)}`, '#/requests')}
-        ${kpi('Ro‘yxatdan o‘tmoqda', s.incomplete, 'Savollarni oxirigacha javob bermaganlar', '#/users?status=incomplete')}
+    const d = new Date();
+    const first = String(state.me?.name || '').trim().split(/\s+/)[0];
+    const daily = s.daily || [];
+    const kind = state.chart;
+    const sum = daily.reduce((n, x) => n + (x[kind] || 0), 0);
+    const chartBtn = (k, label) => `<button type="button" data-act="chart" data-kind="${k}" aria-pressed="${kind === k}">${label}</button>`;
+    return `<div class="head"><div><h1>${greeting()}${first ? `, ${esc(first)}` : ''}</h1>
+        <p>${WEEKDAYS[d.getDay()]}, ${d.getDate()}-${MONTHS[d.getMonth()]} · ${pending ? `${pending} ta ish tasdiqlashni kutmoqda` : 'hamma narsa tartibda'}</p></div>
+        <div class="btn-row">${exportButton}<a class="btn btn-primary" href="#/moderation">${icon('shield')}<span>Moderatsiya</span></a></div></div>
+      <div class="overview">
+        <section class="card">
+          <div class="card-head"><div><h2>${kind === 'users' ? 'Yangi foydalanuvchilar' : 'Yangi so‘rovlar'}</h2>
+            <p>So‘nggi 14 kunda ${fmt(sum)} ta</p></div>
+            <div class="seg" role="group" aria-label="Grafik">${chartBtn('users', 'Foydalanuvchilar')}${chartBtn('applications', 'So‘rovlar')}</div></div>
+          ${daily.length ? barChart(daily, kind) : '<p class="empty">Ma’lumot yo‘q</p>'}
+        </section>
+        <section class="card">
+          <div class="card-head"><div><h2>Foydalanuvchilar tarkibi</h2><p>Bosib, ro‘yxatni oching</p></div></div>
+          ${donut([
+            { label: 'Blogerlar', value: s.bloggers, color: 'var(--c-blogger)', href: '#/users?role=blogger' },
+            { label: 'Bizneslar', value: s.businesses, color: 'var(--c-business)', href: '#/users?role=business' },
+            { label: 'Ro‘yxatda', value: s.incomplete, color: 'var(--c-incomplete)', href: '#/users?status=incomplete' }
+          ])}
+        </section>
       </div>
-      <h2 class="section-title">So‘nggi 7 kun</h2>
       <div class="kpis">
-        ${kpi('Yangi foydalanuvchilar', s.week.users)}
-        ${kpi('Yangi e’lonlar', s.week.ads)}
-        ${kpi('Yangi so‘rovlar', s.week.applications)}
+        ${kpi({ label: 'Profil tasdiq kutmoqda', value: s.pendingUsers, href: '#/moderation', ic: 'shield', alert: s.pendingUsers > 0, tag: s.pendingUsers ? pill('pending', 'Yangi') : '' })}
+        ${kpi({ label: 'E’lon tasdiq kutmoqda', value: s.pendingAds, href: '#/moderation', ic: 'clock', alert: s.pendingAds > 0, tag: s.pendingAds ? pill('pending', 'Yangi') : '' })}
+        ${kpi({ label: 'Blogerlar', value: s.bloggers, href: '#/users?role=blogger', ic: 'star' })}
+        ${kpi({ label: 'Bizneslar', value: s.businesses, href: '#/users?role=business', ic: 'briefcase' })}
+        ${kpi({ label: 'Faol reklama e’lonlari', value: s.activeAds, href: '#/ads', ic: 'megaphone' })}
+        ${kpi({ label: 'So‘rovlar', value: s.applications, sub: `Qabul qilingan: ${fmt(s.accepted)} · kutilmoqda: ${fmt(s.waitingApplications)}`, href: '#/requests', ic: 'inbox' })}
+        ${kpi({ label: 'Ro‘yxatdan o‘tmoqda', value: s.incomplete, sub: 'Savollarni oxirigacha javob bermaganlar', href: '#/users?status=incomplete', ic: 'userPlus' })}
+        ${kpi({ label: 'Yangi: 7 kunda', value: s.week.users, sub: `E’lonlar: ${fmt(s.week.ads)} · so‘rovlar: ${fmt(s.week.applications)}`, ic: 'users', tag: s.week.users ? pill('approved', `+${fmt(s.week.users)}`) : '' })}
       </div>`;
   }
 
@@ -201,6 +317,11 @@
   const link = (url, text) => (url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text || url.replace(/^https?:\/\/(www\.)?/, ''))}</a>` : '');
   const tgLink = (u) => (u.username ? link(`https://t.me/${u.username}`, `@${u.username}`) : '');
   const photo = (src, alt = '') => (src ? `<button type="button" class="photo" data-act="zoom" data-src="${esc(src)}"><img src="${esc(src)}" alt="${esc(alt)}" loading="lazy"></button>` : '');
+
+  // Kartochka tepasidagi rasm: ustida holat va toifa yorliqlari
+  const cover = (src, alt, tag, price = '') => `<div class="cover">${photo(src, alt)}
+    <div class="chips"><span class="chip">${icon('clock')}Moderatsiyada</span>${tag ? `<span class="chip">${esc(tag)}</span>` : ''}</div>
+    ${price ? `<span class="chip price">${esc(price)}</span>` : ''}</div>`;
 
   function userFacts(u) {
     if (u.role === 'business') {
@@ -227,16 +348,17 @@
   }
 
   function userCard(u) {
+    const title = u.role === 'business' ? u.company : u.name;
     return `<article class="card item">
-      <div class="item-head"><div><h3>${esc(u.role === 'business' ? u.company : u.name)}</h3>
-        <span class="muted small">${esc(ROLE[u.role] || '')} · ${date(u.registeredAt)}</span></div>${userPill(u)}</div>
+      ${u.statsImage ? cover(u.statsImage, 'Statistika', ROLE[u.role]) : `<div class="item-tags">${userPill(u)}${pill('role', ROLE[u.role] || '')}</div>`}
+      <div class="item-head"><div class="person"><span class="avatar sm">${esc(initials(title))}</span><div><h3>${esc(title)}</h3>
+        <span class="muted small">${esc(ROLE[u.role] || '')} · ${date(u.registeredAt)}</span></div></div></div>
       <dl class="facts">${userFacts(u)}</dl>
-      ${photo(u.statsImage, 'Statistika')}
       <div class="btn-row">
-        <button type="button" class="btn btn-ok" data-act="user-mod" data-id="${u.id}" data-action="approve">Tasdiqlash</button>
-        <button type="button" class="btn btn-danger" data-act="user-mod" data-id="${u.id}" data-action="reject">Rad etish</button>
-        <button type="button" class="btn" data-act="open-user" data-id="${u.id}">Batafsil</button>
+        <button type="button" class="btn btn-soft" data-act="open-user" data-id="${u.id}">${icon('eye')}<span>Batafsil</span></button>
+        <button type="button" class="btn btn-ok" data-act="user-mod" data-id="${u.id}" data-action="approve">${icon('check')}<span>Tasdiqlash</span></button>
       </div>
+      <button type="button" class="btn btn-danger" data-act="user-mod" data-id="${u.id}" data-action="reject">Rad etish</button>
     </article>`;
   }
 
@@ -256,8 +378,9 @@
 
   function adCard(c) {
     return `<article class="card item">
-      <div class="item-head"><div><h3>${esc(c.title)}</h3><span class="muted small">${date(c.createdAt)}</span></div>${adPill(c)}</div>
-      ${photo(c.image?.url, c.title)}
+      ${c.image?.url ? cover(c.image.url, c.title, c.category, money(c.value)) : ''}
+      ${c.image?.url ? '' : `<div class="item-tags">${adPill(c)}</div>`}
+      <div class="item-head"><div><h3>${esc(c.title)}</h3><span class="muted small">${esc(c.business.company)} · ${date(c.createdAt)}</span></div></div>
       <dl class="facts">${adFacts(c)}</dl>
       ${c.description ? `<p class="quote">${esc(c.description)}</p>` : ''}
       <div class="btn-row">${adActions(c)}</div>
@@ -267,7 +390,7 @@
   function adActions(c) {
     const buttons = [];
     if (c.moderation === 'pending') {
-      buttons.push(`<button type="button" class="btn btn-ok" data-act="ad-mod" data-id="${c.id}" data-action="approve">Tasdiqlash</button>`);
+      buttons.push(`<button type="button" class="btn btn-ok" data-act="ad-mod" data-id="${c.id}" data-action="approve">${icon('check')}<span>Tasdiqlash</span></button>`);
       buttons.push(`<button type="button" class="btn btn-danger" data-act="ad-mod" data-id="${c.id}" data-action="reject">Rad etish</button>`);
     }
     if (c.status === 'active' && c.moderation === 'approved') {
@@ -506,7 +629,7 @@
   /* ---------- Excel'ga yuklab olish ---------- */
   // Hamma ma'lumot: blogerlar, bizneslar, reklama e'lonlari va so'rovlar — to'rt varaqli bitta fayl.
   // Server 500 tadan beradi, fayl brauzerda yasaladi (xlsx.js).
-  const exportButton = `<button type="button" class="btn" data-act="export">${icon('download')}<span>Excel’ga yuklab olish</span></button>`;
+  const exportButton = `<button type="button" class="btn btn-soft" data-act="export">${icon('download')}<span>Excel’ga yuklab olish</span></button>`;
 
   const dateCell = (ts) => (ts ? date(ts) : '');
   const yesNo = (v, yes, no) => (v ? yes : no);
@@ -640,8 +763,11 @@
     state.busy = true;
     button.disabled = true;
     const label = button.innerHTML;
+    // Dumaloq tugmada (tepa qator) matn sig'maydi, jarayon xabarda ko'rinadi
+    const compact = button.classList.contains('round');
     const progress = (text) => {
-      button.innerHTML = `${icon('download')}<span>${esc(text)}</span>`;
+      if (compact) toast(text);
+      else button.innerHTML = `${icon('download')}<span>${esc(text)}</span>`;
     };
     try {
       const data = {};
@@ -758,6 +884,13 @@
       case 'export':
         exportExcel(el);
         break;
+      case 'chart':
+        // Grafik turi almashadi, ma'lumot qayta yuklanmaydi
+        state.chart = el.dataset.kind === 'applications' ? 'applications' : 'users';
+        viewDashboard().then((html) => {
+          if (currentRoute() === '') root.innerHTML = shell(html);
+        });
+        break;
       case 'logout':
         api('/api/admin/logout', { method: 'POST' })
           // Chiqqandan keyin /me 401 qaytaradi va kirish sahifasi bot nomi bilan ochiladi
@@ -776,6 +909,13 @@
     if (!form) return;
     event.preventDefault();
     const kind = form.dataset.form;
+    if (kind === 'search') {
+      // Tepadagi qidiruv: foydalanuvchilar ro'yxatida, boshqa filtrlarsiz
+      Object.assign(state.filters.users, { q: String(new FormData(form).get('q') || '').trim(), role: '', status: '', page: 1 });
+      if (currentRoute() === 'users') render();
+      else location.hash = '#/users';
+      return;
+    }
     const f = state.filters[kind];
     for (const [key, value] of new FormData(form)) f[key] = String(value).trim();
     f.page = 1;

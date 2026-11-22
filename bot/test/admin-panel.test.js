@@ -111,6 +111,10 @@ test('panel: statistika, profil va e’lonlar moderatsiyasi', async () => {
   assert.equal(stats.businesses, 2);
   assert.equal(stats.bloggers, 1);
   assert.equal(stats.week.users, 3);
+  // Grafik: 14 kun, bugungi kunda 3 ta yangi foydalanuvchi
+  assert.equal(stats.daily.length, 14);
+  assert.equal(stats.daily.at(-1).users, 3);
+  assert.equal(stats.daily.reduce((n, d) => n + d.users, 0), 3);
 
   const pending = (await panel(cookie, '/api/admin/users?status=pending')).data;
   assert.equal(pending.total, 2);
