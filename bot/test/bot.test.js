@@ -245,8 +245,8 @@ test('ro‘yxatdan o‘tgan foydalanuvchi /start bosganda bosh menyu chiqadi', a
   assert.match(home.body.text, /Assalomu alaykum, Aziz/);
   const buttons = home.body.reply_markup.inline_keyboard.flat();
   assert.ok(buttons.some((b) => b.web_app?.url === `${ORIGIN}/`));
-  // Biznes ma'lumotlarini yangilamaydi, o'chirib qayta ro'yxatdan o'tadi
-  assert.ok(buttons.some((b) => b.callback_data === 'biz:delete'));
+  // Biznesda tasodifan bosib yuborilmasligi uchun na yangilash, na o'chirish tugmasi bor (o'chirish faqat ilova ichida)
+  assert.ok(!buttons.some((b) => b.callback_data === 'biz:delete'));
   assert.ok(!buttons.some((b) => b.callback_data === 'reg:restart'));
 
   // Blogerda esa "Ma'lumotlarni yangilash"

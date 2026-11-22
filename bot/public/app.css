@@ -994,3 +994,8 @@ textarea.control { min-height: 92px; resize: vertical; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Biznesni o'chirish: sahifaning eng pastida, kichik va tinch havola */
+.danger-zone { margin-top: 48px; padding: 16px 0 8px; text-align: center; }
+.danger-link { background: none; border: 0; padding: 8px 12px; font: inherit; font-size: 13px; color: var(--hint); text-decoration: underline; cursor: pointer; }
+.danger-link:hover { color: #d33; }

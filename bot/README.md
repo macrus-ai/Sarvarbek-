@@ -22,7 +22,7 @@ Qo‘shimcha:
 - Biznesga kelgan so‘rovda blogerning profil havolasi, obunachilari, ko‘rishlari va qamrovi, yo‘nalishi, auditoriya hududi va statistika skrinshoti (rasm bo‘lib) bor. Blogerning Telegram profili va telefon raqami faqat so‘rov qabul qilingandan keyin ko‘rinadi.
 - Ro‘yxatdan o‘tishda maxfiylik siyosatiga havola ko‘rsatiladi (saytdagi `privacy.html`, manzil `wrangler.toml` dagi `PRIVACY_URL` da).
 - Har bir savolda (til va rol tanlashdan boshqa) "⬅️ Orqaga" tugmasi bor: bosilsa oldingi savol qaytadan beriladi, javobni to‘g‘rilash mumkin (Instagramga xos qadamlar bo‘lmasa, o‘tkazib yuboriladi). Telefon savolida u oddiy tugma, qolganlarida inline tugma. Eskirgan "Orqaga" tugmasi ishlamaydi.
-- Bloger ma’lumotlarini botdagi "✏️ Ma’lumotlarni yangilash" tugmasi bilan yangilaydi. Biznesda bu tugma yo‘q: o‘rniga "🗑 Biznesni o‘chirish" bor. U tasdiqdan keyin biznesning profili, barcha e’lonlari va ularga kelgan so‘rovlarni o‘chiradi, so‘ng biznes qaytadan ro‘yxatdan o‘tadi va yana moderatsiyadan o‘tadi (eski e’lonlar qolmaydi).
+- Bloger ma’lumotlarini botdagi "✏️ Ma’lumotlarni yangilash" tugmasi bilan yangilaydi. Biznesda bu tugma yo‘q. "Biznesni o‘chirish" botda ko‘rinmaydi (tasodifan bosilmasin): u mini ilovada "E’lonlarim" sahifasining eng pastida kichik havola. U tasdiqdan keyin biznesning profili, barcha e’lonlari va ularga kelgan so‘rovlarni o‘chiradi, so‘ng biznes qaytadan ro‘yxatdan o‘tadi va yana moderatsiyadan o‘tadi (eski e’lonlar qolmaydi).
 - `/delete` foydalanuvchining profili, e’lonlari va so‘rovlarini tasdiqdan keyin butunlay o‘chiradi. `/privacy` siyosat havolasini yuboradi.
 
 ### Yangi e’lon haqida blogerlarga xabar

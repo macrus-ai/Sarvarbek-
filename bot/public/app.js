@@ -74,6 +74,8 @@
       reopenCampaign: 'Qayta ochish',
       viewRequests: 'So‘rovlar',
       closeConfirm: 'E’lon yopilsa, blogerlar uni ko‘rmaydi. Yopilsinmi?',
+      deleteBusiness: 'Biznesni o‘chirish',
+      deleteBusinessConfirm: 'Biznesingiz, barcha reklama e’lonlaringiz va ularga kelgan so‘rovlar butunlay o‘chiriladi. Keyin qaytadan ro‘yxatdan o‘tasiz. Davom etilsinmi?',
       campaignClosed: 'E’lon yopildi',
       campaignReopened: 'E’lon qayta ochildi',
       fTitle: 'Mahsulot yoki xizmat',
@@ -268,6 +270,8 @@
       reopenCampaign: 'Открыть снова',
       viewRequests: 'Отклики',
       closeConfirm: 'Закрытое объявление блогеры не увидят. Закрыть?',
+      deleteBusiness: 'Удалить бизнес',
+      deleteBusinessConfirm: 'Бизнес, все ваши объявления и отклики на них будут удалены безвозвратно. Затем вы зарегистрируетесь заново. Продолжить?',
       campaignClosed: 'Объявление закрыто',
       campaignReopened: 'Объявление снова открыто',
       fTitle: 'Товар или услуга',
@@ -841,8 +845,10 @@
     const head = `<div class="head-row"><h1 class="view-title">${esc(t('myCampaignsTitle'))}</h1>
       <button type="button" class="btn btn-primary btn-sm" data-act="new" aria-label="${esc(t('newCampaign'))}">${icon('plus')}<span>${esc(t('newShort'))}</span></button></div>`;
     if (!list) return head + skeleton(2);
+    // Eng pastda, ko'zga tashlanmaydigan kichik havola (tasodifan bosilmasin)
+    const danger = `<div class="danger-zone"><button type="button" class="danger-link" data-act="delete-business">${esc(t('deleteBusiness'))}</button></div>`;
     if (!list.length) {
-      return head + emptyHTML(t('emptyMyCampaigns'), 'megaphone', `<button type="button" class="btn btn-primary" data-act="new">${esc(t('newCampaign'))}</button>`);
+      return head + emptyHTML(t('emptyMyCampaigns'), 'megaphone', `<button type="button" class="btn btn-primary" data-act="new">${esc(t('newCampaign'))}</button>`) + danger;
     }
     return head + list.map((c) => `
       <a class="card card-link" href="?c=${c.id}" data-act="open" data-id="${c.id}">
@@ -851,7 +857,24 @@
         <h3>${esc(c.title)}</h3>
         <div class="row"><span class="value">${money(c.value)}</span><span class="muted">${esc(t('acceptedOf', c.accepted, c.slots))}</span></div>
         ${c.pending ? `<span class="pending-note">${esc(t('pendingN', c.pending))}</span>` : ''}
-      </a>`).join('');
+      </a>`).join('') + danger;
+  }
+
+  async function deleteBusiness() {
+    if (state.busy) return;
+    if (!(await confirmAction(t('deleteBusinessConfirm')))) return;
+    state.busy = true;
+    try {
+      await api('/api/me/delete', { method: 'POST', body: {} });
+      haptic('success');
+      if (tg?.close) tg.close();
+      else window.location.reload();
+    } catch (e) {
+      haptic('error');
+      toast(errorText(e));
+    } finally {
+      state.busy = false;
+    }
   }
 
   // Biznes: kelgan so'rovlar
@@ -1533,6 +1556,9 @@
       case 'reset-filters':
         Object.assign(state.filters, { category: '', platform: '', q: '', region: '', sort: 'new', fit: false });
         filtersChanged();
+        break;
+      case 'delete-business':
+        deleteBusiness();
         break;
       case 'image-remove':
         removeImage(el.dataset.target);

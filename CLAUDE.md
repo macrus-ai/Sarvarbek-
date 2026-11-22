@@ -44,7 +44,7 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
 - Yangi bloger, biznes va reklama e’loni **moderatsiyadan** o‘tadi (`moderation`: `pending` / `approved` / `rejected`). E’lon tasdiqlanmaguncha blogerlarga ko‘rinmaydi. Rad etilgan e’lon yopiladi.
 - Moderatsiya kartalari Telegram guruhlariga keladi. Guruhlar `/ulash`, `/ulash bloger`, `/ulash biznes`, `/ulash elon` bilan ulanadi. Guruh bo‘lmasa, kartalar `ADMIN_IDS` ga shaxsan keladi.
 - Blogerning Telegrami va telefoni biznesga faqat so‘rov qabul qilingandan keyin ko‘rinadi. Undan oldin profil havolasi va statistika ko‘rinadi.
-- Biznesda "Ma’lumotlarni yangilash" yo‘q, o‘rniga "🗑 Biznesni o‘chirish" bor: hamma narsa o‘chadi, keyin qayta ro‘yxatdan o‘tiladi.
+- Biznesda "Ma’lumotlarni yangilash" yo‘q. "Biznesni o‘chirish" botning bosh xabarida emas (tasodifan bosilmasin), faqat mini ilovada "E’lonlarim" sahifasining eng pastida kichik havola: hamma narsa o‘chadi, keyin qayta ro‘yxatdan o‘tiladi.
 - Admin panel: botga `/admin` yuboriladi. Bir martalik havola 10 daqiqa amal qiladi, sessiya 30 kun.
 
 ## Test va tekshiruv
