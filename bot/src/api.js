@@ -9,10 +9,10 @@ import {
   listBusinessCampaigns, listBusinessRequests, setCampaignImage, setCampaignStatus, touchUser, updateUser
 } from './db.js';
 import { tr } from './i18n.js';
-import { forgetImage, imageOut, newImageKey, pickSizes, sniffImage, statsImageUrl } from './images.js';
+import { imageOut, newImageKey, pickSizes, sniffImage, statsImageUrl } from './images.js';
 import { AppError, adKeyboard, applyToCampaign, decide, followersOk, moderationEnabled, notifyAdmins, sendAdCard } from './services.js';
 import { TelegramError, validateInitData } from './telegram.js';
-import { formatPhone, guessLang, isRegistered, json, normSearch, profileUrl } from './util.js';
+import { formatPhone, guessLang, isRegistered, json, normSearch, now, profileUrl } from './util.js';
 
 const META = {
   categories: CATEGORIES,
@@ -339,31 +339,29 @@ async function route(ctx, user, method, path, url, request) {
     }
   }
 
-  // E'lon rasmi: PUT — qo'yish yoki almashtirish, DELETE — olib tashlash (faqat egasi)
+  // E'lon rasmi: faqat e'lon joylanayotganda bir marta qo'yiladi (mini ilova e'londan keyin darhol yuklaydi).
+  // Biznes joylangan e'lonni o'zgartira olmaydi: rasmni almashtirish va olib tashlash yopiq, tahrirlash faqat admin panelda.
   if ((m = path.match(/^\/api\/campaigns\/(\d+)\/image$/)) && (method === 'PUT' || method === 'DELETE')) {
     requireRole(user, 'business');
     const campaignId = Number(m[1]);
     const current = await getCampaign(db, campaignId, id);
     if (!current || current.business_id !== id) throw new AppError('not_found', 404);
+    const fresh = now() - current.created_at <= LIMITS.imageUploadWindow;
+    if (method === 'DELETE' || current.image_key || !fresh) throw new AppError('campaign_locked', 403);
 
-    if (method === 'DELETE') {
-      await setCampaignImage(db, campaignId, id, null);
-    } else {
-      const image = await uploadImage(ctx, user, current, await readImage(request));
-      await setCampaignImage(db, campaignId, id, image);
-      // Adminga rasm ham ko'rinsin: e'lon joylangandan keyin almashtirilgan rasmlar ham moderatsiyadan o'tadi
-      // Moderatsiyadagi e'lon rasmi tasdiqlash tugmalari bilan, tasdiqlangan e'lonniki — yopish tugmasi bilan
-      await notifyAdmins(
-        ctx,
-        (T) => ({
-          photo: image.fileId,
-          text: T.adminNewImage({ ...current, business_contact: user.name }),
-          extra: { reply_markup: adKeyboard(T, current) }
-        }),
-        'ads'
-      );
-    }
-    await forgetImage(ctx.origin, campaignId, current.image_key);
+    const image = await uploadImage(ctx, user, current, await readImage(request));
+    await setCampaignImage(db, campaignId, id, image);
+    // Adminga rasm ham ko'rinsin
+    // Moderatsiyadagi e'lon rasmi tasdiqlash tugmalari bilan, tasdiqlangan e'lonniki — yopish tugmasi bilan
+    await notifyAdmins(
+      ctx,
+      (T) => ({
+        photo: image.fileId,
+        text: T.adminNewImage({ ...current, business_contact: user.name }),
+        extra: { reply_markup: adKeyboard(T, current) }
+      }),
+      'ads'
+    );
     return json({ campaign: campaignOut(await getCampaign(db, campaignId, id), id) });
   }
 
