@@ -116,19 +116,29 @@ test('rasm manzili kalitsiz yoki noto‘g‘ri kalit bilan ochilmaydi', async ()
   assert.equal(broken.status, 502);
 });
 
-test('rasmni almashtirish va olib tashlash: eski manzil ishlamay qoladi', async () => {
+test('biznes joylangan e’lon rasmini almashtira olmaydi va olib tashlay olmaydi', async () => {
   const { business, blogger, id } = await setup();
   const first = (await putImage(env, business, id, JPEG)).data.campaign.image;
-  const second = (await putImage(env, business, id, JPEG)).data.campaign.image;
-  assert.notEqual(first.url, second.url);
-  assert.equal((await getImage(env, first.url)).status, 404);
-  assert.equal((await getImage(env, second.url)).status, 200);
 
+  const again = await putImage(env, business, id, JPEG);
+  assert.equal(again.status, 403);
+  assert.equal(again.data.error, 'campaign_locked');
   const removed = await api(env, business, `/api/campaigns/${id}/image`, { method: 'DELETE' });
-  assert.equal(removed.status, 200);
-  assert.equal(removed.data.campaign.image, null);
-  assert.equal((await getImage(env, second.url)).status, 404);
-  assert.equal((await api(env, blogger, `/api/campaigns/${id}`)).data.campaign.image, null);
+  assert.equal(removed.status, 403);
+  assert.equal(removed.data.error, 'campaign_locked');
+
+  // Rasm o'zgarmadi
+  assert.deepEqual((await api(env, blogger, `/api/campaigns/${id}`)).data.campaign.image, first);
+  assert.equal((await getImage(env, first.url)).status, 200);
+});
+
+test('rasmsiz e’longa vaqt o‘tgach rasm qo‘yib bo‘lmaydi', async () => {
+  const { business, id } = await setup();
+  await env.DB.prepare('UPDATE campaigns SET created_at = created_at - 3600 WHERE id = ?1').bind(id).run();
+  const late = await putImage(env, business, id, JPEG);
+  assert.equal(late.status, 403);
+  assert.equal(late.data.error, 'campaign_locked');
+  assert.equal((await api(env, business, `/api/campaigns/${id}`)).data.campaign.image, null);
 });
 
 test('rasm yuklash: tekshiruvlar va huquqlar', async () => {

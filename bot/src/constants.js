@@ -296,6 +296,8 @@ export const LIMITS = {
   followersMax: 10000000,
   daysMax: 90,
   slotsMax: 100,
+  // E'lon joylangandan keyin rasm qo'yish mumkin bo'lgan vaqt (soniya); keyin e'lonni biznes o'zgartira olmaydi
+  imageUploadWindow: 30 * 60,
   imageMaxBytes: 5 * 1024 * 1024, // yuklanadigan rasm hajmi (mini ilova uni oldindan kichraytiradi)
   // Yangi e'lon haqida bitta cron ishga tushishida nechta blogerga xabar yuboriladi (har daqiqada).
   // Cloudflare bepul tarifida bitta ishga tushishda 50 ta tashqi so'rov (Telegram + D1) mumkin:

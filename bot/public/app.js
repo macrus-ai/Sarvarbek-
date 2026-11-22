@@ -101,10 +101,6 @@
       imageHint: 'Rasmli e’lon ko‘proq e’tibor tortadi',
       imageChange: 'Almashtirish',
       imageRemove: 'Olib tashlash',
-      imageRemoveConfirm: 'Rasm olib tashlansinmi?',
-      imageUploading: 'Rasm yuklanmoqda…',
-      imageSaved: 'Rasm saqlandi',
-      imageRemoved: 'Rasm olib tashlandi',
       imageAfterFail: 'E’lon joylandi, lekin rasm yuklanmadi. E’lon sahifasida qayta qo‘shib ko‘ring.',
       publishing: 'Joylanmoqda…',
       publish: 'E’lonni joylash',
@@ -139,6 +135,7 @@
       audienceRegion: 'Auditoriya hududi',
       adPending: 'Moderatsiyada',
       adRejected: 'Rad etilgan',
+      adLockedNote: 'Joylangan e’lonni o‘zgartirib bo‘lmaydi. Xato bo‘lsa, botga yozing: moderator tuzatib beradi. Yoki e’lonni yopib, yangisini joylang.',
       adPendingNote: 'E’lon moderatsiyada. Jamoamiz tasdiqlagach blogerlar uni ko‘radi va botga xabar keladi.',
       adRejectedNote: 'E’lon tasdiqlanmadi. Shartlar va rasmni tekshirib, yangi e’lon joylashingiz mumkin.',
       publishedPending: 'E’lon moderatsiyaga yuborildi. Tasdiqlangach blogerlar ko‘radi.',
@@ -155,6 +152,7 @@
       contactHidden: 'Telegram va telefon raqami so‘rovni qabul qilgach ko‘rinadi.',
       close: 'Yopish',
       err_campaign_rejected: 'Rad etilgan e’lonni qayta ochib bo‘lmaydi. Yangisini joylang.',
+      err_campaign_locked: 'Joylangan e’lonni o‘zgartirib bo‘lmaydi. Xato bo‘lsa, botga yozing.',
       regionSaved: 'Hudud saqlandi',
       campaignFilter: 'E’lon',
       allCampaigns: 'Barcha e’lonlar',
@@ -297,10 +295,6 @@
       imageHint: 'Объявления с фото привлекают больше внимания',
       imageChange: 'Заменить',
       imageRemove: 'Удалить',
-      imageRemoveConfirm: 'Удалить фото?',
-      imageUploading: 'Фото загружается…',
-      imageSaved: 'Фото сохранено',
-      imageRemoved: 'Фото удалено',
       imageAfterFail: 'Объявление размещено, но фото не загрузилось. Добавьте его снова на странице объявления.',
       publishing: 'Размещаем…',
       publish: 'Разместить объявление',
@@ -335,6 +329,7 @@
       audienceRegion: 'Регион аудитории',
       adPending: 'На модерации',
       adRejected: 'Отклонено',
+      adLockedNote: 'Опубликованное объявление нельзя изменить. Если есть ошибка, напишите в бот: модератор исправит. Или закройте объявление и разместите новое.',
       adPendingNote: 'Объявление на модерации. После одобрения блогеры увидят его, а бот пришлёт сообщение.',
       adRejectedNote: 'Объявление не одобрено. Проверьте условия и фото и разместите новое.',
       publishedPending: 'Объявление отправлено на модерацию. После одобрения его увидят блогеры.',
@@ -351,6 +346,7 @@
       contactHidden: 'Telegram и телефон будут видны после того, как вы примете отклик.',
       close: 'Закрыть',
       err_campaign_rejected: 'Отклонённое объявление нельзя открыть снова. Разместите новое.',
+      err_campaign_locked: 'Опубликованное объявление нельзя изменить. Если есть ошибка, напишите в бот.',
       regionSaved: 'Регион сохранён',
       campaignFilter: 'Объявление',
       allCampaigns: 'Все объявления',
@@ -417,8 +413,7 @@
     // Biznes: so'rovlar filtri (status: pending | accepted | all, campaign: e'lon id yoki 0)
     req: { status: 'pending', campaign: 0, region: '', sort: 'new' },
     scroll: {},
-    busy: false,
-    imageBusy: false // e'lon sahifasida rasm yuklanmoqda
+    busy: false
   };
 
   /* ---------- Yordamchilar ---------- */
@@ -646,14 +641,13 @@
     return `<label class="img-pick">${fileInput(target)}${icon('image')}<span>${esc(t('imageAdd'))}</span><small>${esc(t('imageHint'))}</small></label>`;
   }
 
+  // Faqat yangi e'lon formasida: joylangan e'lonni biznes o'zgartira olmaydi (rasmni ham)
   function imageEditorHTML(target, src, alt) {
-    const busy = target === 'detail' && state.imageBusy;
-    return `<figure class="img-figure ${busy ? 'is-busy' : ''}">
+    return `<figure class="img-figure">
       <img class="detail-img" src="${esc(src)}" alt="${esc(alt)}">
-      ${busy ? `<div class="img-overlay" role="status"><div class="spinner"></div><span>${esc(t('imageUploading'))}</span></div>` : ''}
       <figcaption class="btn-row img-actions">
         <label class="btn btn-quiet btn-sm">${fileInput(target)}${icon('image')}<span>${esc(t('imageChange'))}</span></label>
-        <button type="button" class="btn btn-quiet btn-sm" data-act="image-remove" data-target="${target}" ${busy ? 'disabled' : ''}>${esc(t('imageRemove'))}</button>
+        <button type="button" class="btn btn-quiet btn-sm" data-act="image-remove" data-target="${target}">${esc(t('imageRemove'))}</button>
       </figcaption>
     </figure>`;
   }
@@ -985,12 +979,9 @@
     if (c.own && c.moderation === 'pending') ownStats = `<div class="notice notice-warn">${esc(t('adPendingNote'))}</div>`;
     if (c.own && c.moderation === 'rejected') ownStats = `<div class="notice notice-danger">${esc(t('adRejectedNote'))}</div>`;
 
-    let image = '';
-    if (c.own) image = c.image ? imageEditorHTML('detail', c.image.url, c.title) : imagePickerHTML('detail');
-    else if (c.image) image = `<img class="detail-img" src="${esc(c.image.url)}" alt="${esc(c.title)}">`;
-    if (c.own && !c.image && state.imageBusy) {
-      image = `<div class="img-pick is-busy" role="status"><div class="spinner"></div><span>${esc(t('imageUploading'))}</span></div>`;
-    }
+    const image = c.image ? `<img class="detail-img" src="${esc(c.image.url)}" alt="${esc(c.title)}">` : '';
+    // Biznes joylangan e'lonni o'zgartira olmaydi: faqat yopish yoki qayta ochish
+    if (c.own && c.moderation !== 'rejected') ownStats += `<p class="muted small locked-note">${esc(t('adLockedNote'))}</p>`;
 
     return `<article class="detail">
       ${image}
@@ -1374,60 +1365,18 @@
       return;
     }
 
-    if (target === 'form') {
-      if (state.view?.name !== 'new' || !state.form) return;
-      if (state.form.image) URL.revokeObjectURL(state.form.image.url);
-      state.form.image = { blob, url: URL.createObjectURL(blob) };
-      render();
-      return;
-    }
-
-    const c = state.detail;
-    if (!c?.own || state.imageBusy) return;
-    state.imageBusy = true;
+    if (target !== 'form' || state.view?.name !== 'new' || !state.form) return;
+    if (state.form.image) URL.revokeObjectURL(state.form.image.url);
+    state.form.image = { blob, url: URL.createObjectURL(blob) };
     render();
-    try {
-      const data = await api(`/api/campaigns/${c.id}/image`, { method: 'PUT', blob });
-      if (state.detail?.id === c.id) state.detail = data.campaign;
-      state.data.myCampaigns = null;
-      haptic('success');
-      toast(t('imageSaved'));
-    } catch (e) {
-      haptic('error');
-      toast(errorText(e));
-    } finally {
-      state.imageBusy = false;
-      if (state.view?.name === 'detail') render();
-    }
   }
 
-  async function removeImage(target, button) {
-    if (target === 'form') {
-      readForm();
-      if (state.form?.image) URL.revokeObjectURL(state.form.image.url);
-      if (state.form) state.form.image = null;
-      render();
-      return;
-    }
-    const c = state.detail;
-    if (!c?.own || state.imageBusy || state.busy) return;
-    if (!(await confirmAction(t('imageRemoveConfirm')))) return;
-    state.busy = true;
-    button.disabled = true;
-    try {
-      const data = await api(`/api/campaigns/${c.id}/image`, { method: 'DELETE' });
-      if (state.detail?.id === c.id) state.detail = data.campaign;
-      state.data.myCampaigns = null;
-      haptic('success');
-      toast(t('imageRemoved'));
-      render();
-    } catch (e) {
-      haptic('error');
-      toast(errorText(e));
-      button.disabled = false;
-    } finally {
-      state.busy = false;
-    }
+  function removeImage(target) {
+    if (target !== 'form') return;
+    readForm();
+    if (state.form?.image) URL.revokeObjectURL(state.form.image.url);
+    if (state.form) state.form.image = null;
+    render();
   }
 
   async function submitApply(button) {
@@ -1586,7 +1535,7 @@
         filtersChanged();
         break;
       case 'image-remove':
-        removeImage(el.dataset.target, el);
+        removeImage(el.dataset.target);
         break;
       case 'lightbox':
         openLightbox(el.dataset.src);
