@@ -83,7 +83,7 @@ Xavfsizlik: sessiya `HttpOnly` cookie'da, bazada faqat tokenlarning xeshi saqlan
 
 ### Agentlar jadvali (Google Sheets)
 
-Botda birinchi marta ro‘yxatdan o‘tgan bloger "Ovoza kunlik agent jadvali" ning **Blogerlar** varag‘iga, biznes esa **Brendlar** varag‘iga "Yangi" holatida yoziladi (`src/sheets.js`). Manba ustunida "Telegram bot", izohda Telegram ID turadi. Profilni qayta tahrirlash yangi qator qo‘shmaydi.
+Botda birinchi marta ro‘yxatdan o‘tgan bloger "Ovoza kunlik agent jadvali" ning **Blogerlar** varag‘iga, biznes esa **Brendlar** varag‘iga "Yangi" holatida yoziladi (`src/sheets.js`). Manba ustunida "Telegram bot", izohda Telegram ID turadi. Profilni qayta tahrirlash yangi qator qo‘shmaydi. `=`, `+`, `-` yoki `@` bilan boshlangan qiymat oldiga `'` qo‘yiladi: Sheets uni formula deb ishga tushirmaydi (aks holda ism o‘rniga yozilgan formula jadvaldagi boshqa qatorlarni tashqariga yuborishi mumkin edi).
 
 - Jadval tomonida Apps Script web app ishlaydi, uning manzili `wrangler.toml` dagi `SHEETS_URL`. U qatorni qo‘shadi va egasiga Telegramda xabar beradi. `SHEETS_URL` bo‘sh bo‘lsa, hech narsa yuborilmaydi. Skript kodining nusxasi: `apps-script/Code.gs` (o‘zgartirilsa, Apps Script'ga qo‘yilib, yangi versiya deploy qilinadi, manzil o‘zgarmaydi).
 - Kalit bot tokenidan hosil qilinadi (`sha256("ovoza-sheets:" + token)` ning boshidagi 48 belgi). Apps Script ham tokenni biladi, shuning uchun alohida maxfiy kalit kerak emas.

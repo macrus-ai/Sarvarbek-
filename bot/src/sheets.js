@@ -12,6 +12,16 @@ export async function sheetsKey(botToken) {
 
 const joinFilled = (parts) => parts.filter(Boolean).join('; ');
 
+// Google Sheets "=", "+", "-", "@" bilan boshlangan matnni formula deb ishga tushiradi. Ism yoki kompaniya
+// nomini foydalanuvchi o'zi yozadi: "=IMPORTXML(...)" kabi formula jadvaldagi boshqa qatorlarni
+// (telefonlarni) tashqariga yuborishi mumkin. Boshiga ' qo'yilsa, Sheets uni oddiy matn qiladi va ' ko'rinmaydi.
+export const sheetText = (v) => {
+  const s = String(v ?? '');
+  return /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+};
+
+const safeRow = (row) => Object.fromEntries(Object.entries(row).map(([k, v]) => [k, sheetText(v)]));
+
 // Profil havolasidan akkaunt nomi: https://instagram.com/user -> user
 function handleOf(url) {
   const last = String(url ?? '').split('?')[0].split('/').filter(Boolean).pop() || '';
@@ -54,7 +64,8 @@ export function sheetRow(u) {
 }
 
 async function post(ctx, user) {
-  const body = { key: await sheetsKey(ctx.env.BOT_TOKEN), ...sheetRow(user) };
+  const { sheet, row } = sheetRow(user);
+  const body = { key: await sheetsKey(ctx.env.BOT_TOKEN), sheet, row: safeRow(row) };
   const res = await fetch(ctx.env.SHEETS_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
