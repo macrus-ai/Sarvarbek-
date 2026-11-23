@@ -37,6 +37,7 @@ Birinchi chatning tarixi (nima so‘ralgan, nima qilingan, raqobatchilar tahlili
   - `bot/README.md` — mahsulotning to‘liq tavsifi. Funksiya o‘zgarsa, README ham yangilanadi.
 - `.github/workflows/bot.yml` — testlar, `wrangler deploy --dry-run`, `main` da esa migratsiya, deploy va `/setup`.
 - `.claude/skills/yt-*` — YouTube agent: 11 ta skill (`/yt-script`, `/yt-package`, `/yt-plan`, `/yt-viral`, `/yt-seo`, `/yt-shorts`, `/yt-edit`, `/yt-retention`, `/yt-chapters`, `/yt-comment`, `/yt-audit`). Manba: Jakeschincariol/youtube-agent-skill (MIT). Ovoz profili: `.claude/youtube/voice.md`.
+- `.claude/commands/sc/` (30 ta `/sc:*` buyruq) va `.claude/agents/` (20 ta mutaxassis agent) — SuperClaude Framework (MIT, `.claude/LICENSE-SuperClaude`). Nega faqat shu olingani: `docs/claude-repolar.md`.
 - `.claude/skills/watch` — `/watch` skill: videoni (YouTube havolasi yoki fayl) ko‘rib, savolga javob beradi: ffmpeg bilan kadrlar va subtitr/transkript oladi. Manba: bradautomates/claude-video (MIT, `LICENSE-claude-video`). Kerak: Python 3.10+, `ffmpeg`, `yt-dlp` (Windows: `winget install yt-dlp.yt-dlp`). Birinchi ishga tushishda `setup.py` sozlash savollarini beradi; sozlamalar va kalitlar `~/.config/watch/.env` da, repoga yozilmaydi. Gemini kaliti bo‘lsa, videoni Google ko‘radi.
 
 ## Asosiy qoidalar (mahsulot)
