@@ -15,6 +15,7 @@ import {
   AppError, MOD_CHAT_KEYS, adKeyboard, canModerate, decide, editMessage, homeKeyboard, isModerationChat, moderate,
   moderateCampaign, moderationEnabled, pendingKeyboard, resubmitKeyboard, sendAdCard, sendModerationCard
 } from './services.js';
+import { caseKeyboard, decideResultBy, hideCase } from './results.js';
 import { addToSheet } from './sheets.js';
 import { checkInstagram } from './igcheck.js';
 import { botIdOf, esc, guessLang, isAdmin, isRegistered, normalizePhone, normalizeProfile, now, privacyUrl } from './util.js';
@@ -758,6 +759,56 @@ async function onCallback(cq, ctx) {
         return ack(messages[e.code] || T.errNotFound, true);
       }
       return ack(decision === 'accepted' ? T.decidedAccepted : T.decidedRejected);
+    }
+    // Xavfsiz barter: biznes blogerning natijasini tasdiqlaydi ("Bajarildi") yoki "Muammo bor" deydi
+    case 'rs': {
+      const appId = Number(extra);
+      const decision = value === 'c' ? 'confirmed' : value === 'd' ? 'disputed' : null;
+      if (!decision || !Number.isSafeInteger(appId)) return stale();
+      if (!isRegistered(user)) return ack(T.errFinishRegistration, true);
+      if (user.moderation !== 'approved') return ack(T.errNotApproved, true);
+      try {
+        await decideResultBy(ctx, user, appId, decision);
+      } catch (e) {
+        if (!(e instanceof AppError)) throw e;
+        const messages = { result_decided: T.errResultDecided, result_missing: T.errResultMissing };
+        return ack(messages[e.code] || T.errNotFound, true);
+      }
+      await ack(decision === 'confirmed' ? T.resultConfirmedShort : T.resultDisputedShort);
+      // Tugmalar olib tashlanadi, post havolasi qoladi
+      const keep = (cq.message.reply_markup?.inline_keyboard || []).map((row) => row.filter((b) => b.url)).filter((row) => row.length);
+      try {
+        const line = decision === 'confirmed' ? T.resultConfirmedLine : T.resultDisputedLine;
+        await editMessage(ctx, chatId, messageId, `${esc(cq.message.text || '')}
+
+${line}`, {
+          reply_markup: { inline_keyboard: keep }
+        });
+      } catch {
+        /* xabar juda eski bo'lsa tahrirlab bo'lmaydi */
+      }
+      return undefined;
+    }
+    // Jamoa keysni saytdan yashiradi (h) yoki qaytaradi (s)
+    case 'cs': {
+      const appId = Number(extra);
+      if (!['h', 's'].includes(value) || !Number.isSafeInteger(appId)) return stale();
+      if (!(await canModerate(ctx, user.tg_id, chatId))) return ack(T.modNoRights, true);
+      const TM = cq.message.chat.type === 'private' ? T : tr('uz');
+      let a;
+      try {
+        a = await hideCase(ctx, appId, value === 'h');
+      } catch (e) {
+        if (!(e instanceof AppError)) throw e;
+        return ack(e.code === 'already' ? TM.modAlready : TM.modGone, true);
+      }
+      await ack(value === 'h' ? TM.caseHiddenShort : TM.caseShownShort);
+      try {
+        await ctx.tg.editMarkup(chatId, messageId, caseKeyboard(TM, a, value === 'h'));
+      } catch {
+        /* e'tiborsiz */
+      }
+      return undefined;
     }
     case 'del': {
       if (value !== 'yes' && value !== 'no') return stale();

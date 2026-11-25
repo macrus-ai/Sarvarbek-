@@ -6,6 +6,7 @@
 //   /api/*                  — mini ilova API'si
 //   GET /img/c/...          — reklama e'lonlarining rasmlari (Telegramdan olib beriladi)
 //   /admin/login, /api/admin/* — admin panel (sahifasi public/admin/ da)
+//   GET /public/cases[/<id>] — saytdagi "Real keyslar" uchun ochiq ma'lumot (results.js)
 //   qolganlari              — mini ilova fayllari (public/)
 //
 //   scheduled (cron, har daqiqada, wrangler.toml) — yangi e'lonlar haqida blogerlarga xabar (broadcast.js),
@@ -20,6 +21,7 @@ import { getSetting, setSetting } from './db.js';
 import { tr } from './i18n.js';
 import { IMAGE_PATH, STATS_PATH, serveImage, serveStatsImage } from './images.js';
 import { BOT_USERNAME, moveOldFiles, noticeOldUsers, oldTelegram, oldWebhook, setupOldBot } from './oldbot.js';
+import { handlePublic } from './results.js';
 import { createTelegram, webhookSecret } from './telegram.js';
 import { json } from './util.js';
 
@@ -29,6 +31,17 @@ export default {
     const path = url.pathname;
 
     if (path === '/health') return json({ ok: true });
+
+    // Sayt (miqyos.uz) uchun ochiq ma'lumot: tasdiqlangan keyslar. Kirish talab qilinmaydi.
+    if (path === '/public/cases' || path.startsWith('/public/cases/')) {
+      if (!env.DB) return json({ error: 'not_configured' }, 503);
+      try {
+        return await handlePublic(request, { env, db: env.DB, origin: url.origin });
+      } catch (e) {
+        console.error('public request failed:', e);
+        return json({ error: 'server' }, 500);
+      }
+    }
 
     const image = path.match(IMAGE_PATH);
     const stats = path.match(STATS_PATH);

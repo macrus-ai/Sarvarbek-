@@ -183,6 +183,47 @@
       loadErrorTitle: 'Yuklab bo‘lmadi',
       loadErrorText: 'Internet aloqasini tekshirib, qayta urinib ko‘ring.',
       retry: 'Qayta urinish',
+      // Xavfsiz barter: natija
+      resultTitle: 'Xavfsiz barter: natija',
+      resultHint: 'Reklamani joylagach, post havolasini yuboring. Biznes tekshirib, «Bajarildi» deb tasdiqlaydi va hamkorlik Miqyos saytidagi keyslarda chiqadi.',
+      postUrl: 'Post havolasi',
+      postUrlPh: 'https://instagram.com/reel/...',
+      resultViews: 'Ko‘rishlar soni',
+      resultNote: 'Izoh',
+      resultNotePh: 'Masalan: 1 Reels va 2 ta Stories joylandi',
+      sendResult: 'Natijani yuborish',
+      resendResult: 'Qayta yuborish',
+      resultSent: 'Yuborildi. Biznes tekshiradi.',
+      resultWaiting: 'Biznes natijani tekshirmoqda',
+      resultConfirmed: 'Biznes tasdiqladi. Hamkorlik saytdagi keyslarda.',
+      resultDisputed: 'Biznes muammo borligini aytdi. Biznes bilan gaplashib, tuzatgach havolani qayta yuboring.',
+      editResult: 'Havolani o‘zgartirish',
+      openPost: 'Postni ochish',
+      viewsN: (n) => `${fmt(n)} ko‘rish`,
+      businessReview: 'Biznes fikri',
+      resultNone: 'Bloger reklamani joylagach, post havolasi shu yerda va botda chiqadi.',
+      resultCheck: 'Bloger reklamani joyladi. Postni tekshiring.',
+      rating: 'Baho',
+      ratingN: (n) => `${n} yulduz`,
+      reviewLabel: 'Fikringiz',
+      reviewPh: 'Masalan: video yaxshi chiqdi, 20 ta buyurtma keldi',
+      reviewOrNote: 'Fikringiz yoki muammo izohi',
+      confirmResult: 'Bajarildi',
+      disputeResult: 'Muammo bor',
+      disputeConfirm: 'Muammo bor deb belgilansinmi? Blogerga va Miqyos jamoasiga xabar boradi.',
+      confirmedToast: 'Tasdiqlandi. Keys saytga qo‘shildi.',
+      disputedToast: 'Blogerga va jamoaga xabar berildi.',
+      resultConfirmedBiz: 'Siz tasdiqladingiz. Keys saytda ko‘rinadi.',
+      resultDisputedBiz: 'Muammo bor deb belgiladingiz. Bloger tuzatib qayta yuboradi.',
+      addReview: 'Fikr qoldiring: u saytdagi keysda ko‘rinadi.',
+      saveReview: 'Fikrni saqlash',
+      reviewSaved: 'Fikr saqlandi',
+      e_postUrl: 'Havolani to‘liq yozing, masalan https://instagram.com/reel/...',
+      e_views: 'Ko‘rishlar sonini raqam bilan yozing',
+      err_not_accepted: 'So‘rov hali qabul qilinmagan.',
+      err_result_confirmed: 'Natija allaqachon tasdiqlangan.',
+      err_result_decided: 'Natija bo‘yicha qaror allaqachon qabul qilingan.',
+      err_result_missing: 'Bloger hali natija yubormagan.',
       err_network: 'Internet aloqasini tekshirib, qayta urinib ko‘ring.',
       err_server: 'Serverda xatolik. Birozdan keyin qayta urinib ko‘ring.',
       err_unauthorized: 'Sessiya eskirgan. Ilovani yopib, qayta oching.',
@@ -379,6 +420,47 @@
       loadErrorTitle: 'Не удалось загрузить',
       loadErrorText: 'Проверьте интернет и попробуйте ещё раз.',
       retry: 'Повторить',
+      // Безопасный бартер: результат
+      resultTitle: 'Безопасный бартер: результат',
+      resultHint: 'После публикации рекламы отправьте ссылку на пост. Бизнес проверит и подтвердит «Выполнено», и сотрудничество появится в кейсах на сайте Miqyos.',
+      postUrl: 'Ссылка на пост',
+      postUrlPh: 'https://instagram.com/reel/...',
+      resultViews: 'Просмотры',
+      resultNote: 'Комментарий',
+      resultNotePh: 'Например: опубликованы 1 Reels и 2 Stories',
+      sendResult: 'Отправить результат',
+      resendResult: 'Отправить снова',
+      resultSent: 'Отправлено. Бизнес проверит.',
+      resultWaiting: 'Бизнес проверяет результат',
+      resultConfirmed: 'Бизнес подтвердил. Сотрудничество в кейсах на сайте.',
+      resultDisputed: 'Бизнес сообщил о проблеме. Свяжитесь с бизнесом и после исправления отправьте ссылку снова.',
+      editResult: 'Изменить ссылку',
+      openPost: 'Открыть пост',
+      viewsN: (n) => `${fmt(n)} просмотров`,
+      businessReview: 'Отзыв бизнеса',
+      resultNone: 'Когда блогер опубликует рекламу, ссылка на пост появится здесь и в боте.',
+      resultCheck: 'Блогер опубликовал рекламу. Проверьте пост.',
+      rating: 'Оценка',
+      ratingN: (n) => `${n} из 5`,
+      reviewLabel: 'Ваш отзыв',
+      reviewPh: 'Например: видео получилось отличным, пришло 20 заказов',
+      reviewOrNote: 'Отзыв или описание проблемы',
+      confirmResult: 'Выполнено',
+      disputeResult: 'Есть проблема',
+      disputeConfirm: 'Отметить проблему? Блогер и команда Miqyos получат уведомление.',
+      confirmedToast: 'Подтверждено. Кейс добавлен на сайт.',
+      disputedToast: 'Блогер и команда уведомлены.',
+      resultConfirmedBiz: 'Вы подтвердили. Кейс виден на сайте.',
+      resultDisputedBiz: 'Вы отметили проблему. Блогер исправит и отправит снова.',
+      addReview: 'Оставьте отзыв: он появится в кейсе на сайте.',
+      saveReview: 'Сохранить отзыв',
+      reviewSaved: 'Отзыв сохранён',
+      e_postUrl: 'Укажите полную ссылку, например https://instagram.com/reel/...',
+      e_views: 'Укажите просмотры числом',
+      err_not_accepted: 'Отклик ещё не принят.',
+      err_result_confirmed: 'Результат уже подтверждён.',
+      err_result_decided: 'Решение по результату уже принято.',
+      err_result_missing: 'Блогер ещё не отправил результат.',
       err_network: 'Проверьте интернет и попробуйте ещё раз.',
       err_server: 'Ошибка сервера. Попробуйте чуть позже.',
       err_unauthorized: 'Сессия устарела. Закройте и снова откройте приложение.',
@@ -417,6 +499,9 @@
     // Biznes: so'rovlar filtri (status: pending | accepted | all, campaign: e'lon id yoki 0)
     req: { status: 'pending', campaign: 0, region: '', sort: 'new' },
     scroll: {},
+    // Xavfsiz barter: bloger havolani o'zgartiryapti (so'rov id → true), biznes tanlagan baho (so'rov id → 1..5)
+    resultEdit: {},
+    rating: {},
     busy: false
   };
 
@@ -667,6 +752,8 @@
     send: '<path d="M21 3 3 10.5l7 2.5 2.5 7zM21 3 10 13"/>',
     link: '<path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
+    shield: '<path d="M12 3 4.5 6v6c0 4.5 3.2 7.8 7.5 9 4.3-1.2 7.5-4.5 7.5-9V6z"/><path d="m9 12 2 2 4-4"/>',
+    star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
     sliders: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
@@ -710,7 +797,7 @@
   }
 
   function tabBar() {
-    const pending = state.data.requests ? state.data.requests.filter((r) => r.status === 'pending').length : 0;
+    const pending = state.data.requests ? state.data.requests.filter(needsAction).length : 0;
     const tabs =
       state.role === 'business'
         ? [['campaigns', t('tabMyCampaigns'), 'megaphone', 0], ['requests', t('tabRequests'), 'inbox', pending]]
@@ -814,6 +901,102 @@
     </a>`;
   }
 
+  /* ---------- Xavfsiz barter: natija ---------- */
+  const stars = (n) => (n ? `<span class="stars" aria-label="${esc(t('ratingN', n))}">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>` : '');
+
+  // Post havolasi, ko'rishlar, blogerning izohi (ikkala tomonga ham)
+  function postHTML(r) {
+    return `<div class="post-line">
+      <button type="button" class="link-btn" data-act="link" data-url="${esc(r.postUrl)}">${icon('link')}<span>${esc(t('openPost'))}</span></button>
+      ${r.views != null ? `<span class="muted small">${esc(t('viewsN', r.views))}</span>` : ''}
+    </div>${r.note ? `<blockquote class="quote">${esc(r.note)}</blockquote>` : ''}`;
+  }
+
+  // Bloger: qabul qilingan so'rov ostida natija yuborish formasi yoki holati
+  function resultBloggerHTML(a) {
+    const r = a.result;
+    if (r?.status === 'confirmed') {
+      return `<div class="result result-ok">
+        <span class="result-title">${icon('check')}${esc(t('resultConfirmed'))}</span>
+        ${postHTML(r)}
+        ${r.review ? `<div class="review"><span class="muted small">${esc(t('businessReview'))} ${stars(r.rating)}</span><blockquote class="quote">${esc(r.review)}</blockquote></div>` : ''}
+      </div>`;
+    }
+    if (r?.status === 'submitted' && !state.resultEdit[a.id]) {
+      return `<div class="result">
+        <span class="result-title">⏳ ${esc(t('resultWaiting'))}</span>
+        ${postHTML(r)}
+        <button type="button" class="link-btn" data-act="result-edit" data-id="${a.id}">${esc(t('editResult'))}</button>
+      </div>`;
+    }
+    const id = a.id;
+    const top = r?.status === 'disputed'
+      ? `<div class="notice notice-warn">${esc(t('resultDisputed'))}${r.disputeNote ? `<span class="dispute-note">«${esc(r.disputeNote)}»</span>` : ''}</div>`
+      : `<p class="muted small">${esc(t('resultHint'))}</p>`;
+    return `<div class="result result-form">
+      <span class="result-title">${icon('shield')}${esc(t('resultTitle'))}</span>
+      ${top}
+      <div class="field"><label for="rs-url-${id}">${esc(t('postUrl'))}</label>
+        <input id="rs-url-${id}" class="control" data-keep type="url" inputmode="url" autocomplete="off" maxlength="300" placeholder="${esc(t('postUrlPh'))}" value="${esc(r?.postUrl || '')}">
+      </div>
+      <div class="field"><label for="rs-views-${id}">${esc(t('resultViews'))}<span class="opt">${esc(t('optional'))}</span></label>
+        <input id="rs-views-${id}" class="control" data-keep inputmode="numeric" autocomplete="off" value="${r?.views ?? ''}">
+      </div>
+      <div class="field"><label for="rs-note-${id}">${esc(t('resultNote'))}<span class="opt">${esc(t('optional'))}</span></label>
+        <textarea id="rs-note-${id}" class="control" data-keep maxlength="300" placeholder="${esc(t('resultNotePh'))}">${esc(r?.note || '')}</textarea>
+      </div>
+      <button type="button" class="btn btn-primary" data-act="result-submit" data-id="${id}">${esc(r ? t('resendResult') : t('sendResult'))}</button>
+    </div>`;
+  }
+
+  function ratingHTML(id, current) {
+    const n = state.rating[id] ?? current ?? 0;
+    const buttons = [1, 2, 3, 4, 5]
+      .map((k) => `<button type="button" class="star-btn" data-act="rate" data-id="${id}" data-n="${k}" aria-pressed="${k <= n}" aria-label="${esc(t('ratingN', k))}">${icon('star')}</button>`)
+      .join('');
+    return `<div class="field"><span class="label">${esc(t('rating'))}<span class="opt">${esc(t('optional'))}</span></span><div class="star-row" role="group">${buttons}</div></div>`;
+  }
+
+  // Biznes: qabul qilingan so'rov ostida blogerning natijasi va qaror tugmalari
+  function resultBusinessHTML(req) {
+    const r = req.result;
+    const id = req.id;
+    if (!r) return `<p class="muted small">⏳ ${esc(t('resultNone'))}</p>`;
+    if (r.status === 'submitted') {
+      return `<div class="result result-check">
+        <span class="result-title">📬 ${esc(t('resultCheck'))}</span>
+        ${postHTML(r)}
+        ${ratingHTML(id)}
+        <div class="field"><label for="rv-text-${id}">${esc(t('reviewOrNote'))}<span class="opt">${esc(t('optional'))}</span></label>
+          <textarea id="rv-text-${id}" class="control" data-keep maxlength="500" placeholder="${esc(t('reviewPh'))}"></textarea>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" data-act="result-decide" data-id="${id}" data-decision="confirm">${icon('check')}<span>${esc(t('confirmResult'))}</span></button>
+          <button type="button" class="btn btn-quiet" data-act="result-decide" data-id="${id}" data-decision="dispute">${esc(t('disputeResult'))}</button>
+        </div>
+      </div>`;
+    }
+    if (r.status === 'disputed') {
+      return `<div class="result"><div class="notice notice-warn">${esc(t('resultDisputedBiz'))}</div>${postHTML(r)}</div>`;
+    }
+    // Tasdiqlangan: fikr bo'lsa ko'rsatiladi, bo'lmasa qoldirish formasi
+    const review = r.review
+      ? `<div class="review"><span class="muted small">${esc(t('reviewLabel'))} ${stars(r.rating)}</span><blockquote class="quote">${esc(r.review)}</blockquote></div>`
+      : `<p class="muted small">${esc(t('addReview'))}</p>${ratingHTML(id, r.rating)}
+        <div class="field"><label for="rv-text-${id}">${esc(t('reviewLabel'))}</label>
+          <textarea id="rv-text-${id}" class="control" data-keep maxlength="500" placeholder="${esc(t('reviewPh'))}"></textarea>
+        </div>
+        <button type="button" class="btn btn-secondary" data-act="review-save" data-id="${id}">${esc(t('saveReview'))}</button>`;
+    return `<div class="result result-ok">
+      <span class="result-title">${icon('check')}${esc(t('resultConfirmedBiz'))}</span>
+      ${postHTML(r)}
+      ${review}
+    </div>`;
+  }
+
+  // Biznes: tekshirish kutayotgan natijalar ("Yangi" bo'limida ham ko'rinadi)
+  const needsAction = (x) => x.status === 'pending' || x.result?.status === 'submitted';
+
   // Bloger: yuborilgan so'rovlar
   function mineHTML() {
     const list = state.data.mine;
@@ -824,7 +1007,7 @@
     }
     return title + list.map((a) => {
       let footer = `<p class="muted">${esc(t('waiting'))}</p>`;
-      if (a.status === 'accepted' && a.contact) footer = contactHTML(t('contactBusiness'), a.contact);
+      if (a.status === 'accepted' && a.contact) footer = contactHTML(t('contactBusiness'), a.contact) + resultBloggerHTML(a);
       if (a.status === 'rejected') footer = `<p class="muted">${esc(t('rejectedNote'))}</p>`;
       const thumb = a.campaign.image
         ? `<img class="thumb" src="${esc(a.campaign.image.thumb)}" alt="" loading="lazy" decoding="async">`
@@ -884,7 +1067,7 @@
     if (!list) return title + skeleton(2);
     if (!list.length) return title + emptyHTML(t('emptyRequests'), 'inbox');
     const r = state.req;
-    const pending = list.filter((x) => x.status === 'pending');
+    const pending = list.filter(needsAction);
     const segBtn = (id, label) =>
       `<button type="button" role="tab" data-act="req-filter" data-id="${id}" aria-selected="${r.status === id}">${label}</button>`;
     const seg = `<div class="seg" role="tablist">
@@ -916,7 +1099,7 @@
 
     let shown = list.filter(
       (x) =>
-        (r.status === 'all' || x.status === r.status) &&
+        (r.status === 'all' || (r.status === 'pending' ? needsAction(x) : x.status === r.status)) &&
         (!r.campaign || x.campaign.id === r.campaign) &&
         (!r.region || x.blogger.region === r.region)
     );
@@ -943,7 +1126,7 @@
         : '';
     const contact =
       r.status === 'accepted'
-        ? contactHTML(t('contactBlogger'), { phone: b.phone, username: b.username })
+        ? contactHTML(t('contactBlogger'), { phone: b.phone, username: b.username }) + resultBusinessHTML(r)
         : r.status === 'pending'
           ? `<p class="muted small">🔒 ${esc(t('contactHidden'))}</p>`
           : '';
@@ -1448,6 +1631,93 @@
     }
   }
 
+  /* ---------- Xavfsiz barter: harakatlar ---------- */
+  async function submitResult(id, button) {
+    if (state.busy) return;
+    const val = (name) => document.getElementById(`${name}-${id}`)?.value.trim() ?? '';
+    const postUrl = val('rs-url');
+    const views = val('rs-views').replace(/[\s  ]/g, '');
+    if (!postUrl) {
+      haptic('error');
+      toast(t('e_postUrl'));
+      document.getElementById(`rs-url-${id}`)?.focus();
+      return;
+    }
+    if (views && !/^\d+$/.test(views)) {
+      haptic('error');
+      toast(t('e_views'));
+      return;
+    }
+    state.busy = true;
+    button.disabled = true;
+    try {
+      await api(`/api/applications/${id}/result`, { method: 'POST', body: { postUrl, views, note: val('rs-note') } });
+      haptic('success');
+      toast(t('resultSent'));
+      state.resultEdit[id] = false;
+      state.data.mine = (await api('/api/my/applications')).applications;
+      render();
+    } catch (e) {
+      haptic('error');
+      const fields = e.code === 'invalid' && Array.isArray(e.data.fields) ? e.data.fields : [];
+      toast(fields.includes('postUrl') ? t('e_postUrl') : fields.includes('views') ? t('e_views') : errorText(e));
+      button.disabled = false;
+    } finally {
+      state.busy = false;
+    }
+  }
+
+  async function decideResult(id, decision, button) {
+    if (state.busy) return;
+    if (decision === 'dispute' && !(await confirmAction(t('disputeConfirm')))) return;
+    const textValue = document.getElementById(`rv-text-${id}`)?.value.trim() || '';
+    const body = decision === 'confirm'
+      ? { decision, review: textValue, rating: state.rating[id] || null }
+      : { decision, note: textValue.slice(0, 300) };
+    state.busy = true;
+    button.disabled = true;
+    try {
+      await api(`/api/applications/${id}/result/decision`, { method: 'POST', body });
+      haptic('success');
+      toast(decision === 'confirm' ? t('confirmedToast') : t('disputedToast'));
+      delete state.rating[id];
+      state.data.requests = (await api('/api/requests')).requests;
+      render();
+    } catch (e) {
+      haptic('error');
+      toast(errorText(e));
+      await loadTab({ silent: true });
+    } finally {
+      state.busy = false;
+    }
+  }
+
+  async function saveReview(id, button) {
+    if (state.busy) return;
+    const review = document.getElementById(`rv-text-${id}`)?.value.trim() || '';
+    const rating = state.rating[id] || null;
+    if (!review && !rating) {
+      document.getElementById(`rv-text-${id}`)?.focus();
+      return;
+    }
+    state.busy = true;
+    button.disabled = true;
+    try {
+      await api(`/api/applications/${id}/review`, { method: 'POST', body: { review, rating } });
+      haptic('success');
+      toast(t('reviewSaved'));
+      delete state.rating[id];
+      state.data.requests = (await api('/api/requests')).requests;
+      render();
+    } catch (e) {
+      haptic('error');
+      toast(errorText(e));
+      button.disabled = false;
+    } finally {
+      state.busy = false;
+    }
+  }
+
   async function changeCampaignStatus(status, button) {
     const c = state.detail;
     if (!c || state.busy) return;
@@ -1531,6 +1801,27 @@
       case 'decide':
         decideRequest(id, el.dataset.decision, el);
         break;
+      case 'result-submit':
+        submitResult(id, el);
+        break;
+      case 'result-edit':
+        state.resultEdit[id] = true;
+        render();
+        document.getElementById(`rs-url-${id}`)?.focus();
+        break;
+      case 'result-decide':
+        decideResult(id, el.dataset.decision, el);
+        break;
+      case 'review-save':
+        saveReview(id, el);
+        break;
+      case 'rate': {
+        const n = Number(el.dataset.n);
+        state.rating[id] = state.rating[id] === n ? 0 : n;
+        const value = state.rating[id];
+        el.parentElement.querySelectorAll('.star-btn').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.n) <= value)));
+        break;
+      }
       case 'campaign-status':
         changeCampaignStatus(el.dataset.status, el);
         break;

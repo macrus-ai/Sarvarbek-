@@ -999,3 +999,45 @@ textarea.control { min-height: 92px; resize: vertical; }
 .danger-zone { margin-top: 48px; padding: 16px 0 8px; text-align: center; }
 .danger-link { background: none; border: 0; padding: 8px 12px; font: inherit; font-size: 13px; color: var(--hint); text-decoration: underline; cursor: pointer; }
 .danger-link:hover { color: #d33; }
+
+/* ---------- Xavfsiz barter: natija (post havolasi, tasdiq, fikr) ---------- */
+.result {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.result-ok { border-color: transparent; background: var(--ok-soft); }
+.result-check { border-color: var(--brand); background: var(--brand-soft); }
+.result-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.result-title .i { width: 18px; height: 18px; flex: none; }
+.result-ok .result-title { color: var(--ok); }
+.result-form .result-title { color: var(--brand); }
+.post-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.review { display: grid; gap: 6px; }
+.dispute-note { flex-basis: 100%; font-weight: 500; }
+.stars { color: #F5A524; letter-spacing: 1px; }
+.star-row { display: flex; gap: 4px; }
+.star-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--field);
+  color: var(--hint);
+  cursor: pointer;
+}
+.star-btn .i { width: 22px; height: 22px; }
+.star-btn[aria-pressed="true"] { color: #F5A524; }
+.star-btn[aria-pressed="true"] .i { fill: currentColor; }
+.btn .i { width: 18px; height: 18px; }

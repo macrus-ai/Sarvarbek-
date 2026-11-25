@@ -363,7 +363,9 @@ const uz = {
     [
       '✅ <b>Qabul qilindi.</b> Bloger bilan bog‘laning:',
       `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
-      `📞 ${esc(formatPhone(a.blogger_phone))}`
+      `📞 ${esc(formatPhone(a.blogger_phone))}`,
+      '',
+      '🛡 Bloger reklamani joylagach, post havolasi shu botga keladi: tekshirib, «Bajarildi» deb tasdiqlaysiz.'
     ].join('\n'),
   statusRejected: '❌ <b>Rad etildi.</b>',
   decidedAccepted: 'Qabul qilindi',
@@ -378,9 +380,74 @@ const uz = {
       `👤 ${mention(a.business_id, a.business_contact)}${at(a.business_username)}`,
       `📞 ${esc(formatPhone(a.business_phone))}`,
       '',
-      `Kelishilgan format: ${esc(a.format)}.`
+      `Kelishilgan format: ${esc(a.format)}.`,
+      '',
+      '🛡 <b>Xavfsiz barter:</b> reklamani joylagach, ilovadagi «So‘rovlarim» bo‘limida post havolasini yuboring. Biznes «Bajarildi» deb tasdiqlaydi va hamkorlik Miqyos saytidagi keyslarda chiqadi.'
     ].join('\n'),
   toBloggerRejected: (a) => `So‘rovingiz rad etildi.\nReklama e’loni: «${esc(a.title)}»\n\nIlovada boshqa reklama e’lonlari ham bor.`,
+  // Xavfsiz barter: natija (src/results.js)
+  resultSubmitted: (a, again = false) =>
+    [
+      again ? '🔁 <b>Bloger natijani qayta yubordi</b>' : '📬 <b>Bloger reklamani joyladi</b>',
+      `Reklama e’loni: «${esc(a.title)}»`,
+      `👤 ${esc(a.blogger_name)}`,
+      `🔗 ${esc(a.post_url)}`,
+      ...(a.result_views != null ? [`👁 Ko‘rishlar: ${fmtNum(a.result_views)}`] : []),
+      ...(a.result_note ? [`💬 ${esc(a.result_note)}`] : []),
+      '',
+      'Postni tekshiring. Hammasi kelishilgandek bo‘lsa, «Bajarildi» ni bosing: hamkorlik Miqyos saytidagi keyslarda chiqadi. Ilovada fikringizni ham yozib qoldirishingiz mumkin.'
+    ].join('\n'),
+  resultConfirm: '✅ Bajarildi',
+  resultDispute: '⚠️ Muammo bor',
+  resultOpenPost: '🔗 Postni ochish',
+  resultConfirmedShort: 'Tasdiqlandi. Rahmat!',
+  resultDisputedShort: 'Blogerga va Miqyos jamoasiga xabar berildi.',
+  resultConfirmedLine: '✅ <b>Siz tasdiqladingiz.</b> Keys saytga qo‘shildi.',
+  resultDisputedLine: '⚠️ <b>Muammo bor deb belgiladingiz.</b> Bloger tuzatib qayta yuboradi, Miqyos jamoasi ham yordam beradi.',
+  errResultDecided: 'Bu natija bo‘yicha qaror allaqachon qabul qilingan.',
+  errResultMissing: 'Bloger hali natija yubormagan.',
+  toBloggerResultConfirmed: (a, link) =>
+    [
+      '🎉 <b>Biznes natijani tasdiqladi!</b>',
+      `Reklama e’loni: «${esc(a.title)}» · 🏪 ${esc(a.company)}`,
+      ...(a.review ? ['', `💬 Biznes fikri: «${esc(a.review)}»`] : []),
+      ...(link ? ['', `Hamkorlik Miqyos saytidagi keyslarda: ${esc(link)}`] : [])
+    ].join('\n'),
+  toBloggerResultDisputed: (a) =>
+    [
+      '⚠️ <b>Biznes natija bo‘yicha muammo borligini aytdi</b>',
+      `Reklama e’loni: «${esc(a.title)}» · 🏪 ${esc(a.company)}`,
+      ...(a.dispute_note ? [`💬 ${esc(a.dispute_note)}`] : []),
+      '',
+      'Biznes bilan bog‘lanib, kelishilgan formatni tekshiring. Tuzatgach, ilovadagi «So‘rovlarim» bo‘limidan post havolasini qayta yuboring. Savol bo‘lsa, shu botga yozing.'
+    ].join('\n'),
+  caseNew: (a, link) =>
+    [
+      '#Keys',
+      '🏆 <b>Yangi keys: biznes natijani tasdiqladi</b>',
+      `«${esc(a.title)}» · 🏪 ${esc(a.company)}`,
+      `👤 ${esc(a.blogger_name)} · ${esc(a.platform || '')}`,
+      `🔗 ${esc(a.post_url)}`,
+      ...(a.result_views != null ? [`👁 ${fmtNum(a.result_views)}`] : []),
+      ...(a.review ? [`💬 ${esc(a.review)}`] : []),
+      ...(link ? ['', `🌐 Saytda: ${esc(link)}`] : [])
+    ].join('\n'),
+  caseDisputed: (a) =>
+    [
+      '#Muammo',
+      '⚠️ <b>Biznes natija bo‘yicha muammo bor dedi</b>',
+      `«${esc(a.title)}»`,
+      `🏪 ${esc(a.company)}: ${mention(a.business_id, a.business_contact)}${at(a.business_username)}, ${esc(formatPhone(a.business_phone))}`,
+      `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}, ${esc(formatPhone(a.blogger_phone))}`,
+      `🔗 ${esc(a.post_url)}`,
+      ...(a.dispute_note ? [`💬 ${esc(a.dispute_note)}`] : []),
+      '',
+      'Ikki tomon bilan bog‘lanib, kelishmovchilikni hal qiling.'
+    ].join('\n'),
+  caseHide: '🙈 Saytdan yashirish',
+  caseShow: '👁 Saytda ko‘rsatish',
+  caseHiddenShort: 'Keys saytdan yashirildi.',
+  caseShownShort: 'Keys saytda yana ko‘rinadi.',
   errAlreadyDecided: 'Bu so‘rov bo‘yicha qaror allaqachon qabul qilingan.',
   errCampaignFull: 'Bu reklama e’lonida bo‘sh o‘rin qolmagan.',
   errNotFound: 'So‘rov topilmadi.',
@@ -648,7 +715,9 @@ const ru = {
     [
       '✅ <b>Принято.</b> Свяжитесь с блогером:',
       `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}`,
-      `📞 ${esc(formatPhone(a.blogger_phone))}`
+      `📞 ${esc(formatPhone(a.blogger_phone))}`,
+      '',
+      '🛡 Когда блогер опубликует рекламу, ссылка на пост придёт в этот бот: проверьте и подтвердите «Выполнено».'
     ].join('\n'),
   statusRejected: '❌ <b>Отклонено.</b>',
   decidedAccepted: 'Принято',
@@ -663,9 +732,74 @@ const ru = {
       `👤 ${mention(a.business_id, a.business_contact)}${at(a.business_username)}`,
       `📞 ${esc(formatPhone(a.business_phone))}`,
       '',
-      `Согласованный формат: ${esc(a.format)}.`
+      `Согласованный формат: ${esc(a.format)}.`,
+      '',
+      '🛡 <b>Безопасный бартер:</b> после публикации рекламы отправьте ссылку на пост в разделе «Мои отклики» в приложении. Бизнес подтвердит «Выполнено», и сотрудничество появится в кейсах на сайте Miqyos.'
     ].join('\n'),
   toBloggerRejected: (a) => `Ваш отклик отклонён.\nОбъявление: «${esc(a.title)}»\n\nВ приложении есть и другие объявления.`,
+  // Безопасный бартер: результат (src/results.js)
+  resultSubmitted: (a, again = false) =>
+    [
+      again ? '🔁 <b>Блогер повторно отправил результат</b>' : '📬 <b>Блогер опубликовал рекламу</b>',
+      `Объявление: «${esc(a.title)}»`,
+      `👤 ${esc(a.blogger_name)}`,
+      `🔗 ${esc(a.post_url)}`,
+      ...(a.result_views != null ? [`👁 Просмотры: ${fmtNum(a.result_views)}`] : []),
+      ...(a.result_note ? [`💬 ${esc(a.result_note)}`] : []),
+      '',
+      'Проверьте пост. Если всё как договаривались, нажмите «Выполнено»: сотрудничество появится в кейсах на сайте Miqyos. В приложении можно оставить и отзыв.'
+    ].join('\n'),
+  resultConfirm: '✅ Выполнено',
+  resultDispute: '⚠️ Есть проблема',
+  resultOpenPost: '🔗 Открыть пост',
+  resultConfirmedShort: 'Подтверждено. Спасибо!',
+  resultDisputedShort: 'Блогер и команда Miqyos уведомлены.',
+  resultConfirmedLine: '✅ <b>Вы подтвердили.</b> Кейс добавлен на сайт.',
+  resultDisputedLine: '⚠️ <b>Вы отметили проблему.</b> Блогер исправит и отправит снова, команда Miqyos тоже поможет.',
+  errResultDecided: 'По этому результату решение уже принято.',
+  errResultMissing: 'Блогер ещё не отправил результат.',
+  toBloggerResultConfirmed: (a, link) =>
+    [
+      '🎉 <b>Бизнес подтвердил результат!</b>',
+      `Объявление: «${esc(a.title)}» · 🏪 ${esc(a.company)}`,
+      ...(a.review ? ['', `💬 Отзыв бизнеса: «${esc(a.review)}»`] : []),
+      ...(link ? ['', `Сотрудничество в кейсах на сайте Miqyos: ${esc(link)}`] : [])
+    ].join('\n'),
+  toBloggerResultDisputed: (a) =>
+    [
+      '⚠️ <b>Бизнес сообщил о проблеме с результатом</b>',
+      `Объявление: «${esc(a.title)}» · 🏪 ${esc(a.company)}`,
+      ...(a.dispute_note ? [`💬 ${esc(a.dispute_note)}`] : []),
+      '',
+      'Свяжитесь с бизнесом и проверьте согласованный формат. После исправления отправьте ссылку на пост снова в разделе «Мои отклики». Если есть вопросы, напишите в этот бот.'
+    ].join('\n'),
+  caseNew: (a, link) =>
+    [
+      '#Keys',
+      '🏆 <b>Новый кейс: бизнес подтвердил результат</b>',
+      `«${esc(a.title)}» · 🏪 ${esc(a.company)}`,
+      `👤 ${esc(a.blogger_name)} · ${esc(a.platform || '')}`,
+      `🔗 ${esc(a.post_url)}`,
+      ...(a.result_views != null ? [`👁 ${fmtNum(a.result_views)}`] : []),
+      ...(a.review ? [`💬 ${esc(a.review)}`] : []),
+      ...(link ? ['', `🌐 На сайте: ${esc(link)}`] : [])
+    ].join('\n'),
+  caseDisputed: (a) =>
+    [
+      '#Muammo',
+      '⚠️ <b>Бизнес сообщил о проблеме с результатом</b>',
+      `«${esc(a.title)}»`,
+      `🏪 ${esc(a.company)}: ${mention(a.business_id, a.business_contact)}${at(a.business_username)}, ${esc(formatPhone(a.business_phone))}`,
+      `👤 ${mention(a.blogger_id, a.blogger_name)}${at(a.blogger_username)}, ${esc(formatPhone(a.blogger_phone))}`,
+      `🔗 ${esc(a.post_url)}`,
+      ...(a.dispute_note ? [`💬 ${esc(a.dispute_note)}`] : []),
+      '',
+      'Свяжитесь с обеими сторонами и урегулируйте разногласие.'
+    ].join('\n'),
+  caseHide: '🙈 Скрыть с сайта',
+  caseShow: '👁 Показать на сайте',
+  caseHiddenShort: 'Кейс скрыт с сайта.',
+  caseShownShort: 'Кейс снова на сайте.',
   errAlreadyDecided: 'По этому отклику решение уже принято.',
   errCampaignFull: 'В этом объявлении не осталось свободных мест.',
   errNotFound: 'Отклик не найден.',

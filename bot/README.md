@@ -14,6 +14,7 @@ Bizneslar va blogerlar botda ro‘yxatdan o‘tadi. Bizneslar botdagi mini ilova
 3. **Bloger** mini ilovada reklama e’lonlarini ko‘radi va so‘rov yuboradi. Filtrlar: qidiruv, toifa, hudud (standart holatda blogerning o‘z hududi va butun O‘zbekiston uchun e’lonlar), platforma, saralash (yangilari yoki qimmatroq) va "Faqat menga moslari" (obunachilar talabi, hudud, bo‘sh o‘rin va hali so‘rov yuborilmaganlar). Filtrlar blogerning qurilmasida eslab qolinadi.
 4. **Biznesga botda xabar keladi**, xabarda "✅ Qabul qilish" va "❌ Rad etish" tugmalari bor. Xuddi shuni mini ilovadagi "So‘rovlar" bo‘limida ham qilish mumkin. U yerda so‘rovlarni holat (yangi, qabul qilingan, hammasi), e’lon va blogerning hududi bo‘yicha filtrlash, obunachilar soni bo‘yicha saralash mumkin.
 5. **Blogerga javob botda keladi.** So‘rov qabul qilinsa, biznesning telefoni va Telegrami yuboriladi. Biznes ham blogerning telefonini ko‘radi.
+6. **Xavfsiz barter: natija.** Bloger reklamani joylagach, mini ilovadagi "So‘rovlarim" bo‘limida post havolasini (ixtiyoriy: ko‘rishlar soni va izoh) yuboradi. Biznesga botda "✅ Bajarildi" / "⚠️ Muammo bor" tugmali xabar keladi (mini ilovada ham, baho 1–5 va fikr bilan). Tafsiloti pastda.
 
 Qo‘shimcha:
 - Bo‘sh o‘rinlar soni hisobga olinadi: o‘rin to‘lsa, yangi so‘rov qabul qilinmaydi.
@@ -34,6 +35,17 @@ Qo‘shimcha:
 - Botni bloklagan blogerga (Telegram 403) boshqa yuborilmaydi (`notify_ads = 0`). Telegram "kuting" desa (429) yoki tarmoq xatosi bo‘lsa, navbat to‘xtaydi va keyingi daqiqada o‘sha blogerdan davom etadi.
 - E’lon yopilsa, o‘rinlari to‘lsa yoki o‘chirilsa, xabarlar to‘xtaydi. Bir e’lon haqida bir marta yuboriladi (qayta ochilsa ham takrorlanmaydi).
 - `/xabarlar` — bloger xabarlarni yoqadi yoki o‘chiradi. Mini ilova manzili cron uchun `/setup` da `settings.app_origin` ga yoziladi (har deployda).
+
+### Xavfsiz barter va saytdagi "Real keyslar"
+
+Kod: `src/results.js`, baza: `migrations/0012_results.sql` (`applications.result_status` va boshqa ustunlar, `users.public_id`).
+
+- **Holatlar:** natija yo‘q → `submitted` (bloger havola yubordi) → `confirmed` (biznes "Bajarildi" dedi) yoki `disputed` ("Muammo bor"). `disputed` bo‘lsa, bloger tuzatib qayta yuboradi. Tasdiqlangan natijani bloger o‘zgartira olmaydi.
+- **Bloger:** faqat qabul qilingan o‘z so‘rovi uchun. Havola `http(s)` bo‘lishi shart (`instagram.com/...` kabi yozilsa, `https://` qo‘shiladi), 300 belgigacha. Tasdiqlangunga qadar havolani o‘zgartirish mumkin ("Havolani o‘zgartirish").
+- **Biznes:** botdagi tugmalar yoki mini ilova ("So‘rovlar" → "Yangi" bo‘limida tekshirish kutayotgan natijalar ham chiqadi). Mini ilovada baho (1–5 yulduz) va fikr qo‘shiladi, tasdiqlangandan keyin ham fikr qoldirish mumkin. "Muammo bor" bo‘lsa, blogerga va jamoaga (e’lonlar guruhi, ikki tomonning telefoni bilan) xabar boradi.
+- **Keys:** natija tasdiqlanganda biznesga saytdagi ochiq id (`users.public_id`, tasodifiy 10 belgi, Telegram ID emas) beriladi, blogerga sayt havolasi yuboriladi, jamoaga "#Keys" kartasi keladi. Kartadagi "🙈 Saytdan yashirish" / "👁 Saytda ko‘rsatish" tugmalari keysni saytdan olib tashlaydi yoki qaytaradi (adminlar va guruh a’zolari).
+- **Ochiq API (kirishsiz, sayt uchun, CORS `*`, 60 soniya kesh):** `GET /public/cases` — keyslari bor bizneslar (nomi, toifasi, hududi, hamkorliklar, blogerlar, ko‘rishlar soni); `GET /public/cases/<public_id>` — biznesning tasdiqlangan barcha e’lonlari va har biri bo‘yicha natijalar (bloger ismi, platformasi, profil havolasi, obunachilar oralig‘i, post havolasi, ko‘rishlar, biznes fikri va bahosi). Telefon, Telegram ID va username chiqmaydi. Rad etilgan biznes yoki e’lon, yashirilgan keys ko‘rinmaydi.
+- **Sayt:** bosh sahifadagi "Real keyslar" bo‘limi (`#keyslar`) va `keyslar.html` (`?b=<public_id>` — bitta biznes), skript `assets/js/cases.js`, API manzili `assets/js/config.js` dagi `apiBase`. Keys havolasi `wrangler.toml` dagi `SITE_URL` (standart `https://miqyos.uz`) dan yasaladi.
 
 ### Moderatsiya
 
@@ -188,8 +200,15 @@ npm run dev                                    # http://localhost:8787
 
 Mini ilova faqat Telegram ichida to‘liq ishlaydi: brauzerda ochilsa, "Ilovani Telegramda oching" degan sahifa chiqadi.
 
+Brauzerda sinash uchun namuna ma’lumotli server (soxta Telegram, xotiradagi baza, haqiqiy Telegramga hech narsa yubormaydi):
+
+```bash
+node scripts/dev-server.mjs        # http://localhost:8787 — sayt va "Real keyslar"
+                                   # http://localhost:8787/app/?as=100 — mini ilova biznes nomidan (200 — bloger)
+```
+
 ## Keyingi qadamlar uchun g‘oyalar
 
-- Bloger post havolasini yuklashi va biznes uni tasdiqlashi.
+- Bloger natija yubormasa, kelishilgan muddatdan keyin eslatma.
 - Blogerlar reytingi va sharhlar.
 - Tariflar uchun to‘lov (Click, Payme).
