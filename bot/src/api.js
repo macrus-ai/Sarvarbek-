@@ -10,6 +10,7 @@ import {
 } from './db.js';
 import { tr } from './i18n.js';
 import { imageOut, newImageKey, pickSizes, sniffImage, statsImageUrl } from './images.js';
+import { decideResultBy, resultOut, reviewResult, submitResult, validateReview } from './results.js';
 import { AppError, adKeyboard, applyToCampaign, decide, followersOk, moderationEnabled, notifyAdmins, sendAdCard } from './services.js';
 import { TelegramError, validateInitData } from './telegram.js';
 import { formatPhone, guessLang, isRegistered, json, normSearch, now, profileUrl } from './util.js';
@@ -95,7 +96,9 @@ function myApplicationOut(a) {
     contact:
       a.status === 'accepted'
         ? { name: a.contact_name || '', phone: formatPhone(a.contact_phone), username: a.contact_username || null }
-        : null
+        : null,
+    // Xavfsiz barter: post havolasi va biznes qarori (null — hali yuborilmagan)
+    result: resultOut(a)
   };
 }
 
@@ -106,6 +109,7 @@ function requestOut(r) {
     message: r.message || '',
     createdAt: r.created_at,
     campaign: { id: r.campaign_id, title: r.title },
+    result: resultOut(r),
     blogger: {
       id: r.blogger_id,
       name: r.name || '',
@@ -412,6 +416,36 @@ async function route(ctx, user, method, path, url, request) {
     if (!map[decision]) throw new AppError('invalid', 400);
     const result = await decide(ctx, user, Number(m[1]), map[decision]);
     return json({ application: result });
+  }
+
+  // Xavfsiz barter: bloger reklama natijasini (post havolasi) yuboradi
+  if (method === 'POST' && (m = path.match(/^\/api\/applications\/(\d+)\/result$/))) {
+    requireRole(user, 'blogger');
+    const result = await submitResult(ctx, user, Number(m[1]), await readBody(request));
+    return json({ result });
+  }
+
+  // Biznes natijani tasdiqlaydi ("Bajarildi", fikr va baho bilan) yoki "Muammo bor" deydi
+  if (method === 'POST' && (m = path.match(/^\/api\/applications\/(\d+)\/result\/decision$/))) {
+    requireRole(user, 'business');
+    const body = await readBody(request);
+    const appId = Number(m[1]);
+    if (body.decision === 'confirm') {
+      const extra = validateReview(body);
+      return json({ result: await decideResultBy(ctx, user, appId, 'confirmed', extra) });
+    }
+    if (body.decision === 'dispute') {
+      const note = text(body.note);
+      if (note.length > LIMITS.resultNoteMax) throw new AppError('invalid', 400, { fields: ['note'] });
+      return json({ result: await decideResultBy(ctx, user, appId, 'disputed', { note: note || null }) });
+    }
+    throw new AppError('invalid', 400);
+  }
+
+  // Tasdiqlangan natijaga fikr va baho (keyinroq qo'shish yoki o'zgartirish)
+  if (method === 'POST' && (m = path.match(/^\/api\/applications\/(\d+)\/review$/))) {
+    requireRole(user, 'business');
+    return json({ result: await reviewResult(ctx, user, Number(m[1]), await readBody(request)) });
   }
 
   throw new AppError('not_found', 404);

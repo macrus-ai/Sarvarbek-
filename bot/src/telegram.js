@@ -106,6 +106,9 @@ export function createTelegram(token) {
       upload('sendPhoto', 'photo', file, { chat_id: chatId, caption, parse_mode: 'HTML', ...extra }),
     editCaption: (chatId, messageId, caption, extra = {}) =>
       call('editMessageCaption', { chat_id: chatId, message_id: messageId, caption, parse_mode: 'HTML', ...extra }),
+    // Faqat tugmalarni almashtiradi (matn va rasm o'zgarmaydi)
+    editMarkup: (chatId, messageId, replyMarkup) =>
+      call('editMessageReplyMarkup', { chat_id: chatId, message_id: messageId, reply_markup: replyMarkup }),
     answer: (callbackId, text, showAlert = false) =>
       call('answerCallbackQuery', { callback_query_id: callbackId, ...(text ? { text, show_alert: showAlert } : {}) }),
     // Faylni yuklab olish manzili. Unda token bor: faqat serverda ishlatiladi, tashqariga berilmaydi.

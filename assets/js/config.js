@@ -5,5 +5,8 @@ window.OVOZA_CONFIG = {
   botUsername: 'miqyosbot',
 
   // Birinchi ochilganda qaysi til ko'rinsin: 'uz' yoki 'ru'
-  defaultLang: 'uz'
+  defaultLang: 'uz',
+
+  // "Real keyslar" ma'lumoti shu manzildan olinadi (botning Cloudflare Worker'i, /public/cases)
+  apiBase: 'https://ovoza-bot.axborotmarkazi-uz.workers.dev'
 };

@@ -301,6 +301,159 @@ export async function decideApplication(db, id, businessId, status) {
   return res.meta.changes;
 }
 
+/* ---------- Xavfsiz barter: natija (src/results.js) ---------- */
+
+// Bloger natijani yuboradi yoki qayta yuboradi. Faqat o'z, qabul qilingan va hali tasdiqlanmagan so'rovi uchun.
+export async function saveResult(db, id, bloggerId, { postUrl, views, note }) {
+  const res = await db
+    .prepare(
+      `UPDATE applications SET result_status = 'submitted', post_url = ?1, result_views = ?2, result_note = ?3,
+         result_at = ?4, dispute_note = NULL, updated_at = ?4
+       WHERE id = ?5 AND blogger_id = ?6 AND status = 'accepted'
+         AND (result_status IS NULL OR result_status IN ('submitted', 'disputed'))`
+    )
+    .bind(postUrl, views ?? null, note || null, now(), id, bloggerId)
+    .run();
+  return res.meta.changes > 0;
+}
+
+// Biznes natija bo'yicha qaror qiladi: 'confirmed' yoki 'disputed'. Faqat yuborilgan natija uchun.
+export async function decideResult(db, id, businessId, status, { review = null, rating = null, note = null } = {}) {
+  const ts = now();
+  const res = await db
+    .prepare(
+      `UPDATE applications SET result_status = ?1,
+         confirmed_at = CASE WHEN ?1 = 'confirmed' THEN ?2 ELSE NULL END,
+         review = CASE WHEN ?1 = 'confirmed' THEN ?3 ELSE review END,
+         rating = CASE WHEN ?1 = 'confirmed' THEN ?4 ELSE rating END,
+         dispute_note = CASE WHEN ?1 = 'disputed' THEN ?5 ELSE NULL END,
+         updated_at = ?2
+       WHERE id = ?6 AND status = 'accepted' AND result_status = 'submitted'
+         AND campaign_id IN (SELECT id FROM campaigns WHERE business_id = ?7)`
+    )
+    .bind(status, ts, review, rating, note, id, businessId)
+    .run();
+  return res.meta.changes > 0;
+}
+
+// Tasdiqlangan natijaga biznes keyinroq fikr va baho qo'shadi (yoki o'zgartiradi)
+export async function saveReview(db, id, businessId, { review, rating }) {
+  const res = await db
+    .prepare(
+      `UPDATE applications SET review = ?1, rating = ?2, updated_at = ?3
+       WHERE id = ?4 AND result_status = 'confirmed'
+         AND campaign_id IN (SELECT id FROM campaigns WHERE business_id = ?5)`
+    )
+    .bind(review, rating, now(), id, businessId)
+    .run();
+  return res.meta.changes > 0;
+}
+
+export async function setCaseHidden(db, id, hidden) {
+  const res = await db
+    .prepare("UPDATE applications SET case_hidden = ?1 WHERE id = ?2 AND result_status = 'confirmed' AND case_hidden != ?1")
+    .bind(hidden ? 1 : 0, id)
+    .run();
+  return res.meta.changes > 0;
+}
+
+// Saytdagi keys sahifasi uchun biznesning ochiq id'si. Yo'q bo'lsa yaratiladi.
+export async function ensurePublicId(db, businessId, makeId) {
+  const row = await db.prepare('SELECT public_id FROM users WHERE tg_id = ?1').bind(businessId).first();
+  if (!row) return null;
+  if (row.public_id) return row.public_id;
+  for (let i = 0; i < 5; i += 1) {
+    const id = makeId();
+    try {
+      const res = await db
+        .prepare('UPDATE users SET public_id = ?1 WHERE tg_id = ?2 AND public_id IS NULL')
+        .bind(id, businessId)
+        .run();
+      if (res.meta.changes > 0) return id;
+      // Boshqa so'rov bir vaqtda yaratib qo'ygan
+      return (await db.prepare('SELECT public_id FROM users WHERE tg_id = ?1').bind(businessId).first('public_id')) || null;
+    } catch (e) {
+      // Juda kam holat: shu id band (UNIQUE). Boshqasini sinaymiz.
+      if (!/unique/i.test(String(e?.message))) throw e;
+    }
+  }
+  throw new Error('public id collision');
+}
+
+// Saytda ko'rinadigan keyslar: tasdiqlangan, yashirilmagan natija; biznes va e'lon tasdiqlangan
+const CASE_WHERE = `a.result_status = 'confirmed' AND a.case_hidden = 0
+  AND b.moderation = 'approved' AND b.public_id IS NOT NULL AND c.moderation = 'approved'`;
+
+// Keyslari bor bizneslar ro'yxati (eng so'nggi keys birinchi)
+export async function listCaseBusinesses(db, limit = 100) {
+  const { results } = await db
+    .prepare(
+      `SELECT b.public_id, b.company, b.category, b.region,
+         COUNT(*) AS cases,
+         COUNT(DISTINCT a.campaign_id) AS campaigns,
+         COUNT(DISTINCT a.blogger_id) AS bloggers,
+         COALESCE(SUM(a.result_views), 0) AS views,
+         MAX(a.confirmed_at) AS last_at,
+         (SELECT c2.id FROM campaigns c2 JOIN applications a2 ON a2.campaign_id = c2.id
+           WHERE c2.business_id = b.tg_id AND a2.result_status = 'confirmed' AND a2.case_hidden = 0
+             AND c2.image_key IS NOT NULL AND c2.image_file_id IS NOT NULL
+           ORDER BY a2.confirmed_at DESC LIMIT 1) AS cover_id
+       FROM applications a
+       JOIN campaigns c ON c.id = a.campaign_id
+       JOIN users b ON b.tg_id = c.business_id
+       WHERE ${CASE_WHERE}
+       GROUP BY b.tg_id
+       ORDER BY last_at DESC
+       LIMIT ?1`
+    )
+    .bind(limit)
+    .all();
+  return results;
+}
+
+export function getCaseBusiness(db, publicId) {
+  return db
+    .prepare("SELECT tg_id, public_id, company, category, region FROM users WHERE public_id = ?1 AND role = 'business' AND moderation = 'approved'")
+    .bind(publicId)
+    .first();
+}
+
+// Biznesning tasdiqlangan reklama e'lonlari (natijasi bormi-yo'qmi, hammasi)
+export async function listCaseCampaigns(db, businessId) {
+  const { results } = await db
+    .prepare(
+      `SELECT c.id, c.title, c.category, c.value, c.platforms, c.format, c.region, c.city, c.status,
+         c.image_file_id, c.image_key, c.created_at,
+         (SELECT COUNT(*) FROM applications a WHERE a.campaign_id = c.id AND a.status = 'accepted') AS accepted
+       FROM campaigns c
+       WHERE c.business_id = ?1 AND c.moderation = 'approved'
+       ORDER BY c.created_at DESC, c.id DESC
+       LIMIT 100`
+    )
+    .bind(businessId)
+    .all();
+  return results;
+}
+
+// Biznesning saytda ko'rinadigan natijalari (bloger telefoni va Telegrami olinmaydi)
+export async function listCaseResults(db, businessId) {
+  const { results } = await db
+    .prepare(
+      `SELECT a.id, a.campaign_id, a.post_url, a.result_views, a.result_note, a.review, a.rating, a.confirmed_at,
+         g.name AS blogger_name, g.platform, g.profile, g.followers
+       FROM applications a
+       JOIN campaigns c ON c.id = a.campaign_id
+       JOIN users b ON b.tg_id = c.business_id
+       JOIN users g ON g.tg_id = a.blogger_id
+       WHERE c.business_id = ?1 AND ${CASE_WHERE}
+       ORDER BY a.confirmed_at DESC, a.id DESC
+       LIMIT 500`
+    )
+    .bind(businessId)
+    .all();
+  return results;
+}
+
 export function setApplicationNotify(db, id, chatId, messageId) {
   return db
     .prepare('UPDATE applications SET notify_chat_id = ?1, notify_message_id = ?2 WHERE id = ?3')
@@ -322,6 +475,7 @@ export async function listBloggerApplications(db, bloggerId) {
   const { results } = await db
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at, a.updated_at,
+         a.result_status, a.post_url, a.result_views, a.result_note, a.dispute_note, a.review, a.rating,
          c.id AS campaign_id, c.title, c.value, c.format, c.days, c.city, c.region, c.status AS campaign_status,
          c.image_file_id, c.image_key,
          b.company,
@@ -345,6 +499,7 @@ export async function listBusinessRequests(db, businessId) {
   const { results } = await db
     .prepare(
       `SELECT a.id, a.status, a.message, a.created_at,
+         a.result_status, a.post_url, a.result_views, a.result_note, a.dispute_note, a.review, a.rating,
          c.id AS campaign_id, c.title,
          g.tg_id AS blogger_id, g.name, g.platform, g.profile, g.followers, g.niche, g.region,
          g.reach, g.reels_reach, g.reels_views, g.posts_views, g.accounts_reached,
@@ -355,7 +510,7 @@ export async function listBusinessRequests(db, businessId) {
        JOIN campaigns c ON c.id = a.campaign_id
        JOIN users g ON g.tg_id = a.blogger_id
        WHERE c.business_id = ?1
-       ORDER BY (a.status = 'pending') DESC, (g.stats_file_id IS NOT NULL) DESC, a.created_at DESC, a.id DESC
+       ORDER BY (a.status = 'pending' OR a.result_status = 'submitted') DESC, (g.stats_file_id IS NOT NULL) DESC, a.created_at DESC, a.id DESC
        LIMIT 300`
     )
     .bind(businessId)

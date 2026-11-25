@@ -81,6 +81,8 @@
     updateCalc();
     updateBotLinks();
     storageSet(LANG_KEY, lang);
+    // "Real keyslar" bo'limi (cases.js) ham tilni almashtirsin
+    document.dispatchEvent(new CustomEvent('miqyos:lang', { detail: lang }));
   }
 
   /* ---------- Menyu ---------- */

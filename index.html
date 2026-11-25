@@ -25,6 +25,7 @@
   <script src="assets/js/i18n.js" defer></script>
   <script src="assets/js/campaigns.js" defer></script>
   <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/cases.js" defer></script>
 </head>
 <body>
 
@@ -66,6 +67,7 @@
     <nav class="nav" id="nav" aria-label="Asosiy menyu" data-i18n-aria="nav.label">
       <a href="#qanday" data-i18n="nav.how">Qanday ishlaydi</a>
       <a href="#elonlar" data-i18n="nav.campaigns">E’lonlar</a>
+      <a href="#keyslar" data-i18n="nav.cases">Keyslar</a>
       <a href="#kalkulyator" data-i18n="nav.calc">Kalkulyator</a>
       <a href="#xizmatlar" data-i18n="nav.services">Xizmatlar</a>
       <a href="#savollar" data-i18n="nav.faq">Savollar</a>
@@ -282,6 +284,23 @@
     </div>
   </section>
 
+  <!-- Real keyslar: biznes tasdiqlagan hamkorliklar (assets/js/cases.js, ma'lumot botdan) -->
+  <section class="section section-alt" id="keyslar">
+    <div class="wrap" id="cases-section">
+      <div class="section-head section-head-row">
+        <div>
+          <p class="eyebrow" data-i18n="cases.eyebrow">Real keyslar</p>
+          <h2 data-i18n="cases.title">Blogerlarimiz bizneslar uchun qilgan reklamalar</h2>
+        </div>
+        <p class="note"><span class="badge badge-ok" data-i18n="cases.badge">Tasdiqlangan</span> <span data-i18n="cases.note">Har bir keysni biznesning o‘zi botda «Bajarildi» deb tasdiqlagan. Biznesni bosing: uning har bir reklama e’loni va blogerlar natijasi ochiladi.</span></p>
+      </div>
+      <div id="cases-grid" aria-live="polite"></div>
+      <div class="more-wrap">
+        <a class="btn btn-outline" id="cases-more" href="keyslar.html" hidden><span>Barcha keyslar</span></a>
+      </div>
+    </div>
+  </section>
+
   <!-- Kalkulyator -->
   <section class="section section-alt" id="kalkulyator">
     <div class="wrap calc">
@@ -491,6 +510,7 @@
       <ul>
         <li><a href="#qanday" data-i18n="nav.how">Qanday ishlaydi</a></li>
         <li><a href="#elonlar" data-i18n="nav.campaigns">E’lonlar</a></li>
+        <li><a href="keyslar.html" data-i18n="nav.cases">Keyslar</a></li>
         <li><a href="#xizmatlar" data-i18n="nav.services">Xizmatlar</a></li>
         <li><a href="#savollar" data-i18n="nav.faq">Savollar</a></li>
       </ul>

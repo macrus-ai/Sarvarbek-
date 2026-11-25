@@ -302,8 +302,16 @@ export const LIMITS = {
   // Yangi e'lon haqida bitta cron ishga tushishida nechta blogerga xabar yuboriladi (har daqiqada).
   // Cloudflare bepul tarifida bitta ishga tushishda 50 ta tashqi so'rov (Telegram + D1) mumkin:
   // rasmli xabar ikki urinish olishi mumkin, shuning uchun 15 ta. Pullik tarifda wrangler.toml dagi AD_NOTIFY_BATCH bilan oshiring.
-  adNotifyBatch: 15
+  adNotifyBatch: 15,
+  // Xavfsiz barter: natija (post havolasi, izoh, biznes fikri)
+  postUrlMax: 300,
+  resultNoteMax: 300,
+  reviewMax: 500,
+  viewsMax: 100000000
 };
+
+// Sayt: keys sahifasi manzili shu yerdan olinadi (wrangler.toml dagi SITE_URL bilan almashtirsa bo'ladi)
+export const DEFAULT_SITE_URL = 'https://miqyos.uz';
 
 export const LANGS = ['uz', 'ru'];
 
