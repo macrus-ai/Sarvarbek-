@@ -322,6 +322,20 @@ const uz = {
       '',
       'Batafsil ko‘rish va so‘rov yuborish uchun pastdagi tugmani bosing.'
     ].join('\n'),
+  // Yangi tasdiqlangan blogerga hozir ochiq mos e'lonlar (services.js dagi sendOpenAds)
+  openAdsForBlogger: (ads, total) =>
+    [
+      `📢 <b>Sizga mos ochiq reklama e’lonlari: ${total} ta</b>`,
+      '',
+      ads
+        .map((c, i) => `${i + 1}. «${esc(c.title)}»\n🏪 ${esc(c.business_name)} · 💰 ${fmtNum(c.value)} so‘m`)
+        .join('\n\n'),
+      total > ads.length ? `\n…va yana ${total - ads.length} ta. Hammasi ilovada.` : '',
+      '',
+      'Batafsil ko‘rish va so‘rov yuborish uchun e’lon tugmasini bosing. Yangi mos e’lon chiqsa, shu yerga xabar keladi.'
+    ].filter((s, i) => s !== '' || i !== 3).join('\n'),
+  openAdButton: (title) => `👀 ${title.length > 40 ? `${title.slice(0, 39)}…` : title}`,
+  allAdsButton: '📋 Barcha e’lonlar',
   viewAd: '👀 E’lonni ko‘rish',
   notifyOffButton: '🔕 Bunday xabarlarni o‘chirish',
   notifyOnButton: '🔔 Xabarlarni yoqish',
@@ -675,6 +689,19 @@ const ru = {
       '',
       'Нажмите кнопку ниже, чтобы посмотреть подробности и откликнуться.'
     ].join('\n'),
+  openAdsForBlogger: (ads, total) =>
+    [
+      `📢 <b>Открытые подходящие вам объявления: ${total}</b>`,
+      '',
+      ads
+        .map((c, i) => `${i + 1}. «${esc(c.title)}»\n🏪 ${esc(c.business_name)} · 💰 ${fmtNum(c.value)} сум`)
+        .join('\n\n'),
+      total > ads.length ? `\n…и ещё ${total - ads.length}. Все — в приложении.` : '',
+      '',
+      'Нажмите на кнопку объявления, чтобы посмотреть подробности и откликнуться. О новых подходящих объявлениях мы напишем сюда.'
+    ].filter((s, i) => s !== '' || i !== 3).join('\n'),
+  openAdButton: (title) => `👀 ${title.length > 40 ? `${title.slice(0, 39)}…` : title}`,
+  allAdsButton: '📋 Все объявления',
   viewAd: '👀 Открыть объявление',
   notifyOffButton: '🔕 Отключить такие уведомления',
   notifyOnButton: '🔔 Включить уведомления',

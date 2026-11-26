@@ -3,7 +3,7 @@
 import { findFollowers } from './constants.js';
 import {
   closeBusinessCampaigns, closeCampaignByAdmin, decideApplication, enqueueAdBroadcast, getApplicationFull, getCampaign,
-  getSetting, getUser, insertApplication, setApplicationNotify, setCampaignModeration, setModeration
+  getSetting, getUser, insertApplication, openAdsForBlogger, setApplicationNotify, setCampaignModeration, setModeration
 } from './db.js';
 import { tr } from './i18n.js';
 import { TelegramError } from './telegram.js';
@@ -265,7 +265,35 @@ export async function moderate(ctx, moderatorId, targetId, action) {
     // Foydalanuvchi botni bloklagan bo'lishi mumkin: qaror baribir saqlanadi
     console.warn('notify moderated user failed:', e.message);
   }
+  if (status === 'approved') await sendOpenAds(ctx, target);
   return { target, status };
+}
+
+// Yangi tasdiqlangan blogerga hozir ochiq mos e'lonlar haqida bitta xabar (ro'yxat + har biriga tugma).
+// Yangi e'lonlar haqidagi xabarlar (broadcast.js) faqat e'lon tasdiqlangan paytdagi blogerlarga boradi,
+// shuning uchun keyin qo'shilgan bloger avvalgi e'lonlarni shu xabardan biladi. Xato bo'lsa ham tasdiqlash to'xtamaydi.
+export const OPEN_ADS_SHOWN = 5;
+export async function sendOpenAds(ctx, user) {
+  if (user.role !== 'blogger' || Number(user.notify_ads) === 0) return 0;
+  try {
+    const ads = (await openAdsForBlogger(ctx.db, user)).filter((c) => followersOk(user, c));
+    if (!ads.length) return 0;
+    const T = tr(user.lang);
+    const shown = ads.slice(0, OPEN_ADS_SHOWN);
+    await ctx.tg.send(user.tg_id, T.openAdsForBlogger(shown, ads.length), {
+      reply_markup: {
+        inline_keyboard: [
+          ...shown.map((c) => [{ text: T.openAdButton(c.title), web_app: { url: `${ctx.origin}/?c=${c.id}` } }]),
+          ...(ads.length > shown.length ? [[{ text: T.allAdsButton, web_app: { url: appUrl(ctx) } }]] : []),
+          [{ text: T.notifyOffButton, callback_data: 'ntf:off' }]
+        ]
+      }
+    });
+    return ads.length;
+  } catch (e) {
+    console.warn('send open ads failed:', e.message);
+    return 0;
+  }
 }
 
 /* ---------- Reklama e'lonlari moderatsiyasi ---------- */

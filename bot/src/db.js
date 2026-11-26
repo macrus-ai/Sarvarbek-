@@ -603,6 +603,29 @@ export function advanceAdBroadcast(db, campaignId, lastId, sent, done) {
     .run();
 }
 
+// Yangi tasdiqlangan blogerga mos hozir ochiq e'lonlar (eng yangisi birinchi): faol, tasdiqlangan,
+// o'rinlari to'lmagan, platformasi va hududi mos, bloger hali so'rov yubormagan. Obunachilar talabi
+// services.js dagi followersOk bilan tekshiriladi. Shu blogerga cron baribir yetib boradigan e'lonlar
+// (navbati ochiq, bloger hali navbatda oldinda) chiqarib tashlanadi: bir e'lon ikki marta kelmasin.
+export async function openAdsForBlogger(db, u) {
+  const { results } = await db
+    .prepare(
+      `SELECT c.*, biz.company AS business_name FROM campaigns c
+       JOIN users biz ON biz.tg_id = c.business_id
+       WHERE c.status = 'active' AND c.moderation = 'approved'
+         AND instr(',' || c.platforms || ',', ',' || ?2 || ',') > 0
+         AND (c.region = 'all' OR c.region = ?3)
+         AND (SELECT COUNT(*) FROM applications a WHERE a.campaign_id = c.id AND a.status = 'accepted') < c.slots
+         AND NOT EXISTS (SELECT 1 FROM applications a WHERE a.campaign_id = c.id AND a.blogger_id = ?1)
+         AND NOT EXISTS (SELECT 1 FROM ad_broadcasts b WHERE b.campaign_id = c.id AND b.done_at IS NULL AND b.last_tg_id < ?1)
+       ORDER BY c.created_at DESC, c.id DESC
+       LIMIT 100`
+    )
+    .bind(u.tg_id, String(u.platform || ''), String(u.region || ''))
+    .all();
+  return results;
+}
+
 // Botni bloklagan blogerlarga boshqa yuborilmaydi
 export function disableAdNotifications(db, ids) {
   if (!ids.length) return null;

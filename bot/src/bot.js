@@ -13,7 +13,8 @@ import { accountsLabel, catLabel, followersLabel, nicheLabel, reachLabel, reelsL
 import { newImageKey } from './images.js';
 import {
   AppError, MOD_CHAT_KEYS, adKeyboard, canModerate, decide, editMessage, homeKeyboard, isModerationChat, moderate,
-  moderateCampaign, moderationEnabled, pendingKeyboard, resubmitKeyboard, sendAdCard, sendModerationCard
+  moderateCampaign, moderationEnabled, pendingKeyboard, resubmitKeyboard, sendAdCard, sendModerationCard,
+  sendOpenAds
 } from './services.js';
 import { caseKeyboard, decideResultBy, hideCase } from './results.js';
 import { addToSheet } from './sheets.js';
@@ -226,6 +227,7 @@ async function finish(ctx, user) {
   if (!(await moderationEnabled(ctx))) {
     await updateUser(ctx.db, user.tg_id, { moderation: 'approved' });
     await ctx.tg.send(user.tg_id, doneText, { reply_markup: homeKeyboard(T, ctx, user.role) });
+    await sendOpenAds(ctx, user);
     return;
   }
 
